@@ -1554,6 +1554,23 @@
     width: var(--cw) !important; max-width: none !important; height: var(--ch) !important; min-height: 0 !important;
     transform: scale(var(--z)); transform-origin: 0 0;
     padding-left: max(40px, calc((var(--cw) - 1440px) / 2)) !important; padding-right: max(40px, calc((var(--cw) - 1440px) / 2)) !important; }
+
+  /* ===== 곡 화면 영상 비율·가운데 정렬(영상·자막·버튼을 같은 폭으로) ===== */
+  .study-main { --study-w: min(100%, 900px, calc(62vh * 16 / 9)); }
+  .study-main > .video-area,
+  .study-main > .subs,
+  .study-main > .sub-modes,
+  .study-main > .practice2,
+  .study-main > .play-status,
+  .study-main > .range,
+  .study-main > p.small,
+  .study-main > p.meta { width: 100%; max-width: var(--study-w); margin-left: auto; margin-right: auto; box-sizing: border-box; }
+  .study-main > .video-area { border-radius: var(--r-card, 16px); overflow: hidden; }
+  .study-main > .video-area .video { width: 100%; }
+  .study-main > .subs { border-radius: 0 0 var(--r-card, 16px) var(--r-card, 16px); margin-top: 0; }
+  .study-main > .sub-modes { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 12px; margin-bottom: 8px; }
+  .study-main > .sub-modes .toggle { flex: 1 1 0; min-width: 88px; }
+  .study-main > p.small, .study-main > p.meta { text-align: center; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
