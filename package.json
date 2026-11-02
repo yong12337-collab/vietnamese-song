@@ -1,0 +1,15 @@
+{
+  "name": "vietnamese-song",
+  "version": "1.0.0",
+  "private": true,
+  "description": "노래로 배우는 베트남어 — 화면 파일(index.html)을 웹사이트로 보여 주는 설정",
+  "scripts": {
+    "start": "serve . --listen tcp://0.0.0.0:${PORT:-3000} --no-clipboard"
+  },
+  "dependencies": {
+    "serve": "14.2.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
