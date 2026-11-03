@@ -1755,9 +1755,115 @@
     body:not(.anon) nav#mainNav::before { display: none; }
     .nav-hello { order: 0; margin: 0 !important; padding-top: 0; }
   }
+
+  /* ===== 40단계: 레퍼런스(No Spend Challenge) 그대로 — 크림 바탕 · 숲 초록 사이드 · 세리프 제목 · 선 아이콘 ===== */
+  :root { --navw: 208px; --rf-bg: #F4F1E8; --rf-card: #FBFAF5; --rf-line: #E4DFD1; --rf-side: #2C4A32; --rf-ink: #1E2A21; --rf-muted: #6B706A;
+    --rf-green: #2E4B33; --rf-soft: #E8E5D8; --serif: "Noto Serif KR", "Nanum Myeongjo", "AppleMyungjo", Georgia, serif;
+    --g-ink: #1E2A21; --g-dark: #2E4B33; --g-soft: #E8E5D8; --g-line: #E4DFD1; --org: #2E4B33; --org-d: #22392A; }
+  body:not(.anon) { background: var(--rf-bg) !important; color: var(--rf-ink) !important; }
+  /* 사이드: 화면 전체 높이 · 숲 초록 */
+  body:not(.anon) .layout { grid-template-columns: minmax(0, 1fr) !important; padding-left: var(--navw) !important; }
+  body:not(.anon) .layout > main { grid-column: 1 / -1 !important; min-width: 0; }
+  body:not(.anon) nav#mainNav { position: fixed !important; left: 0 !important; top: 0 !important; bottom: auto !important; height: 100vh !important; max-height: none !important; width: var(--navw) !important; min-height: 0 !important; margin: 0 !important; z-index: 20;
+    border-radius: 0 !important; background: var(--rf-side) !important; box-shadow: none !important; padding: 26px 0 22px !important; overflow-y: auto;
+    display: flex !important; flex-direction: column; gap: 4px; }
+  body:not(.anon) nav#mainNav::before { width: 54px !important; height: 54px !important; margin: 0 auto 26px !important; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%23EFEBDD' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M30 58 C31 44 32 30 35 12'/%3E%3Cpath d='M31.5 44 C22 44 15 37 13 27 C23 27 30 34 31.5 44 Z'/%3E%3Cpath d='M32.5 34 C42 33 49 26 51 16 C41 17 34 24 32.5 34 Z'/%3E%3Cpath d='M33.5 24 C27 22 23 15 23 8 C30 10 33.5 17 33.5 24 Z'/%3E%3Cpath d='M31.5 44 C24 41 19 36 13 27M32.5 34 C39 30 45 24 51 16'/%3E%3C/svg%3E") no-repeat center / contain !important; }
+  body:not(.anon) header { margin-left: var(--navw) !important; }
+  /* 메뉴: 양옆 띄운 뭉툭한 직사각형 · 내용에 맞는 높이 */
+  nav#mainNav a.big-item { display: flex !important; align-items: center; gap: 12px; margin: 0 16px !important; padding: 10px 12px !important; min-height: 44px !important;
+    border-radius: 10px !important; color: #E6EBE1 !important; font-size: 14.5px; font-weight: 500 !important; background: transparent !important; box-shadow: none !important; }
+  nav#mainNav a.big-item::before, nav#mainNav a.big-item::after { content: none !important; display: none !important; }
+  nav#mainNav a.big-item .chick { color: inherit !important; }
+  nav#mainNav a.big-item[aria-current="page"] .chick, nav#mainNav[data-group="practice"] a.big-item[data-group="practice"] .chick,
+  nav#mainNav[data-group="assign"] a.big-item[data-group="assign"] .chick, nav#mainNav[data-group="tassign"] a.big-item[data-group="tassign"] .chick { background: currentColor !important; box-shadow: none !important; }
+  nav#mainNav .mode-btn, nav#mainNav > button { width: calc(100% - 32px) !important; max-width: calc(100% - 32px) !important; box-sizing: border-box !important; align-self: center; }
+  nav#mainNav a.big-item .chick { display: block !important; position: static !important; transform: none !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important;
+    width: 20px !important; height: 20px !important; min-width: 20px !important; flex: none !important; background: currentColor !important; box-shadow: none !important; opacity: 1 !important;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center; -webkit-mask-size: 20px 20px; mask-size: 20px 20px; }
+  nav#mainNav a.big-item .chick > *, nav#mainNav a.big-item .chick::before, nav#mainNav a.big-item .chick::after { display: none !important; content: none !important; }
+  nav#mainNav a.big-item[href="#/checkin"] .chick { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='15.5' rx='2'/%3E%3Cpath d='M8 3v4M16 3v4M3.5 9.5h17M9 15l2 2 4-4'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='15.5' rx='2'/%3E%3Cpath d='M8 3v4M16 3v4M3.5 9.5h17M9 15l2 2 4-4'/%3E%3C/svg%3E"); }
+  nav#mainNav a.big-item[href="#/learn"] .chick { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18V5.5l10.5-2v12.5'/%3E%3Ccircle cx='6.5' cy='18' r='2.5'/%3E%3Ccircle cx='17' cy='16' r='2.5'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18V5.5l10.5-2v12.5'/%3E%3Ccircle cx='6.5' cy='18' r='2.5'/%3E%3Ccircle cx='17' cy='16' r='2.5'/%3E%3C/svg%3E"); }
+  nav#mainNav a.big-item[href="#/weeks"] .chick { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 5.5c3.2-1.2 6.6-1 9.5 1 2.9-2 6.3-2.2 9.5-1v13c-3.2-1.2-6.6-1-9.5 1-2.9-2-6.3-2.2-9.5-1zM12 6.5v13'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 5.5c3.2-1.2 6.6-1 9.5 1 2.9-2 6.3-2.2 9.5-1v13c-3.2-1.2-6.6-1-9.5 1-2.9-2-6.3-2.2-9.5-1zM12 6.5v13'/%3E%3C/svg%3E"); }
+  nav#mainNav a.big-item[href="#/practice"] .chick { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 15v-2.5a8 8 0 0 1 16 0V15'/%3E%3Crect x='3' y='14' width='4.2' height='6.5' rx='1.4'/%3E%3Crect x='16.8' y='14' width='4.2' height='6.5' rx='1.4'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 15v-2.5a8 8 0 0 1 16 0V15'/%3E%3Crect x='3' y='14' width='4.2' height='6.5' rx='1.4'/%3E%3Crect x='16.8' y='14' width='4.2' height='6.5' rx='1.4'/%3E%3C/svg%3E"); }
+  nav#mainNav a.big-item[href="#/assignments"] .chick { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='4.5' width='14' height='16.5' rx='2'/%3E%3Crect x='9' y='2.8' width='6' height='3.4' rx='1'/%3E%3Cpath d='M9 11h6M9 15h6'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='4.5' width='14' height='16.5' rx='2'/%3E%3Crect x='9' y='2.8' width='6' height='3.4' rx='1'/%3E%3Cpath d='M9 11h6M9 15h6'/%3E%3C/svg%3E"); }
+  nav#mainNav a.big-item[href="#/assign"] .chick { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='4.5' width='14' height='16.5' rx='2'/%3E%3Crect x='9' y='2.8' width='6' height='3.4' rx='1'/%3E%3Cpath d='M9 11h6M9 15h6'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='4.5' width='14' height='16.5' rx='2'/%3E%3Crect x='9' y='2.8' width='6' height='3.4' rx='1'/%3E%3Cpath d='M9 11h6M9 15h6'/%3E%3C/svg%3E"); }
+  nav#mainNav a.big-item[href="#/me"] .chick { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='3.8'/%3E%3Cpath d='M4.5 20.5c0-4 3.4-6.6 7.5-6.6s7.5 2.6 7.5 6.6'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='3.8'/%3E%3Cpath d='M4.5 20.5c0-4 3.4-6.6 7.5-6.6s7.5 2.6 7.5 6.6'/%3E%3C/svg%3E"); }
+  nav#mainNav a.big-item[href="#/board"] .chick { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.5 5h15a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5H9.5L5 20.5V6.5A1.5 1.5 0 0 1 4.5 5z'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.5 5h15a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5H9.5L5 20.5V6.5A1.5 1.5 0 0 1 4.5 5z'/%3E%3C/svg%3E"); }
+  nav#mainNav a.big-item[href="#/t"] .chick { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 10.5 12 3.8l8.5 6.7V19.5a1 1 0 0 1-1 1h-4.6v-6h-5.8v6H4.5a1 1 0 0 1-1-1z'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 10.5 12 3.8l8.5 6.7V19.5a1 1 0 0 1-1 1h-4.6v-6h-5.8v6H4.5a1 1 0 0 1-1-1z'/%3E%3C/svg%3E"); }
+  nav#mainNav a.big-item[href="#/t/attendance"] .chick { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='15.5' rx='2'/%3E%3Cpath d='M8 3v4M16 3v4M3.5 9.5h17M9 15l2 2 4-4'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='15.5' rx='2'/%3E%3Cpath d='M8 3v4M16 3v4M3.5 9.5h17M9 15l2 2 4-4'/%3E%3C/svg%3E"); }
+  nav#mainNav a.big-item[href="#/t/progress"] .chick { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20V11M10 20V5M16 20v-7M3 20.5h18'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20V11M10 20V5M16 20v-7M3 20.5h18'/%3E%3C/svg%3E"); }
+  nav#mainNav a.big-item[href="#/classes"] .chick { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8.2' r='3.3'/%3E%3Cpath d='M2.8 20c0-3.4 2.8-5.8 6.2-5.8s6.2 2.4 6.2 5.8M15.6 4.8a3.3 3.3 0 0 1 0 6.6M17.6 14.4c2.2.6 3.6 2.6 3.6 5.6'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8.2' r='3.3'/%3E%3Cpath d='M2.8 20c0-3.4 2.8-5.8 6.2-5.8s6.2 2.4 6.2 5.8M15.6 4.8a3.3 3.3 0 0 1 0 6.6M17.6 14.4c2.2.6 3.6 2.6 3.6 5.6'/%3E%3C/svg%3E"); }
+  nav#mainNav a.big-item[href="#/glossary"] .chick { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 5.5A2.5 2.5 0 0 1 7.5 3H19v15H7.5A2.5 2.5 0 0 0 5 20.5zM5 20.5A2.5 2.5 0 0 1 7.5 18H19v3H7.5'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 5.5A2.5 2.5 0 0 1 7.5 3H19v15H7.5A2.5 2.5 0 0 0 5 20.5zM5 20.5A2.5 2.5 0 0 1 7.5 18H19v3H7.5'/%3E%3C/svg%3E"); }
+  nav#mainNav a.big-item[href="#/admin/weeks"] .chick { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='15.5' rx='2'/%3E%3Cpath d='M8 3v4M16 3v4M3.5 9.5h17M8 13.5h2M14 13.5h2M8 17h2'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='15.5' rx='2'/%3E%3Cpath d='M8 3v4M16 3v4M3.5 9.5h17M8 13.5h2M14 13.5h2M8 17h2'/%3E%3C/svg%3E"); }
+  nav#mainNav a.big-item:hover { background: rgba(255,255,255,.07) !important; }
+  nav#mainNav a.big-item { justify-content: flex-start !important; text-align: left !important; flex-direction: row !important; }
+  nav#mainNav a.big-item .bi-text { flex: 1 1 auto !important; display: block !important; text-align: left !important; margin: 0 !important; padding: 0 !important; position: static !important; }
+  nav#mainNav a.big-item .bi-label { display: block !important; text-align: left !important; font-size: 14.5px !important; font-weight: inherit !important; color: inherit !important; }
+  nav#mainNav a.big-item[aria-current="page"], nav#mainNav[data-group="practice"] a.big-item[data-group="practice"], nav#mainNav[data-group="assign"] a.big-item[data-group="assign"], nav#mainNav[data-group="tassign"] a.big-item[data-group="tassign"] {
+    background: #FAF8F2 !important; color: var(--rf-ink) !important; font-weight: 600 !important; box-shadow: 0 1px 3px rgba(0,0,0,.18) !important; }
+  nav#mainNav a.sub-item, nav#mainNav a.tool-item { margin: 0 16px 0 28px !important; padding: 12px 10px !important; min-height: 44px !important; box-sizing: border-box; line-height: 20px; border-radius: 8px !important; color: #C9D4C5 !important; font-size: 13px !important; background: transparent !important; }
+  nav#mainNav a.sub-item[aria-current="page"], nav#mainNav a.tool-item[aria-current="page"] { background: rgba(250,248,242,.14) !important; color: #FFFFFF !important; }
+  nav#mainNav .nav-title { margin: 14px 16px 2px 28px !important; color: #9DB29F !important; font-size: 11px !important; letter-spacing: .14em; }
+  nav#mainNav .mode-btn, nav#mainNav button { margin: 10px 16px 0 !important; border-radius: 10px !important; background: transparent !important; color: #E6EBE1 !important; border: 1px solid rgba(239,235,221,.35) !important; box-shadow: none !important; font-weight: 500 !important; }
+  /* 아래 인사: 그림 없이 글만 */
+  .nav-avatar { display: none !important; }
+  .nav-hello { order: 99; margin: auto 16px 0 !important; padding-top: 20px; }
+  .nh-name { color: #DCE4D7 !important; font-size: 13px !important; font-weight: 400 !important; line-height: 1.5; text-align: center; }
+  /* 맨 위 줄: 조용한 검색 · 이름 칩 · 로그아웃 */
+  body:not(.anon) header { background: transparent !important; border: 0 !important; padding: 18px clamp(18px, 2.4vw, 36px) 8px !important; }
+  body:not(.anon) header h1 { display: none !important; }
+  body:not(.anon) .top-row { justify-content: flex-end !important; }
+  body:not(.anon) .user-box { gap: 10px !important; align-items: center; }
+  #top-search { background-color: var(--rf-card) !important; border: 1px solid var(--rf-line) !important; border-radius: 10px !important; min-height: 44px !important; width: clamp(200px, 20vw, 280px) !important; box-shadow: none !important; }
+  body:not(.anon) .user-box .hello > span:first-child { display: none !important; }
+  body:not(.anon) .user-box .hello { display: inline-flex; align-items: center; height: 44px; padding: 0 14px; border-radius: 10px; background: var(--rf-card); border: 1px solid var(--rf-line); }
+  body:not(.anon) .user-box .hello .small { font-size: 13px !important; color: var(--rf-ink) !important; }
+  body:not(.anon) .user-box > button { min-height: 44px; border-radius: 10px !important; background: transparent !important; border: 1px solid var(--rf-line) !important; box-shadow: none !important; color: var(--rf-ink) !important; font-weight: 500 !important; }
+  /* 글꼴 · 제목 */
+  main h2, body:not(.anon) main h2 { font-family: var(--serif) !important; font-weight: 600 !important; font-size: clamp(26px, 2.3vw, 34px) !important; letter-spacing: -0.01em; color: var(--rf-ink) !important; background: none !important; }
+  main h3, body:not(.anon) main h3 { font-size: 12.5px !important; font-weight: 700 !important; letter-spacing: .12em; color: #2F3B31 !important; }
+  .kicker, main .kicker { background: none !important; color: #3A4A3D !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important;
+    font-size: 12px !important; font-weight: 600 !important; letter-spacing: .14em; }
+  .stat strong, .stat-grid .stat strong { font-family: var(--serif) !important; font-weight: 600 !important; font-size: 24px !important; color: var(--rf-ink) !important; }
+  .songs li .song .title, .c-title { font-family: var(--serif) !important; }
+  /* 카드: 크림 · 가는 선 · 그림자 거의 없음 */
+  .card, .song, .pcard, .aside-card, .stat, .write-box, .vault-mini, .me-cards .card, .admin-login, .flow-steps li, .wk-card, .wk-card.now, .login-panel, .stat-grid .stat, .stat-grid .stat:nth-child(n), .ibadge, .cal-c {
+    background: var(--rf-card) !important; border: 1px solid var(--rf-line) !important; border-radius: 14px !important; box-shadow: 0 1px 2px rgba(30,40,30,.04) !important; }
+  .cal-c { border-radius: 10px !important; }
+  .study-aside { background: var(--rf-card) !important; border: 1px solid var(--rf-line); box-shadow: none !important; }
+  .wk-card.now { box-shadow: 0 0 0 2px var(--rf-green) !important; }
+  .wk-no, .songs li .song .tags .tag.lv { background: var(--rf-green) !important; color: #FFFFFF !important; }
+  th { background: var(--rf-soft) !important; color: var(--rf-ink) !important; }
+  /* 버튼: 뭉툭한 직사각형 */
+  body:not(.anon) button, body:not(.anon) .btn, body:not(.anon) .ptab { border-radius: 10px !important; background: var(--rf-card) !important; color: var(--rf-ink) !important;
+    border: 1px solid #D8D2C2 !important; box-shadow: none !important; font-weight: 600 !important; }
+  body:not(.anon) button:hover:not(:disabled), body:not(.anon) .btn:hover { background: #F1EEE4 !important; transform: none !important; }
+  body:not(.anon) button:active:not(:disabled), body:not(.anon) .btn:active { transform: translateY(1px) !important; box-shadow: none !important; }
+  body:not(.anon) button.primary, body:not(.anon) .btn.primary, body:not(.anon) .btn.primary-link, body:not(.anon) .stamp-btn, body:not(.anon) .practice2 > button:not(.go-practice) {
+    background: var(--rf-green) !important; color: #FFFFFF !important; border: 1px solid var(--rf-green) !important; box-shadow: 0 1px 2px rgba(0,0,0,.12) !important; }
+  body:not(.anon) button.primary:hover:not(:disabled), body:not(.anon) .btn.primary:hover { background: #253E2A !important; }
+  body:not(.anon) .toggle[aria-pressed="true"], body:not(.anon) .pills button[aria-pressed="true"], body:not(.anon) .ptab.on {
+    background: var(--rf-soft) !important; color: var(--rf-ink) !important; border: 1px solid #BDB6A2 !important; box-shadow: none !important; }
+  body:not(.anon) button.danger, body:not(.anon) .btn.danger { color: #8E2F2F !important; border-color: #E0C2BC !important; }
+  .songs li .song::after { border-radius: 10px !important; background: var(--rf-green) !important; box-shadow: none !important; }
+  .songs li .song.disabled::after { background: var(--rf-soft) !important; color: #5F655D !important; }
+  .songs li .song .thumb { background: linear-gradient(135deg, #DCE4D2 0%, #B9C9B0 60%, #8EA88A 100%) !important; }
+  .cal-c.on { background: #E9EEE2 !important; border-color: #B7C5B0 !important; }
+  .cal button.cal-c.tap-today { border: 1.5px solid var(--rf-green) !important; background: var(--rf-card) !important; }
+  .cal button.cal-c.tap-today::after { background: var(--rf-green) !important; }
+  .tap-spark { color: #8EA88A !important; }
+  @media (max-width: 980px) {
+    body:not(.anon) nav#mainNav { position: static !important; width: auto; padding: 12px 0 !important; }
+    body:not(.anon) nav#mainNav::before { display: none; }
+    body:not(.anon) header { margin-left: 0 !important; }
+    body:not(.anon) .layout { grid-template-columns: 1fr !important; padding-left: 0 !important; }
+    body:not(.anon) nav#mainNav { height: auto !important; }
+    .nav-hello { order: 0; margin: 0 16px 6px !important; padding-top: 0; }
+    #top-search { width: 100% !important; }
+  }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 <div id="diamondStrip" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
