@@ -1861,6 +1861,17 @@
     .nav-hello { order: 0; margin: 0 16px 6px !important; padding-top: 0; }
     #top-search { width: 100% !important; }
   }
+
+  /* ===== 41단계: 주차별 학습 카드 버튼을 카드 맨 아래로 통일 ===== */
+  .wk-grid { align-items: stretch !important; }
+  .wk-grid > .wk-card { display: flex !important; flex-direction: column !important; height: 100%; box-sizing: border-box; }
+  .wk-grid > .wk-card .acts { margin-top: auto !important; padding-top: 12px; }
+  .wk-title, .wk-card .wk-title { font-family: var(--serif) !important; color: var(--rf-ink) !important; font-weight: 600 !important; }
+  body:not(.anon) nav#mainNav a.big-item, body:not(.anon) nav#mainNav a.big-item:link, body:not(.anon) nav#mainNav a.big-item:visited,
+  body:not(.anon) nav#mainNav a.big-item .bi-label { color: #E6EBE1 !important; }
+  body:not(.anon) nav#mainNav a.big-item[aria-current="page"], body:not(.anon) nav#mainNav[data-group="practice"] a.big-item[data-group="practice"], body:not(.anon) nav#mainNav[data-group="assign"] a.big-item[data-group="assign"], body:not(.anon) nav#mainNav[data-group="tassign"] a.big-item[data-group="tassign"], body:not(.anon) nav#mainNav a.big-item[aria-current="page"]:link, body:not(.anon) nav#mainNav[data-group="practice"] a.big-item[data-group="practice"]:link, body:not(.anon) nav#mainNav[data-group="assign"] a.big-item[data-group="assign"]:link, body:not(.anon) nav#mainNav[data-group="tassign"] a.big-item[data-group="tassign"]:link, body:not(.anon) nav#mainNav a.big-item[aria-current="page"]:visited, body:not(.anon) nav#mainNav[data-group="practice"] a.big-item[data-group="practice"]:visited, body:not(.anon) nav#mainNav[data-group="assign"] a.big-item[data-group="assign"]:visited, body:not(.anon) nav#mainNav[data-group="tassign"] a.big-item[data-group="tassign"]:visited, body:not(.anon) nav#mainNav a.big-item[aria-current="page"] .bi-label, body:not(.anon) nav#mainNav[data-group="practice"] a.big-item[data-group="practice"] .bi-label, body:not(.anon) nav#mainNav[data-group="assign"] a.big-item[data-group="assign"] .bi-label, body:not(.anon) nav#mainNav[data-group="tassign"] a.big-item[data-group="tassign"] .bi-label { color: #1E2A21 !important; }
+  body:not(.anon) nav#mainNav a.sub-item:link, body:not(.anon) nav#mainNav a.sub-item:visited, body:not(.anon) nav#mainNav a.tool-item:link, body:not(.anon) nav#mainNav a.tool-item:visited { color: #C9D4C5 !important; }
+  .wk-title a, .wk-title a:link, .wk-title a:visited { color: var(--rf-ink) !important; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet">
