@@ -1582,7 +1582,7 @@
   body:not(.anon) { background: radial-gradient(ellipse 60% 40% at 10% 0%, #FFFFFF 0%, rgba(255,255,255,0) 60%), linear-gradient(180deg, #FCF8F1 0%, #F7F1E6 100%) fixed !important; color: var(--ink) !important; }
   body:not(.anon) header { background: rgba(252,248,241,.92) !important; border-bottom: 1px solid #EFE6D8 !important; }
   /* 비율: 왼쪽 메뉴 약 17% */
-  body:not(.anon) .layout { grid-template-columns: clamp(220px, 17vw, 460px) minmax(0, 1fr) !important; }
+  body:not(.anon) .layout { grid-template-columns: clamp(230px, 18vw, 480px) minmax(0, 1fr) !important; }
   body:not(.anon) nav#mainNav { background: #FFFFFF !important; border-radius: 0 26px 26px 0 !important; margin: 14px 0 14px 0 !important; padding: 16px 14px 16px 0 !important;
     box-shadow: 0 14px 34px rgba(60,50,30,.10), 0 2px 6px rgba(60,50,30,.05) !important; border: 0 !important; }
   .nh-name { color: var(--g-deep) !important; }
@@ -1627,9 +1627,9 @@
   .cal button.cal-c.tap-today::after { background: var(--org-d) !important; }
   /* 곡 화면: 가운데 영상 + 오른쪽 학습 포인트 판(약 21%, 화면 오른쪽 끝) */
   body:not(.anon) main { padding-right: 0 !important; }
-  .study-grid { max-width: none !important; margin: 0 !important; grid-template-columns: minmax(0, 1fr) clamp(280px, 21vw, 560px) !important; gap: clamp(20px, 2.4vw, 40px) !important; align-items: start; }
+  .study-grid { max-width: none !important; margin: 0 !important; grid-template-columns: minmax(0, 1fr) clamp(290px, 22vw, 580px) !important; gap: clamp(20px, 2.4vw, 40px) !important; align-items: start; }
   .study-main { width: 100%; max-width: var(--colw); justify-self: center; }
-  :root { --colw: min(1700px, calc(62vh * 16 / 9)); }
+  :root { --colw: min(1600px, calc(57vh * 16 / 9)); }
   .study-aside { position: sticky; top: 0; min-height: calc(100vh - 90px); background: #FFFFFF; border-radius: 26px 0 0 26px; padding: 18px 16px 18px 18px;
     box-shadow: 0 14px 34px rgba(60,50,30,.10), 0 2px 6px rgba(60,50,30,.05); box-sizing: border-box; }
   .study-aside .aside-card { box-shadow: none !important; border: 1px solid #F1E9DC !important; }
@@ -1671,6 +1671,19 @@
   .ibadge { background: #FFFFFF !important; border: 1px solid #F1E9DC !important; }
   .stat-grid .stat:nth-child(n) { background: #FFFFFF !important; }
   .stage .plinth > :not(.top) { background: #E8D9C1 !important; border-color: #D9C4A3 !important; }
+
+  /* ===== 37단계: 곡 카드 버튼 맨 아래로 통일 · 맨 위 줄 여유 · 검색창 돋보기 ===== */
+  .songs li { display: flex !important; }
+  .songs li .song { flex: 1 1 auto; height: 100%; box-sizing: border-box; }
+  .songs li .song .body { flex: 1 1 auto; }
+  .songs li .song::after { margin-top: auto !important; }
+  /* 맨 위 줄(검색 · 인사 · 로그아웃): 위아래 여유를 줘 아래 선을 조금 내림 */
+  body:not(.anon) header { padding-top: 16px !important; padding-bottom: 16px !important; }
+  body:not(.anon) .layout { margin-top: 6px; }
+  /* 검색창 왼쪽 돋보기 */
+  #top-search { padding-left: 42px !important; background-color: #FFFFFF !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232F5D46' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='M15.5 15.5 L21 21'/%3E%3C/svg%3E") !important; background-repeat: no-repeat !important;
+    background-position: 14px center !important; background-size: 18px 18px !important; border: 1.5px solid #CFE0D3 !important; border-radius: 999px !important; min-height: 44px; }
+  #top-search:focus-visible { border-color: #2F5D46 !important; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
