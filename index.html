@@ -1684,6 +1684,77 @@
   #top-search { padding-left: 42px !important; background-color: #FFFFFF !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232F5D46' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='M15.5 15.5 L21 21'/%3E%3C/svg%3E") !important; background-repeat: no-repeat !important;
     background-position: 14px center !important; background-size: 18px 18px !important; border: 1.5px solid #CFE0D3 !important; border-radius: 999px !important; min-height: 44px; }
   #top-search:focus-visible { border-color: #2F5D46 !important; }
+
+  /* 16단계 SQL에 맞춘 화면: 삭제한 곡 · 가사 줄 도구 */
+  .deleted-box { margin-top: 28px; }
+  .deleted-list { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 8px; }
+  .deleted-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; border-radius: 12px; background: #FBF7F0; }
+  .ed-tools .line-toggle:disabled { opacity: .45; }
+
+  /* ===== 39단계: 절제된 초록 파스텔(레퍼런스: No Spend Challenge · Market Analysis) ===== */
+  :root { --g-ink: #1F3A2B; --g-dark: #2E5E3E; --g-side: #284A35; --g-pill: #F3EFE4; --g-soft: #E6F0E3; --g-line: #DCE8D8; --org: #2E5E3E; --org-d: #234C31; }
+  body:not(.anon) { background: linear-gradient(180deg, #E4EFE1 0%, #D7E8D4 100%) fixed !important; color: #26352C !important; }
+  body:not(.anon) header { background: transparent !important; border-bottom: 1px solid rgba(46,94,62,.12) !important; }
+  /* 왼쪽 메뉴: 좁고 짙은 초록 세로 판 */
+  body:not(.anon) .layout { grid-template-columns: clamp(196px, 15vw, 236px) minmax(0, 1fr) !important; }
+  body:not(.anon) nav#mainNav { background: var(--g-side) !important; border-radius: 0 22px 22px 0 !important; margin: 10px 0 14px 0 !important;
+    padding: 18px 12px 18px 12px !important; box-shadow: 0 10px 26px rgba(30,60,40,.16) !important; display: flex !important; flex-direction: column; gap: 2px;
+    min-height: calc(100vh - 110px) !important; position: sticky; top: 8px; align-self: start; }
+  body:not(.anon) nav#mainNav::before { content: ""; display: block; width: 46px; height: 46px; margin: 2px auto 14px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%23F3EFE4' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M32 58 C32 44 32 30 34 14'/%3E%3Cpath d='M33 40 C24 40 16 34 14 24 C24 24 31 30 33 40 Z'/%3E%3Cpath d='M33 31 C42 30 49 24 51 14 C41 15 35 21 33 31 Z'/%3E%3Cpath d='M33.5 22 C27 20 23 14 23 7 C30 9 33 15 33.5 22 Z'/%3E%3C/svg%3E") no-repeat center / contain; flex: none; }
+  nav#mainNav a.big-item { color: #EAF1E6 !important; border-radius: 12px !important; padding: 10px 12px !important; margin: 0 !important; min-height: 44px; }
+  nav#mainNav a.big-item .bi-sub { display: none !important; }
+  nav#mainNav a.big-item .bi-title, nav#mainNav a.big-item b, nav#mainNav a.big-item strong { color: inherit !important; font-weight: 700; }
+  nav#mainNav a.big-item:hover { background: rgba(255,255,255,.08) !important; }
+  nav#mainNav a.big-item[aria-current="page"], nav#mainNav[data-group="practice"] a.big-item[data-group="practice"], nav#mainNav[data-group="assign"] a.big-item[data-group="assign"], nav#mainNav[data-group="tassign"] a.big-item[data-group="tassign"] {
+    background: var(--g-pill) !important; color: var(--g-ink) !important; box-shadow: 0 2px 6px rgba(0,0,0,.12) !important; }
+  nav#mainNav a.big-item .chick { width: 30px !important; height: 30px !important; background: rgba(243,239,228,.14) !important; box-shadow: none !important; }
+  nav#mainNav a.big-item[aria-current="page"] .chick { background: var(--g-soft) !important; }
+  nav#mainNav a.sub-item, nav#mainNav a.tool-item { color: #D6E3D2 !important; border-radius: 10px !important; }
+  nav#mainNav a.sub-item:hover, nav#mainNav a.tool-item:hover { background: rgba(255,255,255,.08) !important; }
+  nav#mainNav a.sub-item[aria-current="page"], nav#mainNav a.tool-item[aria-current="page"] { background: rgba(243,239,228,.18) !important; color: #FFFFFF !important; }
+  nav#mainNav .nav-title { color: #A9C2AE !important; }
+  nav#mainNav .mode-btn, nav#mainNav button { background: transparent !important; color: #EAF1E6 !important; border: 1px solid rgba(243,239,228,.4) !important; box-shadow: none !important; }
+  /* 인사(동그라미 얼굴)는 맨 아래로 */
+  .nav-hello { order: 99; margin: auto 0 0 !important; padding-top: 18px; }
+  .nav-avatar { width: 64px !important; height: 64px !important; border: 3px solid var(--g-pill) !important; box-shadow: none !important; }
+  .nh-name { color: #EAF1E6 !important; font-size: 13.5px !important; font-weight: 600 !important; }
+  /* 카드: 흰 바탕 · 얇은 선 · 옅은 그림자 */
+  .card, .song, .pcard, .aside-card, .stat, .write-box, .vault-mini, .me-cards .card, .admin-login, .flow-steps li, .wk-card, .wk-card.now, .login-panel, .stat-grid .stat, .stat-grid .stat:nth-child(n), .ibadge {
+    background: #FFFFFF !important; border: 1px solid var(--g-line) !important; border-radius: 16px !important; box-shadow: 0 4px 14px rgba(30,60,40,.06) !important; }
+  .wk-card.now { box-shadow: 0 0 0 2px #7FA98A, 0 4px 14px rgba(30,60,40,.08) !important; }
+  .study-aside { background: rgba(255,255,255,.72) !important; box-shadow: 0 4px 16px rgba(30,60,40,.06) !important; }
+  main h2, body:not(.anon) main h2, main h3, body:not(.anon) main h3, .stat strong { color: var(--g-ink) !important; }
+  .kicker, main .kicker { background: var(--g-dark) !important; color: #FFFFFF !important; border-radius: 999px !important; }
+  th { background: var(--g-soft) !important; color: var(--g-ink) !important; }
+  /* 버튼: 짙은 초록(주요) · 흰 바탕 초록 테두리(보조) — 입체감은 은은하게 */
+  body:not(.anon) button, body:not(.anon) .btn, body:not(.anon) .ptab {
+    background: #FFFFFF !important; color: var(--g-ink) !important; border: 1px solid #BFD3C1 !important; box-shadow: 0 2px 0 #D3E2D2 !important; }
+  body:not(.anon) button:active:not(:disabled), body:not(.anon) .btn:active { transform: translateY(2px) !important; box-shadow: 0 0 0 #D3E2D2 !important; }
+  body:not(.anon) button.primary, body:not(.anon) .btn.primary, body:not(.anon) .btn.primary-link, body:not(.anon) .stamp-btn, body:not(.anon) .practice2 > button:not(.go-practice) {
+    background: var(--g-dark) !important; color: #FFFFFF !important; border: 0 !important; text-shadow: none !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 3px 0 #1B3A26, 0 6px 14px rgba(30,60,40,.18) !important; }
+  body:not(.anon) button.primary:active:not(:disabled), body:not(.anon) .btn.primary:active { box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 0 0 #1B3A26 !important; }
+  body:not(.anon) .toggle[aria-pressed="true"], body:not(.anon) .pills button[aria-pressed="true"], body:not(.anon) .ptab.on {
+    background: var(--g-soft) !important; color: var(--g-ink) !important; border: 1.5px solid var(--g-dark) !important; box-shadow: none !important; font-weight: 800; }
+  body:not(.anon) button.danger, body:not(.anon) .btn.danger { color: #9B2C2C !important; border-color: #E2B4B4 !important; }
+  /* 곡 카드: 초록 배지 · 초록 버튼 */
+  .songs li .song .tags .tag.lv { background: var(--g-dark) !important; box-shadow: none !important; }
+  .songs li .song .tags .fav-mark { color: #C0563C; }
+  .songs li .song::after { background: var(--g-dark) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 3px 0 #1B3A26 !important; }
+  .songs li .song.disabled::after { background: #EEF3EC !important; color: #5A6B5F !important; box-shadow: none !important; }
+  .songs li .song .thumb { background: linear-gradient(135deg, #D9EAD6 0%, #A9CBB0 60%, #7FA98A 100%) !important; }
+  /* 출석 달력 */
+  .cal-c.on { background: var(--g-soft) !important; border-color: #A9C7AF !important; }
+  .cal button.cal-c.tap-today { border: 2px solid #7FA98A !important; }
+  .cal button.cal-c.tap-today::after { background: var(--g-dark) !important; }
+  .cal button.cal-c.tap-today:hover { box-shadow: 0 10px 18px rgba(30,60,40,.18), 0 2px 0 #7FA98A !important; background: #F7FBF5 !important; }
+  .tap-spark { color: #7FA98A !important; }
+  #top-search { border-color: #BFD3C1 !important; }
+  @media (max-width: 980px) {
+    body:not(.anon) nav#mainNav { position: static; min-height: 0 !important; border-radius: 0 !important; margin: 0 !important; }
+    body:not(.anon) nav#mainNav::before { display: none; }
+    .nav-hello { order: 0; margin: 0 !important; padding-top: 0; }
+  }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
@@ -2128,7 +2199,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       profile = rows[0] || null;
       return profile;
     }
-    const SONG_COLS = "id,title,artist,chart_rank,release_date,video_url,video_note,spotify_url,duration_sec,sync_offset,visibility,owner_id,class_id,line_count";
+    const SONG_COLS = "id,title,artist,chart_rank,release_date,video_url,video_note,spotify_url,duration_sec,sync_offset,visibility,owner_id,class_id,line_count,deleted_at";
     const LYRIC_COLS = "line_id,song_id,position,verse,vietnamese,korean,translation_status,start_time,calc_excluded";
     return {
       async init() {
@@ -2179,6 +2250,8 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       songOriginals: (id) => run(c => c.from("lyric_originals").select("line_id,song_id,line_number,verse,vietnamese,korean,translation_status").eq("song_id", id)),
       editLog: (id) => run(c => c.from("lyric_edit_log").select("line_id,action,before,after,at").eq("song_id", id).order("at")),
       saveLyrics: (id, lines, log) => run(c => c.rpc("save_song_lyrics", { p_song: id, p_lines: lines, p_log: log || [] })),
+      trashSong: (id) => run(c => c.rpc("delete_song", { p_song: id })),     // 휴지통으로(되살릴 수 있음)
+      untrashSong: (id) => run(c => c.rpc("restore_song", { p_song: id })),
       saveSync: (id, times, offset) => run(c => c.rpc("save_sync", { p_song: id, p_times: times, p_offset: offset === undefined ? null : offset, p_set_offset: offset !== undefined })),
       setExcluded: (lineId, v) => run(c => c.from("lyrics").update({ calc_excluded: v }).eq("line_id", lineId).select("line_id")),
       updateSong: (id, patch) => run(c => c.from("songs").update(patch).eq("id", id).select("id")),
@@ -2304,7 +2377,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     function songFromRow(r) {
       return { id: r.id, title: r.title, artist: r.artist, chartRank: r.chart_rank, releaseDate: r.release_date, videoUrl: r.video_url,
                videoNote: r.video_note, spotifyUrl: r.spotify_url, durationSec: r.duration_sec == null ? null : Number(r.duration_sec),
-               syncOffset: r.sync_offset == null ? null : Number(r.sync_offset), visibility: r.visibility, ownerId: r.owner_id, classId: r.class_id,
+               syncOffset: r.sync_offset == null ? null : Number(r.sync_offset), visibility: r.visibility, ownerId: r.owner_id, classId: r.class_id, deletedAt: r.deleted_at || null,
                lineCount: r.line_count, status: r.line_count > 0 ? "ready" : "준비 중" };
     }
     function setOriginals(songId, rows) {
@@ -2322,15 +2395,18 @@ if (typeof module !== "undefined") module.exports = UploadKit;
                  modified: !!orig && (orig.vietnamese !== r.vietnamese || orig.korean !== (r.korean || "")), isNew: !orig };
       }));
     }
+    let deletedSongs = [];
     function indexSongs(rows) {
-      songs = rows.map(songFromRow).sort((a, b) => a.id - b.id);
+      const all = rows.map(songFromRow).sort((a, b) => a.id - b.id);
+      songs = all.filter(s => !s.deletedAt); deletedSongs = all.filter(s => s.deletedAt);
       songById = new Map(songs.map(s => [s.id, s]));
     }
     async function reloadSong(songId) {
       const [ly, og, srow] = await Promise.all([Server.songLyrics(songId), Server.songOriginals(songId),
         Server.song(songId)]);
       setOriginals(songId, og); setLyrics(songId, ly);
-      if (srow[0]) { const s = songFromRow(srow[0]); const i = songs.findIndex(x => x.id === songId); if (i >= 0) songs[i] = s; else songs.push(s); songById.set(songId, s); }
+      if (srow[0] && srow[0].deleted_at) { songs = songs.filter(x => x.id !== songId); songById.delete(songId); }
+      else if (srow[0]) { const s = songFromRow(srow[0]); const i = songs.findIndex(x => x.id === songId); if (i >= 0) songs[i] = s; else songs.push(s); songById.set(songId, s); }
       editLogCache.delete(songId);
       notify();
     }
@@ -2380,6 +2456,24 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       },
       reloadSong,
       getSongs: () => songs,
+      getDeletedSongs: () => deletedSongs,
+      async trashSong(songId) { const r = await Server.trashSong(songId); await this.initUser(); return r; },
+      async untrashSong(songId) { await Server.untrashSong(songId); await this.initUser(); },
+      async insertLineBefore(songId, beforeLineId, fields) {
+        if (!fields.vietnamese || !fields.vietnamese.trim()) throw new Error("새 줄의 베트남어 원문을 입력하세요.");
+        const list = workingList(songId), i = findIdx(list, beforeLineId), lineId = newLineId(), ko = fields.korean || "";
+        list.splice(i, 0, { lineId, verse: list[i].verse, vietnamese: fields.vietnamese, korean: ko, translationStatus: ko.trim() ? "검수 완료" : null });
+        await saveList(songId, list, [{ lineId, action: "줄 넣기", before: null, after: { before: beforeLineId, vietnamese: fields.vietnamese, korean: ko } }]);
+        return lineId;
+      },
+      // 줄 순서 바꾸기: 위(-1) · 아래(+1). 절 구성(각 절의 줄 수)은 그대로 두고 문장만 자리를 바꾼다.
+      async moveLine(songId, lineId, dir) {
+        const list = workingList(songId), i = findIdx(list, lineId), j = i + dir;
+        if (j < 0 || j >= list.length) throw new Error(dir < 0 ? "맨 위 줄입니다." : "맨 아래 줄입니다.");
+        const vi = list[i].verse, vj = list[j].verse, a = list[i];
+        list[i] = list[j]; list[j] = a; list[i].verse = vi; list[j].verse = vj;
+        await saveList(songId, list, [{ lineId, action: "줄 옮기기", before: { position: i + 1 }, after: { position: j + 1 } }]);
+      },
       getSong: (id) => songById.get(id) || null,
       getLyrics: (id) => lyricsBySong.get(id) || [],
       getOriginal: (lineId) => originalById.get(lineId) || null,
@@ -3151,6 +3245,28 @@ if (typeof module !== "undefined") module.exports = UploadKit;
   // 아래 네 칸(그림 속 위치, 원본 1672×941 기준): 마우스를 대면 그 칸만 살짝 커진다
   const C6_SPOTS = [[22, 668, 460, 864], [488, 722, 818, 864], [846, 708, 1210, 864], [1236, 726, 1610, 864]];
 
+  // 곡 삭제(휴지통): 모두의 목록 · 주차별 학습에서 사라지고, 학생 기록은 남는다. '삭제한 곡'에서 되살릴 수 있다.
+  function songDeleteButton(songId) {
+    const b = el("button", { type: "button", class: "danger", text: "곡 삭제" });
+    b.addEventListener("click", async () => {
+      const s = Repo.getSong(songId); if (!s) return;
+      const ok = window.confirm("'" + s.title + "' 곡을 삭제할까요?\n\n· 전체 곡 · 주차별 학습 · 검색에서 모두에게 사라집니다.\n· 이 곡이 들어 있던 주차는 비워집니다.\n· 학생들의 녹음 · 제출 · 연습 기록은 지워지지 않습니다.\n· 전체 곡 화면 아래 '삭제한 곡'에서 되살릴 수 있습니다.");
+      if (!ok) return;
+      b.disabled = true;
+      try { await Repo.trashSong(songId); location.hash = "#/learn"; }
+      catch (e) { b.disabled = false; window.alert("삭제하지 못했습니다: " + e.message); }
+    });
+    return b;
+  }
+  function deletedSongsBox() {
+    const del = Repo.getDeletedSongs(); if (!del.length) return null;
+    return el("section", { class: "card deleted-box" }, [el("h3", { text: "삭제한 곡 (" + del.length + ")" }),
+      el("p", { class: "small muted", text: "되살리면 다시 전체 곡에 나타납니다. 주차 배정은 [주차별 곡 관리]에서 다시 정해 주세요." }),
+      el("ul", { class: "deleted-list" }, del.map(s => { const b = el("button", { type: "button", class: "small-btn", text: "되살리기" });
+        b.addEventListener("click", async () => { b.disabled = true; try { await Repo.untrashSong(s.id); renderList(); } catch (e) { b.disabled = false; window.alert(e.message); } });
+        return el("li", null, [el("span", { lang: "vi", text: s.title + " — " + s.artist }), b]); }))]);
+  }
+
   // 같은 단계 안: 어휘 점수 낮은 순 → 차트 순위 → ID
   function byScoreThenChart(x, y) {
     const ax = Analysis.get(x.id), ay = Analysis.get(y.id);
@@ -3197,7 +3313,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       nodes.push(el("div", { class: "row-actions" }, [loggedIn ? (Server.isAdmin() ? el("a", { class: "btn primary-link", href: "#/add", text: "내 곡 추가" }) : null)
                                                               : el("a", { class: "btn primary-link", href: "#/login", text: "로그인 / 가입" })]));
       nodes.push(el("ul", { class: "songs" }));
-      setView(nodes, "list"); flash = null; return;
+      nodes.push(deletedSongsBox()); setView(nodes, "list"); flash = null; return;
     }
     if (!loggedIn) {
       nodes.push(el("p", { class: "notice", text: "가사·번역과 학습 기능은 로그인한 뒤에 볼 수 있습니다." }));
@@ -3223,7 +3339,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       nodes.push(el("h3", { text: "준비 중 (" + rest.length + "곡)" }));
       nodes.push(el("ul", { class: "songs" }, rest.map(s => songItem(s, hid))));
     }
-    setView(nodes, "list");
+    nodes.push(deletedSongsBox()); setView(nodes, "list");
     if (hid) {
       const target = document.getElementById("song-" + hid);
       if (target) target.scrollIntoView({ block: "center" });
@@ -3832,6 +3948,9 @@ if (typeof module !== "undefined") module.exports = UploadKit;
             btn("취소", () => { editing = null; drawLyrics(); })])]);
       }
       const tools = [btn("고치기", () => { editing = { lineId: l.lineId, kind: "edit" }; drawLyrics(); }),
+        btn("위로 ↑", () => runEdit(() => Repo.moveLine(id, l.lineId, -1), l.lineNumber + "번 줄을 한 칸 위로 옮겼습니다.")),
+        btn("아래로 ↓", () => runEdit(() => Repo.moveLine(id, l.lineId, 1), l.lineNumber + "번 줄을 한 칸 아래로 옮겼습니다.")),
+        btn("위에 줄 넣기", () => { editing = { lineId: l.lineId, kind: "insertBefore" }; drawLyrics(); }),
         btn("아래에 줄 넣기", () => { editing = { lineId: l.lineId, kind: "insert" }; drawLyrics(); }),
         btn("지우기", () => { editing = { lineId: l.lineId, kind: "delete" }; drawLyrics(); })];
       if (!firstInVerse) tools.push(btn("여기서 절 나누기", () => runEdit(() => Repo.splitVerse(id, l.lineId), l.lineNumber + "번 줄부터 새 절로 나눴습니다.")));
@@ -3840,6 +3959,17 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         tools.push(btn("번역 검수 완료", () => runEdit(() => Repo.reviewLine(id, l.lineId), l.lineNumber + "번 줄 번역을 '검수 완료'로 바꿨습니다.")));
       if (l.modified) tools.push(btn("원래대로", () => runEdit(() => Repo.revertLine(id, l.lineId), l.lineNumber + "번 줄을 엑셀 원래 가사로 되돌렸습니다.")));
       const kids = [el("div", { class: "ed-tools" }, tools)];
+      if (idx === 0) tools[1].disabled = true;
+      if (idx === lyrics.length - 1) tools[2].disabled = true;
+      if (editing && editing.lineId === l.lineId && editing.kind === "insertBefore") {
+        const vi = el("textarea", { class: "ed-ta", lang: "vi", "aria-label": "새 줄 베트남어 원문" });
+        const ko = el("textarea", { class: "ed-ta", "aria-label": "새 줄 한국어 번역" });
+        kids.push(el("div", { class: "ed-form" }, [el("p", { class: "small", text: l.lineNumber + "번 줄 위에 새 줄 (시작 시간은 비어 있고 '싱크 필요'로 표시됩니다)" }),
+          el("label", { text: "베트남어 원문" }), vi, el("label", { text: "한국어 번역 (비워도 됨)" }), ko,
+          el("div", { class: "row-actions" }, [
+            btn("넣기", () => runEdit(() => Repo.insertLineBefore(id, l.lineId, { vietnamese: vi.value, korean: ko.value }), l.lineNumber + "번에 새 줄을 넣었습니다."), "primary"),
+            btn("취소", () => { editing = null; drawLyrics(); })])]));
+      }
       if (editing && editing.lineId === l.lineId && editing.kind === "insert") {
         const vi = el("textarea", { class: "ed-ta", lang: "vi", "aria-label": "새 줄 베트남어 원문" });
         const ko = el("textarea", { class: "ed-ta", "aria-label": "새 줄 한국어 번역" });
@@ -3944,7 +4074,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       rangePanel,
       summaryBox,
       // 교사용 편집 버튼은 이 곡을 고칠 수 있는 사람에게만 보인다(실제 허용은 서버 규칙이 정한다)
-      el("div", { class: "row-actions" }, [starBtn, toneBtn].concat(Repo.canEdit(id) ? [editBtn, syncBtn, lyricEditBtn] : [])),
+      el("div", { class: "row-actions" }, [starBtn, toneBtn].concat(Repo.canEdit(id) ? [editBtn, syncBtn, lyricEditBtn, songDeleteButton(id)] : [])),
       lineStatus,
       lyricsBox
     ];
@@ -6798,7 +6928,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         big("#/t/progress", "t-prog", "학습 현황", "핵심 단어 · 녹음"),
         big("#/assign", "assign", "과제" + cnt(navCounts.toReview), "녹음 과제", "tassign"),
         small("#/assign", "assign", "과제 내기 · 제출 현황", "tassign"), small("#/submissions", "submissions", "제출된 녹음 듣기 · 피드백" + cnt(navCounts.toReview), "tassign"),
-        big("#/classes", "classes", "반 관리", "반 코드 · 학생 명단"),
+        big("#/classes", "classes", "반 관리", "반 코드 · 학생 명단"), ...(Server.isAdmin() ? [] : [big("#/admin/weeks", "admin-weeks", "주차별 곡", "1~15주차 곡 정하기")]),
         big("#/glossary", "glossary", "단어장", "핵심 단어 뜻"),
         big("#/board", "board", "열린 게시판", "반 글 보기"));
       if (Server.isAdmin()) kids.push(el("p", { class: "nav-title", text: "관리자" }), tool("#/admin/users", "admin-users", "학생·사용자 관리" + cnt(navCounts.pending)),
@@ -6891,7 +7021,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     else if (h === "#/t/attendance") { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "t-att"; renderTeachAttendance(); } }
     else if (h === "#/t/progress") { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "t-prog"; renderTeachProgress(); } }
     else if (h === "#/weeks") { if (login()) { currentRoute = "weeks"; renderWeeks(); } }
-    else if (h === "#/admin/weeks") { if (login() && need(Server.isAdmin(), "관리자만 주차별 곡을 정할 수 있습니다.")) { currentRoute = "admin-weeks"; renderAdminWeeks(); } }
+    else if (h === "#/admin/weeks") { if (login() && need(Server.canTeach(), "교수자 · 관리자만 주차별 곡을 정할 수 있습니다.")) { currentRoute = "admin-weeks"; renderAdminWeeks(); } }
     else if (h === "#/checkin") { if (login()) { currentRoute = "checkin"; renderCheckin(); } }
     else if (h === "#/learn") { if (login()) { currentRoute = "list"; renderList(); } }
     else if (h === "#/practice" || (m = h.match(/^#\/practice\/pick\/(repeat|words|sing)$/))) {
