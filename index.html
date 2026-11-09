@@ -2529,6 +2529,11 @@
   .rc-bar { height: 8px; border-radius: 99px; background: rgba(160,172,194,.3); margin-top: 6px; overflow: hidden; } .rc-bar i { display: block; height: 100%; background: linear-gradient(90deg, #8F86EC, #5E53C9); border-radius: 99px; }
   .rc-overall { display: grid; gap: 4px; }
   @media (max-width: 760px) { .ev-grid { grid-template-columns: 1fr; } }
+
+  /* 22단계: 공유 · HTML 내보내기 */
+  .sh-bar { display: grid; gap: 10px; }
+  .sh-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .sh-link { flex: 1 1 320px; min-width: 0; font-size: 13.5px !important; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet">
@@ -2910,7 +2915,9 @@ if (typeof module !== "undefined") module.exports = UploadKit;
   function koError(e) {
     const m = String((e && (e.message || e.msg || e.error_description)) || e || "");
     const code = e && (e.code || e.error_code);
-    if (/recording_limit:(\d+)/.test(m)) return "녹음은 " + m.match(/recording_limit:(\d+)/)[1] + "개까지 보관할 수 있습니다.";
+    if (/recording_limit:(\d+)/.test(m)) return "연습 녹음은 " + m.match(/recording_limit:(\d+)/)[1] + "개까지 보관할 수 있습니다. '내 녹음 보관함'에서 지난 연습 녹음을 지운 뒤 다시 해 주세요.";
+    if (/recording_pending_limit/.test(m)) return "제출을 마치지 않은 녹음이 남아 있습니다. 새로고침한 뒤 다시 제출해 주세요.";
+    if (/bad_recording_tag/.test(m)) return "이 주차의 녹음 과제가 열려 있지 않습니다.";
     if (/not_allowed/.test(m) || code === "42501" || /permission denied|row-level security/i.test(m)) return "권한이 없습니다.";
     if (/class_not_found/.test(m)) return "반 코드를 찾을 수 없습니다.";
     if (/feedback_locked/.test(m)) return "선생님 피드백을 받은 제출은 바꾸거나 취소할 수 없습니다.";
@@ -3049,7 +3056,13 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       addFavorite: (songId) => run(c => c.from("favorites").insert({ user_id: session.user.id, song_id: songId })),
       removeFavorite: (songId) => run(c => c.from("favorites").delete().eq("user_id", session.user.id).eq("song_id", songId)),
       // ---- 녹음(본인만)
-      myRecordings: () => all("recordings", "id,song_id,line_id,path,mime,size_bytes,created_at", q => q.eq("user_id", session.user.id).order("created_at")),
+      // 22단계: '내 녹음'(연습 보관함 · 한도 계산)에는 주차 녹음 과제로 낸 녹음을 넣지 않는다(서버 한도 규칙과 같게)
+      myRecordings: async () => {
+        const [list, wk] = await Promise.all([all("recordings", "id,song_id,line_id,path,mime,size_bytes,created_at", q => q.eq("user_id", session.user.id).order("created_at")),
+          run(c => c.from("week_recordings").select("recording_id").eq("user_id", session.user.id)).catch(() => [])]);
+        const used = new Set((wk || []).map(x => x.recording_id));
+        return list.filter(r => !String(r.line_id || "").startsWith("week") && !used.has(r.id));
+      },
       async uploadRecording(blob, songId, lineId) {
         const mime = (blob.type || "audio/webm").split(";")[0];
         const ext = mime === "audio/mp4" ? "m4a" : mime === "audio/ogg" ? "ogg" : "webm";
@@ -4022,7 +4035,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         el("span", { class: "c9-go", "aria-hidden": "true", text: "→" })])));
     const nodes = [el("div", { class: "cover5 cover9" }, [
       el("div", { class: "c9-in" }, [
-        lockNotice ? el("p", { class: "lock-note c9-lock", role: "status", text: "로그인한 뒤에 쓸 수 있습니다. 아래에서 학습자 또는 관리자 Google 로그인을 눌러 주세요." }) : null,
+        lockNotice ? el("p", { class: "lock-note c9-lock", role: "status", text: (() => { try { return sessionStorage.getItem("nbv-next") ? "공유받은 강의를 보려면 로그인하세요. 로그인하면 그 강의로 바로 이동합니다." : null; } catch (e) { return null; } })() || "로그인한 뒤에 쓸 수 있습니다. 아래에서 학습자 또는 관리자 Google 로그인을 눌러 주세요." }) : null,
         hero, cards])])];
     lockNotice = false;
     setView(nodes.filter(Boolean), "cover");
@@ -4116,7 +4129,8 @@ if (typeof module !== "undefined") module.exports = UploadKit;
           qby.get(n) ? el("p", { class: "cw-quiz" }, [el("span", { text: "퀴즈 " + qby.get(n).questions + "문항" + (qby.get(n).published ? "" : " (비공개)") + " · 제출 " + qby.get(n).submitted + "/" + qby.get(n).members + "명" + (qby.get(n).avg_pct != null ? " · 평균 " + qby.get(n).avg_pct + "%" : "") + (qby.get(n).review ? " · 채점 대기 " + qby.get(n).review : "") }),
             el("a", { href: "#/course/" + cid + "/week/" + n + "/quiz", text: "결과" })]) : null,
           r.rec_enabled ? el("p", { class: "cw-quiz" }, [el("span", { text: "녹음 과제" + (r.rec_due ? " · 마감 " + fmtWhen(r.rec_due) : "") }), el("a", { href: "#/course/" + cid + "/week/" + n + "/rec", text: "녹음" })]) : null,
-          el("div", { class: "row-actions cw-acts" }, [el("a", { class: "btn primary", href: "#/course/" + cid + "/week/" + n, text: "편집" }), el("a", { class: "btn", href: "#/lecture/" + cid + "/" + n, text: "미리보기" }), el("a", { class: "btn", href: "#/present/" + cid + "/" + n, text: "발표", "aria-label": n + "주차 프레젠테이션 시작" })])]);
+          el("div", { class: "row-actions cw-acts" }, [el("a", { class: "btn primary", href: "#/course/" + cid + "/week/" + n, text: "편집" }), el("a", { class: "btn", href: "#/lecture/" + cid + "/" + n, text: "미리보기" }), el("a", { class: "btn", href: "#/present/" + cid + "/" + n, text: "발표", "aria-label": n + "주차 프레젠테이션 시작" }),
+            (() => { const b = el("button", { type: "button", class: "small-btn", text: "링크", "aria-label": n + "주차 공유 링크 복사" }); b.addEventListener("click", async () => { b.textContent = (await copyText(lectureLink(cid, n))) ? "복사됨" : "복사 실패"; setTimeout(() => { b.textContent = "링크"; }, 1800); }); return b; })()])]);
       }));
     }
     draw(); window.scrollTo(0, 0);
@@ -4220,7 +4234,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     (async () => {
       let r = null;
       try { r = (await Server.courseWeek(cid, n))[0] || null; } catch (e) { fill(box, el("p", { class: "bad", text: "불러오지 못했습니다: " + e.message })); return; }
-      if (!r) { fill(box, el("h2", { text: n + "주차" }), el("p", { class: "muted", text: manage ? "아직 작성한 내용이 없습니다. [편집]에서 강의를 작성하세요." : "아직 게시되지 않은 강의입니다." })); return; }
+      if (!r) { fill(box, el("h2", { text: n + "주차" }), el("p", { class: "muted", text: manage ? "아직 작성한 내용이 없습니다. [편집]에서 강의를 작성하세요." : !Repo.memberOf(cid) ? "이 강의는 해당 교과목 수강생만 볼 수 있습니다. 교수자에게 반 코드를 받아 [반 참여]를 한 뒤 다시 열어 주세요." : "아직 게시되지 않은 강의입니다." })); return; }
       const lines = (x) => String(x || "").split(/\n+/).map(v => v.trim()).filter(Boolean);
       const sec = (title, kids) => el("section", { class: "card lec-sec" }, [el("h3", { text: title })].concat(kids));
       const s = r.song_id ? Repo.getSong(r.song_id) : null, lyr = s ? Repo.getLyrics(s.id) : [];
@@ -4237,7 +4251,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       nodes.push(lectureQuizSection(cid, n, manage));
       if (r.rec_enabled || manage) nodes.push(lectureRecSection(cid, n, manage, r, s, lyr));
       if (r.summary) nodes.push(sec("학습 정리", [el("p", { class: "lec-text", text: r.summary })]));
-      if (manage) nodes.splice(2, 0, el("div", { class: "row-actions" }, [el("a", { class: "btn primary", href: "#/present/" + cid + "/" + n, text: "▶ 프레젠테이션 시작" }), el("a", { class: "btn", href: "#/course/" + cid + "/week/" + n, text: "이 주차 편집" })]));
+      if (manage) nodes.splice(2, 0, el("div", { class: "row-actions" }, [el("a", { class: "btn primary", href: "#/present/" + cid + "/" + n, text: "▶ 프레젠테이션 시작" }), el("a", { class: "btn", href: "#/course/" + cid + "/week/" + n, text: "이 주차 편집" })]), shareBar(c, cid, n, r, s, lyr));
       fill(box, ...nodes);
     })();
     window.scrollTo(0, 0);
@@ -4771,8 +4785,10 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         else {
           kids.push(el("p", { class: "small", text: !mine ? "원곡을 들으며 연습한 뒤 녹음해 제출하세요." : mine.status === "resubmit" ? "다시 녹음해 제출해 주세요." : mine.eval ? "다시 제출하면 교수자가 새로 평가합니다(지금 평가는 숨겨집니다)." : "다시 녹음해서 제출하면 새 녹음으로 바뀝니다." }));
           kids.push(recorderWidget(r.rec_max_sec || 120, async (blob) => {
-            const rec = await Server.uploadRecording(blob, song ? song.id : null, null);
-            await Server.weekRecSubmit(cid, n, rec.id);
+            const rec = await Server.uploadRecording(blob, song ? song.id : null, "week:" + cid + ":" + n); // 제출용 표시(연습 보관 한도에서 제외)
+            try { await Server.weekRecSubmit(cid, n, rec.id); }
+            catch (e) { await Server.deleteRecording(rec).catch(() => {}); throw e; } // 제출이 거절되면 방금 올린 파일을 지운다
+            if (mine && mine.recording_id && mine.recording_id !== rec.id) await Server.deleteRecording({ id: mine.recording_id, path: mine.path }).catch(() => {}); // 바뀐 이전 녹음 정리(끝날 때까지 기다림)
             await draw("제출했습니다. 교수자가 듣고 피드백을 남기면 여기서 확인할 수 있습니다.");
           }));
         }
@@ -4838,6 +4854,93 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       if (focusUid) { const card = document.getElementById("ev-" + focusUid); if (card) { card.scrollIntoView({ block: "start" }); const m = card.querySelector("[role=status]"); if (m) m.textContent = "저장했습니다."; } }
     }
     draw(); window.scrollTo(0, 0);
+  }
+
+  /* ----- 22단계: 강의 공유 · 게시 전환 · HTML 내보내기 ----- */
+  function lectureLink(cid, n) { return location.origin + location.pathname + "#/lecture/" + cid + "/" + n; }
+  async function copyText(txt) {
+    try { await navigator.clipboard.writeText(txt); return true; } catch (e) {}
+    const ta = el("textarea", { readonly: "", "aria-hidden": "true", style: "position:fixed;left:-9999px;top:0" }); ta.value = txt; document.body.appendChild(ta); ta.select();
+    let ok = false; try { ok = document.execCommand("copy"); } catch (e) {} ta.remove(); return ok;
+  }
+  function shareBar(c, cid, n, r, song, lyr) {
+    const msg = el("p", { class: "small", role: "status" });
+    const link = el("input", { type: "text", readonly: "", class: "sh-link", value: lectureLink(cid, n), "aria-label": "공유 링크" });
+    link.addEventListener("focus", () => link.select());
+    const bCopy = el("button", { type: "button", text: "공유 링크 복사" });
+    bCopy.addEventListener("click", async () => { link.select(); msg.textContent = (await copyText(link.value)) ? "링크를 복사했습니다. 수강생에게 보내 주세요(이 교과목 수강생만, 게시된 강의만 열립니다)." : "자동 복사가 안 됩니다. 링크 칸을 눌러 직접 복사해 주세요."; });
+    const state = el("span", { class: "cw-state " + (r.published ? "on" : "off"), text: r.published ? "게시됨" : "비공개" });
+    const bPub = el("button", { type: "button", text: r.published ? "비공개로 전환" : "게시하기" });
+    bPub.addEventListener("click", async () => {
+      const to = !r.published; bPub.disabled = true;
+      try { await Server.saveCourseWeek({ class_id: cid, week_no: n, published: to }); r.published = to;
+        state.className = "cw-state " + (to ? "on" : "off"); state.textContent = to ? "게시됨" : "비공개"; bPub.textContent = to ? "비공개로 전환" : "게시하기";
+        msg.textContent = to ? "게시했습니다. 수강생이 이 강의를 볼 수 있습니다." : "비공개로 바꿨습니다. 수강생에게 더 이상 보이지 않습니다."; }
+      catch (e) { msg.textContent = "바꾸지 못했습니다: " + e.message; }
+      bPub.disabled = false;
+    });
+    const withKey = el("input", { type: "checkbox", id: "sh-key" });
+    const bHtml = el("button", { type: "button", text: "HTML 파일 내보내기" });
+    bHtml.addEventListener("click", async () => {
+      bHtml.disabled = true; msg.textContent = "만드는 중…";
+      try {
+        let qz = []; try { qz = (await Server.quizAdmin(cid, n)) || []; } catch (e) {}
+        const html = buildLectureHtml(c, n, r, song, lyr, qz, withKey.checked);
+        const name = [c.name, n + "주차", r.title || ""].filter(Boolean).join("_").replace(/[\\/:*?"<>|]+/g, "").replace(/\s+/g, "_").slice(0, 80) + (withKey.checked ? "_정답포함" : "") + ".html";
+        const url = URL.createObjectURL(new Blob([html], { type: "text/html;charset=utf-8" }));
+        const a = el("a", { href: url, download: name }); document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
+        msg.textContent = "'" + name + "' 파일을 내려받았습니다. 가사가 들어 있으니 수강생에게만 나눠 주세요.";
+      } catch (e) { msg.textContent = "만들지 못했습니다: " + e.message; }
+      bHtml.disabled = false;
+    });
+    return el("section", { class: "card sh-bar" }, [el("div", { class: "sh-row" }, [el("b", { text: "공유" }), state, bPub]),
+      el("div", { class: "sh-row" }, [link, bCopy]),
+      el("div", { class: "sh-row" }, [bHtml, el("label", { class: "check" }, [withKey, el("span", { text: " 퀴즈 정답 · 해설 포함(교수자용)" })])]), msg]);
+  }
+  // 주차 강의를 인터넷 없이도 열리는 단독 HTML로 만든다(닫는 태그는 <\/...> 로 적어 앱 파일 안에서 헷갈리지 않게)
+  function buildLectureHtml(c, n, r, song, lyr, qz, withKey) {
+    const E = (x) => String(x == null ? "" : x).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+    const lines = (x) => String(x || "").split(/\n+/).map(v => v.trim()).filter(Boolean);
+    const P = (x) => lines(x).map(v => "<p>" + E(v) + "<\/p>").join("");
+    const vocab = lines(r.vocab).map(x => { const k = x.split(/\s+[-–—:]\s+/); return { w: k[0], m: k.slice(1).join(" - ") }; });
+    const tones = (w) => w.split(/\s+/).map(x => x.replace(/[^\p{L}]/gu, "")).filter(Boolean).map(x => '<span class="tone"><b lang="vi">' + E(x) + "<\/b><small>" + E(VocabEngine.toneOf(x) || "") + "<\/small><\/span>").join("");
+    const sec = (title, body) => body ? "<section><h2>" + E(title) + "<\/h2>" + body + "<\/section>" : "";
+    const vid = song && song.videoUrl ? youtubeId(song.videoUrl) : null;
+    const lyrLi = (l) => '<li><span class="vi" lang="vi">' + E(l.vietnamese) + '<\/span><span class="ko">' + E(l.korean || "") + "<\/span><\/li>";
+    const recLines = r.rec_enabled && r.rec_from ? lyr.slice(r.rec_from - 1, r.rec_to || r.rec_from) : [];
+    const qHtml = (qz || []).map((q) => {
+      const opts = q.qtype === "ox" ? ["O", "X"] : (q.options || []);
+      const ans = q.qtype === "ox" ? (String(q.answer).toUpperCase() === "X" ? 1 : 0) : Number(q.answer);
+      const choice = ["mc", "meaning", "tone", "ox"].includes(q.qtype);
+      let body = choice ? '<ol class="opts" type="A">' + opts.map((o, k) => '<li lang="vi"' + (withKey && k === ans ? ' class="ok"' : "") + ">" + E(o) + "<\/li>").join("") + "<\/ol>"
+        : '<div class="blank">' + (q.qtype === "translate" ? "해석: " : "답: ") + "<\/div>";
+      if (withKey) body += '<p class="key"><b>' + (q.qtype === "translate" ? "모범 답안" : "정답") + ":<\/b> " + E(choice ? opts[ans] : String(q.answer).split("|").join(" / ")) + "<\/p>" + (q.explanation ? '<p class="ex">' + E(q.explanation) + "<\/p>" : "");
+      return '<li><p class="q"><span class="tag">' + E(QTYPE_NAME[q.qtype]) + " · " + (q.points || 1) + '점<\/span> <span lang="vi">' + E(q.prompt) + "<\/span><\/p>" + body + "<\/li>";
+    }).join("");
+    const css = "body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;color:#2B3654;background:#EEF1F6;margin:0;line-height:1.7}"
+      + "main{max-width:880px;margin:0 auto;padding:32px 20px 60px}header{margin-bottom:22px}.kick{color:#5B50C6;font-weight:700;margin:0}h1{font-size:30px;margin:4px 0 0;line-height:1.3}"
+      + "section{background:#fff;border-radius:18px;padding:20px 22px;margin:16px 0;box-shadow:0 6px 18px rgba(120,130,160,.15)}h2{font-size:18px;margin:0 0 10px;color:#5B50C6}"
+      + "p{margin:.3em 0}ol.lyr{padding-left:1.8em}ol.lyr li{margin:.5em 0}.vi{display:block;font-weight:700}.ko{display:block;color:#76819A}"
+      + ".song{font-size:22px;font-weight:800;margin:0}.vocab{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;padding:0;list-style:none}"
+      + ".vocab li{background:#F4F5FA;border-radius:12px;padding:10px 12px}.vocab b{font-size:18px}.tones{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}"
+      + ".tone{display:inline-flex;flex-direction:column;align-items:center;background:#fff;border:1px solid #E1E4EE;border-radius:10px;padding:2px 8px}.tone small{color:#5B50C6;font-weight:700}"
+      + ".quiz>li{margin:14px 0}.q{font-weight:700}.tag{font-size:12px;background:#E4E2FA;color:#5B50C6;border-radius:99px;padding:2px 8px}.opts li{margin:.2em 0}"
+      + ".opts li.ok{color:#15803D;font-weight:800}.blank{border-bottom:1px solid #C9CEDB;min-height:28px;color:#76819A}.key{color:#15803D}.ex{background:#F4F5FA;border-radius:10px;padding:8px 10px}"
+      + "a{color:#5B50C6}footer{color:#76819A;font-size:13px;text-align:center;margin-top:30px}@media print{body{background:#fff}section{box-shadow:none;border:1px solid #E1E4EE;break-inside:avoid}}";
+    return "<!DOCTYPE html>\n<html lang=\"ko\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+      + "<title>" + E(c.name + " " + n + "주차 — " + (r.title || "강의")) + "<\/title><style>" + css + "<\/style><\/head><body><main>"
+      + '<header><p class="kick">' + E(c.name + (courseLabel(c) ? " · " + courseLabel(c) : "") + " · " + n + "주차") + "<\/p><h1>" + E(r.title || n + "주차 강의") + "<\/h1><\/header>"
+      + sec("학습 목표", lines(r.goals).length ? "<ul>" + lines(r.goals).map(x => "<li>" + E(x) + "<\/li>").join("") + "<\/ul>" : "")
+      + sec("오늘의 노래", song ? '<p class="song" lang="vi">' + E(song.title) + '<\/p><p lang="vi">' + E(song.artist) + "<\/p>" + (vid ? '<p><a href="https://www.youtube.com/watch?v=' + E(vid) + '">▶ 유튜브에서 노래 듣기<\/a><\/p>' : "") : "")
+      + sec("가수 및 곡 소개", P(r.song_intro))
+      + sec("가사와 한국어 번역", lyr.length ? '<ol class="lyr">' + lyr.map(lyrLi).join("") + "<\/ol>" : "")
+      + sec("핵심 어휘와 표현", vocab.length ? '<ul class="vocab">' + vocab.map(v => '<li><b lang="vi">' + E(v.w) + "<\/b> " + E(v.m) + '<div class="tones">' + tones(v.w) + "<\/div><\/li>").join("") + "<\/ul>" : "")
+      + sec("성조 및 발음", P(r.pron_notes))
+      + sec("확인 퀴즈" + (withKey ? " (정답 · 해설 포함)" : ""), qHtml ? '<ol class="quiz">' + qHtml + "<\/ol>" : "")
+      + sec("녹음 과제", r.rec_enabled ? P(r.rec_guide) + (recLines.length ? '<ol class="lyr" start="' + E(r.rec_from) + '">' + recLines.map(lyrLi).join("") + "<\/ol>" : "")
+          + "<p>최대 " + E(fmtSec(r.rec_max_sec || 120)) + (r.rec_due ? " · 마감 " + E(new Date(r.rec_due).toLocaleString("ko-KR")) : "") + " · 웹앱의 강의 페이지에서 녹음해 제출하세요.<\/p><p><a href=\"" + E(lectureLink(c.id, n)) + "\">웹앱에서 이 강의 열기<\/a><\/p>" : "")
+      + sec("학습 정리", P(r.summary))
+      + "<footer>노래로 배우는 베트남어 · " + E(new Date().toLocaleDateString("ko-KR")) + " 내보냄 · 수업용 자료(가사 포함 — 수강생에게만 배포)<\/footer><\/main><\/body><\/html>";
   }
 
   // 같은 단계 안: 어휘 점수 낮은 순 → 차트 순위 → ID
@@ -8576,6 +8679,10 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     let m;
     if (Server.noProfile()) { currentRoute = "noprofile"; renderNoProfile(); return; }
     teacherLogin = h === "#/login/teacher";
+    // 22단계: 공유받은 강의 링크는 기억했다가 로그인(이메일 · Google) 뒤 그 강의로 보낸다
+    if (loggedIn) { let nx = null; try { nx = sessionStorage.getItem("nbv-next"); } catch (e) {}
+      if (nx && (h === "#/" || h === "" || /^#\/login/.test(h))) { try { sessionStorage.removeItem("nbv-next"); } catch (e) {} if (/^#\/lecture\/[0-9a-f-]{36}\/\d+$/.test(nx)) { location.hash = nx; return; } } }
+    else if (/^#\/lecture\/[0-9a-f-]{36}\/\d+$/.test(h)) { try { sessionStorage.setItem("nbv-next", h); } catch (e) {} }
     // 13단계: 로그인하지 않았으면 표지 · 로그인 화면만. 다른 주소는 표지로 돌려보낸다.
     if (!loggedIn && !/^#\/(login(\/teacher)?|signup)?$/.test(h)) {
       lockNotice = true; history.replaceState(null, "", location.pathname + location.search + "#/");
