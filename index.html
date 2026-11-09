@@ -2369,6 +2369,39 @@
   /* 47단계: 표지 문구가 글자 단위로 쪼개져 한 글자만 다음 줄로 떨어지지 않게 — 낱말 단위 · 줄 길이 균형 */
   .cover9 .c9-desc, .cover9 .c9-em, .cover9 .c9-fine span, .cover9 .c9-title { word-break: keep-all; overflow-wrap: break-word; text-wrap: balance; }
   .cover9 .c9-desc { max-width: 46em !important; }
+
+  /* 17단계: 교과목 정보 · 주차별 강의 · 강의 페이지 */
+  .course-info { margin: 18px 0; display: grid; gap: 8px; }
+  .course-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .course-grid > div { display: grid; gap: 6px; }
+  .cw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 22px; margin-top: 16px; }
+  .cw-card { display: flex; flex-direction: column; gap: 8px; }
+  .cw-head { display: flex; justify-content: space-between; align-items: center; }
+  .cw-state { font-size: 12.5px; font-weight: 800; padding: 4px 10px; border-radius: 999px; }
+  .cw-state.on { color: #1F7A5C; background: #DFF3EA; } .cw-state.off { color: #6B7280; background: #ECEEF3; }
+  .cw-title { margin: 0; font-weight: 800; font-size: 16px; color: var(--sv-ink, #2B3654); word-break: keep-all; }
+  .cw-song { margin: 0; font-size: 13.5px; color: var(--sv-muted, #76819A); }
+  .cw-acts { margin-top: auto; padding-top: 6px; }
+  .we-form { display: grid; gap: 8px; max-width: 900px; }
+  .we-form label { font-weight: 700; margin-top: 8px; }
+  .we-form select[size] { min-height: 180px; padding: 6px !important; }
+  .we-pub { margin-top: 14px !important; display: flex; align-items: center; gap: 8px; }
+  .lec { display: grid; gap: 18px; max-width: 980px; }
+  .lec-sec h3 { margin: 0 0 10px; }
+  .lec-text { white-space: pre-line; line-height: 1.75; margin: 0; }
+  .lec-list { margin: 0; padding-left: 1.2em; line-height: 1.8; }
+  .lec-song { font-size: 22px; font-weight: 800; margin: 0; }
+  .lec-lyrics { margin: 0; padding-left: 1.6em; display: grid; gap: 10px; }
+  .lec-lyrics li { line-height: 1.5; } .lec-lyrics .vi { display: block; font-weight: 700; } .lec-lyrics .ko { display: block; color: var(--sv-muted, #76819A); font-size: 14.5px; }
+  .lec-vocab { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+  .lec-vocab li { display: flex; gap: 10px; align-items: baseline; padding: 10px 12px; border-radius: 14px; background: rgba(255,255,255,.5); }
+  .my-lectures { margin: 18px 0 8px; display: grid; gap: 14px; }
+  .ml-name { font-weight: 800; margin: 0 0 4px; }
+  .ml-list { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
+  .ml-list a { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 12px; border-radius: 14px; text-decoration: none; min-height: 44px; }
+  .ml-list a:hover { background: rgba(255,255,255,.55); }
+  .ml-t { font-weight: 700; color: var(--sv-ink, #2B3654); } .ml-s { font-size: 13.5px; color: var(--sv-muted, #76819A); }
+  @media (max-width: 760px) { .course-grid { grid-template-columns: 1fr; } }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet">
@@ -2905,7 +2938,14 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       },
       async recordingUrl(rec) { const d = await run(c => c.storage.from("recordings").createSignedUrl(rec.path, 600)); return d.signedUrl; },
       // ---- 반
-      myClasses: () => run(c => c.from("classes").select("id,name,code,teacher_id,archived,created_at").order("created_at")),
+      myClasses: () => run(c => c.from("classes").select("id,name,code,teacher_id,archived,created_at,description,term,year,weeks_count").order("created_at")),
+      // 17단계: 교과목 정보 · 주차별 강의
+      updateCourse: (id, f) => run(c => c.from("classes").update(f).eq("id", id).select("id")),
+      courseWeeks: (cid) => run(c => c.from("class_weeks").select("*").eq("class_id", cid).order("week_no")),
+      courseWeek: (cid, n) => run(c => c.from("class_weeks").select("*").eq("class_id", cid).eq("week_no", n)),
+      saveCourseWeek: (row) => run(c => c.from("class_weeks").upsert(row).select("week_no")),
+      saveCourseWeeks: (rows) => run(c => c.from("class_weeks").upsert(rows).select("week_no")),
+      myLectures: () => run(c => c.from("class_weeks").select("class_id,week_no,song_id,title,published").eq("published", true).order("week_no")),
       myMemberships: () => run(c => c.from("class_members").select("class_id,joined_at").eq("user_id", session.user.id)),
       createClass: (name) => run(c => c.rpc("create_class", { p_name: name })),
       joinClass: (code) => run(c => c.rpc("join_class", { p_code: code })),
@@ -3869,6 +3909,168 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       el("ul", { class: "deleted-list" }, del.map(s => { const b = el("button", { type: "button", class: "small-btn", text: "되살리기" });
         b.addEventListener("click", async () => { b.disabled = true; try { await Repo.untrashSong(s.id); renderList(); } catch (e) { b.disabled = false; window.alert(e.message); } });
         return el("li", null, [el("span", { lang: "vi", text: s.title + " — " + s.artist }), b]); }))]);
+  }
+
+  /* ----- 17단계: 교과목(반) 정보 · 주차별 강의 ----- */
+  const TERMS = ["", "1학기", "2학기", "여름학기", "겨울학기"];
+  function courseLabel(c) { return [c.year ? c.year + "년" : "", c.term || ""].filter(Boolean).join(" ") ; }
+  function courseInfoCard(c) {
+    const msg = el("p", { role: "status", class: "small" });
+    const desc = el("textarea", { id: "co-desc", rows: "3", maxlength: "1000", placeholder: "교과목 소개(학생에게 보입니다)" }); desc.value = c.description || "";
+    const term = el("select", { id: "co-term" }, TERMS.map(x => el("option", { value: x, text: x || "학기 선택" }))); term.value = c.term || "";
+    const year = el("input", { type: "number", id: "co-year", min: "2000", max: "2100", placeholder: "연도", value: c.year || "" });
+    const weeks = el("input", { type: "number", id: "co-weeks", min: "1", max: "30", value: c.weeks_count || 15 });
+    const save = el("button", { type: "button", class: "primary", text: "교과목 정보 저장" });
+    save.addEventListener("click", async () => {
+      const w = Math.max(1, Math.min(30, parseInt(weeks.value, 10) || 15)), y = year.value ? parseInt(year.value, 10) : null;
+      const f = { description: desc.value.trim() || null, term: term.value || null, year: y, weeks_count: w };
+      save.disabled = true; msg.textContent = "저장하는 중…";
+      try { await Server.updateCourse(c.id, f); Object.assign(c, f); weeks.value = w; msg.textContent = "저장했습니다."; }
+      catch (e) { msg.textContent = "저장하지 못했습니다: " + e.message; }
+      save.disabled = false;
+    });
+    return el("section", { class: "card course-info" }, [el("h3", { text: "교과목 정보" }),
+      el("label", { for: "co-desc", text: "교과목 소개" }), desc,
+      el("div", { class: "course-grid" }, [
+        el("div", null, [el("label", { for: "co-year", text: "연도" }), year]),
+        el("div", null, [el("label", { for: "co-term", text: "학기" }), term]),
+        el("div", null, [el("label", { for: "co-weeks", text: "전체 주차 (기본 15)" }), weeks])]),
+      el("div", { class: "row-actions" }, [save, el("a", { class: "btn", href: "#/course/" + c.id, text: "주차별 강의 관리 →" })]), msg]);
+  }
+  function canManageCourse(cid) { return Server.isAdmin() || Repo.teaches(cid); }
+  function renderCourseWeeks(cid) {
+    const c = Repo.getClasses().find(x => x.id === cid);
+    const back = el("a", { class: "btn", href: "#/class/" + cid, text: "← 교과목" });
+    if (!c || !canManageCourse(cid)) { setView([back, el("p", { class: "bad", text: "이 교과목을 관리할 권한이 없습니다." })], "classes"); return; }
+    const box = el("div", { class: "cw-grid" }, [el("p", { class: "muted", text: "불러오는 중…" })]), msg = el("p", { role: "status", class: "small" });
+    const copy = el("button", { type: "button", text: "기본 노래표 가져오기" });
+    copy.addEventListener("click", async () => {
+      copy.disabled = true; msg.textContent = "가져오는 중…";
+      try {
+        const [base, mine] = await Promise.all([Server.weeks(), Server.courseWeeks(cid)]);
+        const have = new Map(mine.map(r => [r.week_no, r]));
+        const rows = base.filter(b => b.song_id && b.week_no <= (c.weeks_count || 15) && !(have.get(b.week_no) || {}).song_id)
+          .map(b => Object.assign({}, have.get(b.week_no) || { class_id: cid, week_no: b.week_no, published: false }, { class_id: cid, week_no: b.week_no, song_id: b.song_id }));
+        if (rows.length) await Server.saveCourseWeeks(rows.map(r => { const o = Object.assign({}, r); delete o.updated_at; delete o.updated_by; return o; }));
+        msg.textContent = rows.length ? rows.length + "개 주차에 기본 노래표의 곡을 넣었습니다(이미 곡이 있는 주차는 그대로)." : "새로 넣을 곡이 없습니다(이미 곡이 정해져 있거나 기본 노래표가 비어 있음).";
+        draw();
+      } catch (e) { msg.textContent = "가져오지 못했습니다: " + e.message; }
+      copy.disabled = false;
+    });
+    setView([back, el("p", { class: "kicker", text: (courseLabel(c) || "교과목") + " · " + (c.weeks_count || 15) + "주" }), el("h2", { text: c.name + " — 주차별 강의" }),
+      el("p", { class: "small muted", text: "주차마다 강의 제목 · 학습 목표 · 노래(185곡 중 선택) · 핵심 어휘 · 발음 · 성조 설명을 정하고 [게시]하면 수강생에게 보입니다." }),
+      el("div", { class: "row-actions" }, [copy]), msg, box], "classes");
+    async function draw() {
+      let rows = [];
+      try { rows = await Server.courseWeeks(cid); } catch (e) { fill(box, el("p", { class: "bad", text: "불러오지 못했습니다: " + e.message })); return; }
+      const by = new Map(rows.map(r => [r.week_no, r]));
+      fill(box, ...Array.from({ length: c.weeks_count || 15 }, (_, i) => {
+        const n = i + 1, r = by.get(n) || {}, s = r.song_id ? Repo.getSong(r.song_id) : null;
+        return el("article", { class: "card cw-card" + (r.published ? " is-pub" : "") }, [
+          el("div", { class: "cw-head" }, [el("span", { class: "wk-no", text: n + "주차" }), el("span", { class: "cw-state " + (r.published ? "on" : "off"), text: r.published ? "게시됨" : "비공개" })]),
+          el("p", { class: "cw-title", text: r.title || "(강의 제목 없음)" }),
+          el("p", { class: "cw-song", lang: "vi", text: s ? "♪ " + s.title + " — " + s.artist : "곡 미지정" }),
+          el("div", { class: "row-actions cw-acts" }, [el("a", { class: "btn primary", href: "#/course/" + cid + "/week/" + n, text: "편집" }), el("a", { class: "btn", href: "#/lecture/" + cid + "/" + n, text: "미리보기" })])]);
+      }));
+    }
+    draw(); window.scrollTo(0, 0);
+  }
+  function renderWeekEditor(cid, n) {
+    const c = Repo.getClasses().find(x => x.id === cid);
+    const back = el("a", { class: "btn", href: "#/course/" + cid, text: "← 주차별 강의" });
+    if (!c || !canManageCourse(cid) || n < 1 || n > (c.weeks_count || 15)) { setView([back, el("p", { class: "bad", text: "이 주차를 편집할 권한이 없거나 없는 주차입니다." })], "classes"); return; }
+    const box = el("div", null, [el("p", { class: "muted", text: "불러오는 중…" })]);
+    setView([back, el("p", { class: "kicker", text: c.name + " · " + n + "주차" }), el("h2", { text: n + "주차 강의 편집" }), box], "classes");
+    (async () => {
+      let r = {};
+      try { r = (await Server.courseWeek(cid, n))[0] || {}; } catch (e) { fill(box, el("p", { class: "bad", text: "불러오지 못했습니다: " + e.message })); return; }
+      const ta = (id, label, val, max, ph, rows) => { const x = el("textarea", { id, maxlength: String(max), rows: String(rows || 4), placeholder: ph || "" }); x.value = val || ""; return [el("label", { for: id, text: label }), x]; };
+      const title = el("input", { type: "text", id: "we-title", maxlength: "120", placeholder: "예: 그리움을 노래하는 표현 — nhớ, đợi", value: r.title || "" });
+      const songs = Repo.getSongs().slice().sort((a, b) => (b.status === "ready") - (a.status === "ready") || (a.chartRank || 999) - (b.chartRank || 999));
+      const q = el("input", { type: "search", id: "we-song-q", placeholder: "곡명 · 가수로 찾기" });
+      const sel = el("select", { id: "we-song", size: "7" });
+      const songInfo = el("p", { class: "small", role: "status" });
+      function fillSongs() {
+        const qq = q.value.trim().toLowerCase();
+        const list = songs.filter(s => !qq || (s.title + " " + s.artist).toLowerCase().includes(qq));
+        sel.replaceChildren(el("option", { value: "", text: "— 곡을 정하지 않음 —" }), ...list.map(s => el("option", { value: String(s.id), lang: "vi", text: s.title + " — " + s.artist + (s.status === "ready" ? "" : "  (가사 준비 중)") })));
+        sel.value = r.song_id ? String(r.song_id) : "";
+      }
+      function showSong() { const s = sel.value ? Repo.getSong(Number(sel.value)) : null; songInfo.textContent = s ? (s.status === "ready" ? "가사 " + Repo.getLyrics(s.id).length + "줄 · 번역 · 성조 정보가 강의에 자동으로 들어갑니다." : "이 곡은 아직 가사가 없어 강의에 가사가 표시되지 않습니다.") : ""; }
+      q.addEventListener("input", fillSongs); sel.addEventListener("change", () => { r.song_id = sel.value ? Number(sel.value) : null; showSong(); });
+      fillSongs(); showSong();
+      const goals = ta("we-goals", "학습 목표", r.goals, 2000, "한 줄에 하나씩 적으면 목록으로 보입니다.", 3);
+      const intro = ta("we-intro", "가수 및 곡 소개", r.song_intro, 3000, "", 4);
+      const vocab = ta("we-vocab", "핵심 어휘와 표현", r.vocab, 4000, "한 줄에 하나씩: nhớ - 그리워하다", 6);
+      const pron = ta("we-pron", "성조 및 발음 설명", r.pron_notes, 4000, "", 5);
+      const summ = ta("we-sum", "학습 정리", r.summary, 3000, "", 3);
+      const pub = el("input", { type: "checkbox", id: "we-pub" }); pub.checked = !!r.published;
+      const msg = el("p", { role: "status" });
+      const save = el("button", { type: "button", class: "primary", text: "저장" });
+      save.addEventListener("click", async () => {
+        const row = { class_id: cid, week_no: n, title: title.value.trim() || null, song_id: sel.value ? Number(sel.value) : null,
+          goals: goals[1].value.trim() || null, song_intro: intro[1].value.trim() || null, vocab: vocab[1].value.trim() || null,
+          pron_notes: pron[1].value.trim() || null, summary: summ[1].value.trim() || null, published: pub.checked, updated_at: new Date().toISOString() };
+        save.disabled = true; msg.textContent = "저장하는 중…";
+        try { await Server.saveCourseWeek(row); r = row; msg.textContent = "저장했습니다." + (row.published ? " 수강생에게 게시되었습니다." : " (비공개 — 수강생에게는 아직 보이지 않습니다)"); }
+        catch (e) { msg.textContent = "저장하지 못했습니다: " + e.message; }
+        save.disabled = false;
+      });
+      fill(box, el("section", { class: "card we-form" }, [
+        el("label", { for: "we-title", text: "강의 제목" }), title,
+        el("label", { for: "we-song-q", text: "오늘의 노래 (185곡에서 선택)" }), q, sel, songInfo,
+        ...goals, ...intro, ...vocab, ...pron, ...summ,
+        el("label", { class: "check we-pub" }, [pub, el("span", { text: " 게시 — 수강생에게 이 강의를 보여 줍니다" })]),
+        el("div", { class: "row-actions" }, [save, el("a", { class: "btn", href: "#/lecture/" + cid + "/" + n, text: "미리보기" })]), msg]));
+    })();
+    window.scrollTo(0, 0);
+  }
+  // 강의 페이지(수강생 열람 · 교수자 미리보기): 곡을 연결하면 가사 · 번역은 곡 데이터에서 그대로 불러온다
+  function renderLecture(cid, n) {
+    const c = Repo.getClasses().find(x => x.id === cid);
+    const manage = canManageCourse(cid);
+    const back = el("a", { class: "btn", href: manage ? "#/course/" + cid : "#/weeks", text: manage ? "← 주차별 강의" : "← 주차별 학습" });
+    const box = el("div", { class: "lec" }, [el("p", { class: "muted", text: "불러오는 중…" })]);
+    setView([back, box], manage ? "classes" : "weeks");
+    (async () => {
+      let r = null;
+      try { r = (await Server.courseWeek(cid, n))[0] || null; } catch (e) { fill(box, el("p", { class: "bad", text: "불러오지 못했습니다: " + e.message })); return; }
+      if (!r) { fill(box, el("h2", { text: n + "주차" }), el("p", { class: "muted", text: manage ? "아직 작성한 내용이 없습니다. [편집]에서 강의를 작성하세요." : "아직 게시되지 않은 강의입니다." })); return; }
+      const lines = (x) => String(x || "").split(/\n+/).map(v => v.trim()).filter(Boolean);
+      const sec = (title, kids) => el("section", { class: "card lec-sec" }, [el("h3", { text: title })].concat(kids));
+      const s = r.song_id ? Repo.getSong(r.song_id) : null, lyr = s ? Repo.getLyrics(s.id) : [];
+      const nodes = [el("p", { class: "kicker", text: (c ? c.name + " · " : "") + n + "주차" }), el("h2", { text: r.title || n + "주차 강의" })];
+      if (manage && !r.published) nodes.push(el("p", { class: "notice", role: "status", text: "미리보기 — 비공개 상태라 수강생에게는 아직 보이지 않습니다." }));
+      if (r.goals) nodes.push(sec("학습 목표", [el("ul", { class: "lec-list" }, lines(r.goals).map(x => el("li", { text: x })))]));
+      if (s) nodes.push(sec("오늘의 노래", [el("p", { class: "lec-song", lang: "vi", text: s.title }), el("p", { class: "muted", lang: "vi", text: s.artist + (s.chartRank ? " · 차트 " + s.chartRank + "위" : "") }),
+        el("div", { class: "row-actions" }, [el("a", { class: "btn primary", href: "#/song/" + s.id, text: "노래 듣고 학습하기 →" }), s.status === "ready" ? el("a", { class: "btn", href: "#/words/" + s.id, text: "핵심 단어 연습" }) : null].filter(Boolean))]));
+      if (r.song_intro) nodes.push(sec("가수 및 곡 소개", [el("p", { class: "lec-text", text: r.song_intro })]));
+      if (s) nodes.push(sec("가사와 한국어 번역", lyr.length ? [el("ol", { class: "lec-lyrics" }, lyr.map(l => el("li", null, [el("span", { class: "vi", lang: "vi", text: l.vietnamese }), el("span", { class: "ko", text: l.korean || "" })])))]
+        : [el("p", { class: "muted", text: "이 곡은 아직 가사가 준비되지 않았습니다." })]));
+      if (r.vocab) nodes.push(sec("핵심 어휘와 표현", [el("ul", { class: "lec-vocab" }, lines(r.vocab).map(x => { const k = x.split(/\s+[-–—:]\s+/); return el("li", null, [el("b", { lang: "vi", text: k[0] }), k[1] ? el("span", { text: k.slice(1).join(" - ") }) : null].filter(Boolean)); }))]));
+      if (r.pron_notes) nodes.push(sec("성조 및 발음", [el("p", { class: "lec-text", text: r.pron_notes })]));
+      if (r.summary) nodes.push(sec("학습 정리", [el("p", { class: "lec-text", text: r.summary })]));
+      if (manage) nodes.push(el("div", { class: "row-actions" }, [el("a", { class: "btn primary", href: "#/course/" + cid + "/week/" + n, text: "이 주차 편집" })]));
+      fill(box, ...nodes);
+    })();
+    window.scrollTo(0, 0);
+  }
+  // 수강생 '주차별 학습' 위: 내 교과목의 게시된 강의
+  async function addMyLectures() {
+    const view = document.getElementById("view"); if (!view) return;
+    let rows = [];
+    try { rows = await Server.myLectures(); } catch (e) { return; }
+    rows = rows.filter(r => Repo.memberOf(r.class_id));
+    if (!rows.length || document.body.dataset.route !== "weeks") return;
+    const by = new Map(); rows.forEach(r => { if (!by.has(r.class_id)) by.set(r.class_id, []); by.get(r.class_id).push(r); });
+    const sec = el("section", { class: "my-lectures" }, [el("h3", { text: "내 교과목 강의" })].concat([...by].map(([cid, list]) => {
+      const c = Repo.getClasses().find(x => x.id === cid) || { name: "교과목" };
+      return el("div", { class: "card ml-course" }, [el("p", { class: "ml-name", text: c.name + (courseLabel(c) ? " · " + courseLabel(c) : "") }),
+        c.description ? el("p", { class: "small muted", text: c.description }) : null,
+        el("ul", { class: "ml-list" }, list.map(r => { const s = r.song_id ? Repo.getSong(r.song_id) : null;
+          return el("li", null, [el("a", { href: "#/lecture/" + cid + "/" + r.week_no }, [el("span", { class: "wk-no", text: r.week_no + "주차" }), el("span", { class: "ml-t", text: r.title || r.week_no + "주차 강의" }), s ? el("span", { class: "ml-s", lang: "vi", text: "♪ " + s.title }) : null].filter(Boolean))]); }))].filter(Boolean));
+    })));
+    const first = view.firstElementChild; if (first && first.nextSibling) view.insertBefore(sec, first.nextSibling); else view.appendChild(sec);
   }
 
   // 같은 단계 안: 어휘 점수 낮은 순 → 차트 순위 → ID
@@ -6253,6 +6455,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
   function renderWeeks() {
     const box = el("div", null, [el("p", { class: "muted", text: "불러오는 중…" })]);
     setView([titleDeco([el("h2", { text: "주차별 학습" }), el("p", { class: "kicker", text: "1~15주차 · 한 주에 한 곡 · 1~4 입문 · 5~8 초급 · 9~12 중급 · 13~15 고급" })], "e_vietnam"), box], "weeks");
+    addMyLectures();
     Server.weeks().then(rows => {
       const byNo = new Map(rows.map(r => [r.week_no, r])), now = currentWeek();
       const all = Array.from({ length: 15 }, (_, i) => byNo.get(i + 1) || { week_no: i + 1, song_id: null, memo: null });
@@ -6767,7 +6970,8 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     const back = el("a", { class: "btn", href: "#/classes", text: "← 반" });
     if (!c || !(Repo.teaches(cid) || Server.isAdmin())) { setView([back, el("p", { class: "bad", text: "이 반을 볼 권한이 없습니다." })], "classes"); return; }
     const box = el("div", null, [el("p", { class: "muted", text: "학생 정보를 불러오는 중…" })]);
-    setView([back, el("h2", { text: c.name }), el("p", null, ["반 코드 ", el("span", { class: "class-code big", text: c.code }), " (학생에게 알려 주세요)"]), box], "classes");
+    setView([back, el("h2", { text: c.name }), el("p", null, ["반 코드 ", el("span", { class: "class-code big", text: c.code }), " (학생에게 알려 주세요)"]),
+      courseInfoCard(c), box], "classes");
     (async () => {
       // 학습 현황 목록은 서버 함수가 자기 반 학생만, 이메일 없이 돌려준다
       const people = (await Server.studyPeople()).filter(p => (p.classes || []).some(k => k.id === cid))
@@ -7530,7 +7734,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         big("#/t/progress", "t-prog", "학습 현황", "핵심 단어 · 녹음"),
         big("#/assign", "assign", "과제" + cnt(navCounts.toReview), "녹음 과제", "tassign"),
         small("#/assign", "assign", "과제 내기 · 제출 현황", "tassign"), small("#/submissions", "submissions", "제출된 녹음 듣기 · 피드백" + cnt(navCounts.toReview), "tassign"),
-        big("#/classes", "classes", "반 관리", "반 코드 · 학생 명단"), ...(Server.isAdmin() ? [] : [big("#/admin/weeks", "admin-weeks", "주차별 곡", "1~15주차 곡 정하기")]),
+        big("#/classes", "classes", "교과목 관리", "강의 · 반 코드 · 수강생"), ...(Server.isAdmin() ? [] : [big("#/admin/weeks", "admin-weeks", "주차별 곡", "1~15주차 곡 정하기")]),
         big("#/glossary", "glossary", "단어장", "핵심 단어 뜻"),
         big("#/board", "board", "열린 게시판", "반 글 보기"));
       if (Server.isAdmin()) kids.push(el("p", { class: "nav-title", text: "관리자" }), tool("#/admin/users", "admin-users", "학생·사용자 관리" + cnt(navCounts.pending)),
@@ -7619,6 +7823,9 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     else if ((m = h.match(/^#\/song\/(\d+)$/))) { if (login()) { currentRoute = "song"; renderSong(Number(m[1])); } }
     else if ((m = h.match(/^#\/song\/(\d+)\/sing\/([\w-]+)$/))) { if (login()) { currentRoute = "song"; practiceSong = Number(m[1]); renderSong(Number(m[1]), { singLineId: m[2], singOnly: true }); } }
     else if ((m = h.match(/^#\/words\/(\d+)$/))) { if (login()) { currentRoute = "words"; renderWords(Number(m[1])); } }
+    else if ((m = h.match(/^#\/course\/([0-9a-f-]{36})$/))) { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "course"; renderCourseWeeks(m[1]); } }
+    else if ((m = h.match(/^#\/course\/([0-9a-f-]{36})\/week\/(\d+)$/))) { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "course-week"; renderWeekEditor(m[1], Number(m[2])); } }
+    else if ((m = h.match(/^#\/lecture\/([0-9a-f-]{36})\/(\d+)$/))) { if (login()) { currentRoute = "lecture"; renderLecture(m[1], Number(m[2])); } }
     else if (h === "#/t") { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "t-home"; renderTeachHome(); } }
     else if (h === "#/t/attendance") { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "t-att"; renderTeachAttendance(); } }
     else if (h === "#/t/progress") { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "t-prog"; renderTeachProgress(); } }
