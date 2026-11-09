@@ -2512,6 +2512,23 @@
   .rw [hidden], .rw button[hidden], .rw audio[hidden] { display: none !important; }
   .rc-ed { margin-top: 22px; display: grid; gap: 10px; max-width: 900px; }
   .rc-ed input[type=datetime-local] { max-width: 280px; }
+
+  /* 21단계: 녹음 평가 · 피드백 */
+  .rs-none { color: #6B7280; background: #ECEEF3; } .rs-todo { color: #B45309; background: #FEF3C7; } .rs-draft { color: #5B50C6; background: #E4E2FA; }
+  .rs-ok { color: #15803D; background: #DFF3EA; } .rs-wait { color: #B42318; background: #FDE4E2; }
+  .ev-h { margin: 22px 0 6px; } .ev-card { display: grid; gap: 10px; margin-top: 16px; scroll-margin-top: 20px; }
+  .ev-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; } .ev-head h3 { margin: 0; }
+  .ev-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .ev-item { display: grid; gap: 6px; } .ev-row { display: flex; align-items: center; gap: 8px; font-weight: 700; } .ev-score { width: 90px !important; }
+  .ev-sum { display: flex; align-items: baseline; gap: 12px; } .ev-total { font-size: 24px; color: #5B50C6; }
+  .rc-resub { padding: 12px 14px; border-radius: 16px; background: #FDE4E2; color: #7A1F1A; display: grid; gap: 6px; }
+  .rc-eval { padding: 14px 16px; border-radius: 18px; background: rgba(255,255,255,.55); display: grid; gap: 12px; }
+  .rc-total { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; } .rc-total strong { font-size: 28px; color: #5B50C6; }
+  .rc-items { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .rc-item-h { display: flex; justify-content: space-between; gap: 10px; } .rc-items p { margin: 4px 0 0; white-space: pre-line; }
+  .rc-bar { height: 8px; border-radius: 99px; background: rgba(160,172,194,.3); margin-top: 6px; overflow: hidden; } .rc-bar i { display: block; height: 100%; background: linear-gradient(90deg, #8F86EC, #5E53C9); border-radius: 99px; }
+  .rc-overall { display: grid; gap: 4px; }
+  @media (max-width: 760px) { .ev-grid { grid-template-columns: 1fr; } }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet">
@@ -3069,6 +3086,9 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       weekRecSubmit: (cid, n, rid) => run(c => c.rpc("week_rec_submit", { p_class: cid, p_week: n, p_recording: rid })),
       weekRecMine: (cid, n) => run(c => c.rpc("week_rec_mine", { p_class: cid, p_week: n })),
       weekRecList: (cid, n) => run(c => c.rpc("week_rec_list", { p_class: cid, p_week: n })),
+      // 21단계: 녹음 평가 · 피드백
+      weekRecGrade: (cid, n, uid, ev, mode) => run(c => c.rpc("week_rec_grade", { p_class: cid, p_week: n, p_user: uid, p_eval: ev, p_mode: mode })),
+      weekRecSeen: (cid, n) => run(c => c.rpc("week_rec_seen", { p_class: cid, p_week: n })),
       myMemberships: () => run(c => c.from("class_members").select("class_id,joined_at").eq("user_id", session.user.id)),
       createClass: (name) => run(c => c.rpc("create_class", { p_name: name })),
       joinClass: (code) => run(c => c.rpc("join_class", { p_code: code })),
@@ -4620,7 +4640,9 @@ if (typeof module !== "undefined") module.exports = UploadKit;
 
   /* ----- 20단계: 웹 녹음 · 주차별 녹음 과제 ----- */
   const REC_LIMIT = 3 * 1024 * 1024; // 저장소 파일 한도(20단계 SQL)
-  const REC_ERR = { rec_closed: "마감 시간이 지나 제출할 수 없습니다.", rec_not_open: "아직 열리지 않은 녹음 과제입니다.", not_your_recording: "본인 녹음만 제출할 수 있습니다." };
+  const REC_ERR = { rec_closed: "마감 시간이 지나 제출할 수 없습니다.", rec_not_open: "아직 열리지 않은 녹음 과제입니다.", not_your_recording: "본인 녹음만 제출할 수 있습니다.",
+    scores_required: "공개하려면 네 항목 점수를 모두 넣어 주세요.", reason_required: "재녹음을 요청하려면 종합 의견에 사유를 적어 주세요.", no_submission: "제출된 녹음이 없습니다." };
+  const RUBRIC = [["tone", "성조 정확성", 30], ["pron", "발음 정확성", 30], ["rhythm", "억양 및 리듬", 20], ["fluency", "유창성 및 표현", 20]];
   function recErr(e) { const m = String(e && e.message || e); const k = Object.keys(REC_ERR).find(x => m.includes(x)); if (k) return REC_ERR[k]; if (/size|large|exceed|413/i.test(m)) return "파일이 너무 큽니다(3MB 이하). 조금 짧게 다시 녹음해 주세요."; return m; }
   function fmtSec(s) { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
   function pickRecMime() {
@@ -4730,15 +4752,24 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       }
       async function draw(note) {
         let mine = null; try { mine = await Server.weekRecMine(cid, n); } catch (e) {}
-        const closed = r.rec_due && Date.now() > new Date(r.rec_due).getTime();
+        const closed = r.rec_due && Date.now() > new Date(r.rec_due).getTime() && !(mine && mine.status === "resubmit");
         const status = el("p", { class: "rc-status " + (mine ? mine.status : "none") }, [el("b", { text: mine ? REC_STATUS[mine.status] || mine.status : "미제출" }),
           mine ? el("span", { text: " · " + fmtWhen(mine.submitted_at) + " 제출" }) : null].filter(Boolean));
         const kids = [el("h3", { text: "녹음 과제" }), ...info(), status];
         if (note) kids.push(el("p", { class: "notice", role: "status", text: note }));
+        if (mine && mine.status === "resubmit") kids.push(el("div", { class: "rc-resub", role: "status" }, [el("b", { text: "교수자가 다시 녹음해 제출하라고 요청했습니다." }), mine.resubmit_note ? el("p", { class: "lec-text", text: mine.resubmit_note }) : null].filter(Boolean)));
+        if (mine && mine.eval) {
+          const e = mine.eval, total = RUBRIC.reduce((a, [k]) => a + (e[k] || 0), 0);
+          kids.push(el("div", { class: "rc-eval" }, [el("div", { class: "rc-total" }, [el("span", { text: "교수자 평가" }), el("strong", { text: total + " / 100점" }), mine.graded_at ? el("span", { class: "small muted", text: fmtWhen(mine.graded_at) }) : null].filter(Boolean)),
+            el("ul", { class: "rc-items" }, RUBRIC.map(([k, name, max]) => el("li", null, [el("div", { class: "rc-item-h" }, [el("b", { text: name }), el("span", { text: (e[k] ?? "—") + " / " + max })]),
+              el("div", { class: "rc-bar", "aria-hidden": "true" }, [el("i", { style: "width:" + Math.round(100 * (e[k] || 0) / max) + "%" })]), e["fb_" + k] ? el("p", { class: "small", text: e["fb_" + k] }) : null].filter(Boolean)))),
+            e.overall ? el("div", { class: "rc-overall" }, [el("b", { text: "종합 의견" }), el("p", { class: "lec-text", text: e.overall })]) : null].filter(Boolean)));
+        } else if (mine && mine.status === "submitted") kids.push(el("p", { class: "small muted", text: "교수자 평가를 기다리는 중입니다." }));
+        if (mine && mine.published && !mine.seen_at) Server.weekRecSeen(cid, n).catch(() => {});
         if (mine) kids.push(el("div", { class: "rc-mine" }, [el("span", { class: "small muted", text: "내가 제출한 녹음" }), await recAudioEl(mine.path)]));
         if (closed) kids.push(el("p", { class: "bad", text: "마감되어 더 이상 제출할 수 없습니다." }));
         else {
-          kids.push(el("p", { class: "small", text: mine ? "다시 녹음해서 제출하면 새 녹음으로 바뀝니다." : "원곡을 들으며 연습한 뒤 녹음해 제출하세요." }));
+          kids.push(el("p", { class: "small", text: !mine ? "원곡을 들으며 연습한 뒤 녹음해 제출하세요." : mine.status === "resubmit" ? "다시 녹음해 제출해 주세요." : mine.eval ? "다시 제출하면 교수자가 새로 평가합니다(지금 평가는 숨겨집니다)." : "다시 녹음해서 제출하면 새 녹음으로 바뀝니다." }));
           kids.push(recorderWidget(r.rec_max_sec || 120, async (blob) => {
             const rec = await Server.uploadRecording(blob, song ? song.id : null, null);
             await Server.weekRecSubmit(cid, n, rec.id);
@@ -4751,27 +4782,62 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     })();
     return sec;
   }
-  // 교수자: 주차별 녹음 제출 현황
+  // 교수자: 주차별 녹음 제출 현황 · 평가(21단계)
   function renderWeekRecordings(cid, n) {
     const c = Repo.getClasses().find(x => x.id === cid);
     const back = el("a", { class: "btn", href: "#/course/" + cid, text: "← 주차별 강의" });
     if (!c || !canManageCourse(cid)) { setView([back, el("p", { class: "bad", text: "이 교과목을 관리할 권한이 없습니다." })], "classes"); return; }
     const box = el("div", null, [el("p", { class: "muted", text: "불러오는 중…" })]);
-    setView([back, el("p", { class: "kicker", text: c.name + " · " + n + "주차" }), el("h2", { text: n + "주차 녹음 과제 제출 현황" }), box], "classes");
-    (async () => {
+    setView([back, el("p", { class: "kicker", text: c.name + " · " + n + "주차" }), el("h2", { text: n + "주차 녹음 과제 · 평가" }), box], "classes");
+    const stateOf = (x) => !x.path ? ["none", "미제출"] : x.status === "resubmit" ? ["wait", "재제출 요청"] : x.published ? ["ok", "피드백 완료"] : x.graded_at ? ["draft", "평가 저장(비공개)"] : ["todo", "피드백 대기"];
+    async function draw(focusUid) {
       let list; try { list = await Server.weekRecList(cid, n); } catch (e) { fill(box, el("p", { class: "bad", text: "불러오지 못했습니다: " + e.message })); return; }
-      const sub = list.filter(x => x.path);
-      const rows = list.map(x => { const cell = el("td");
-        if (x.path) { const b = el("button", { type: "button", class: "small-btn", text: "▶ 듣기" }); b.addEventListener("click", async () => { b.disabled = true; const a = await recAudioEl(x.path); cell.replaceChildren(a); if (a.play) a.play().catch(() => {}); }); cell.appendChild(b); }
-        else cell.textContent = "—";
-        return el("tr", null, [el("td", { text: x.name }), el("td", null, [el("span", { class: "qz-st " + (x.path ? (x.status === "resubmit" ? "wait" : "ok") : "none"), text: x.path ? REC_STATUS[x.status] || x.status : "미제출" })]),
-          el("td", { text: x.submitted_at ? fmtWhen(x.submitted_at) : "—" }), el("td", { text: x.size_bytes ? Math.round(x.size_bytes / 1024) + "KB" : "—" }), cell]); });
-      fill(box, el("div", { class: "stat-grid" }, [el("div", { class: "stat" }, [el("span", { text: "전체 수강생" }), el("strong", { text: list.length + "명" })]),
-          el("div", { class: "stat" }, [el("span", { text: "제출" }), el("strong", { text: sub.length + "명" })]), el("div", { class: "stat" }, [el("span", { text: "미제출" }), el("strong", { text: (list.length - sub.length) + "명" })])]),
-        el("section", { class: "card" }, [el("h3", { text: "학생별 제출" }), el("div", { class: "tbl-wrap" }, [el("table", { class: "qz-table rc-table" }, [el("thead", null, [el("tr", null, ["이름", "상태", "제출 시각", "크기", "녹음"].map(x => el("th", { text: x })))]), el("tbody", null, rows)])])]),
-        el("p", { class: "small muted", text: "평가 항목별 점수와 피드백은 다음 단계(교수자 녹음 평가)에서 이 화면에 더해집니다." }));
-    })();
-    window.scrollTo(0, 0);
+      const sub = list.filter(x => x.path), cnt = (k) => sub.filter(x => stateOf(x)[0] === k).length;
+      const stat = (label, v) => el("div", { class: "stat" }, [el("span", { text: label }), el("strong", { text: v + "명" })]);
+      const rows = list.map(x => { const [k, label] = stateOf(x), tot = x.published || x.graded_at ? RUBRIC.reduce((a, [kk]) => a + (x[kk] || 0), 0) : null;
+        const name = x.path ? el("a", { href: "#ev-" + x.user_id, text: x.name }) : el("span", { text: x.name });
+        if (x.path) name.addEventListener("click", ev => { ev.preventDefault(); const card = document.getElementById("ev-" + x.user_id); if (card) { card.scrollIntoView({ behavior: "smooth", block: "start" }); const a = card.querySelector("audio"); if (a) a.focus(); } });
+        return el("tr", null, [el("td", null, [name]), el("td", null, [el("span", { class: "qz-st rs-" + k, text: label })]), el("td", { text: x.submitted_at ? fmtWhen(x.submitted_at) : "—" }),
+          el("td", { text: tot == null ? "—" : tot + "점" }), el("td", { text: x.published ? (x.seen_at ? "확인함" : "아직") : "—" })]); });
+      const cards = await Promise.all(sub.map(async x => {
+        const [k, label] = stateOf(x);
+        const inputs = {}, fbs = {};
+        const totalEl = el("strong", { class: "ev-total" });
+        const recalc = () => { const vals = RUBRIC.map(([kk]) => inputs[kk].value === "" ? null : Number(inputs[kk].value)); totalEl.textContent = (vals.every(v => v === null) ? "—" : vals.reduce((a, v) => a + (v || 0), 0)) + " / 100점"; };
+        const items = RUBRIC.map(([kk, nm, max]) => {
+          const inp = el("input", { type: "number", min: "0", max: String(max), step: "1", class: "ev-score", id: "ev-" + kk + "-" + x.user_id, value: x[kk] ?? "", "aria-label": nm + " 점수(0~" + max + ")" });
+          inp.addEventListener("input", () => { const v = parseInt(inp.value, 10); if (inp.value !== "" && (isNaN(v) || v < 0)) inp.value = 0; else if (v > max) inp.value = max; recalc(); });
+          const fb = el("textarea", { rows: "2", maxlength: "1000", placeholder: nm + " 피드백(선택)", "aria-label": nm + " 피드백" }); fb.value = x["fb_" + kk] || "";
+          inputs[kk] = inp; fbs[kk] = fb;
+          return el("div", { class: "ev-item" }, [el("label", { for: inp.id }, [el("b", { text: nm }), el("span", { class: "small muted", text: " (" + max + "점)" })]), el("div", { class: "ev-row" }, [inp, el("span", { text: "/ " + max })]), fb]);
+        });
+        const overall = el("textarea", { rows: "3", maxlength: "2000", placeholder: "종합 의견(재녹음 요청 시 사유)", "aria-label": x.name + " 종합 의견" }); overall.value = x.overall || "";
+        const msg = el("p", { role: "status", class: "small" });
+        const go = async (mode, b) => {
+          const ev = { overall: overall.value };
+          RUBRIC.forEach(([kk]) => { ev[kk] = inputs[kk].value === "" ? "" : String(parseInt(inputs[kk].value, 10)); ev["fb_" + kk] = fbs[kk].value; });
+          if (mode === "publish" && RUBRIC.some(([kk]) => ev[kk] === "")) { msg.textContent = REC_ERR.scores_required; return; }
+          if (mode === "resubmit" && !overall.value.trim()) { msg.textContent = REC_ERR.reason_required; overall.focus(); return; }
+          b.disabled = true; msg.textContent = "저장하는 중…";
+          try { await Server.weekRecGrade(cid, n, x.user_id, ev, mode); await draw(x.user_id); }
+          catch (er) { b.disabled = false; msg.textContent = "저장하지 못했습니다: " + recErr(er); }
+        };
+        const bSave = el("button", { type: "button", text: "저장(비공개)" }), bPub = el("button", { type: "button", class: "primary", text: x.published ? "고쳐서 다시 공개" : "학생에게 공개" }), bRe = el("button", { type: "button", class: "danger", text: "재녹음 요청" });
+        bSave.addEventListener("click", () => go("save", bSave)); bPub.addEventListener("click", () => go("publish", bPub)); bRe.addEventListener("click", () => go("resubmit", bRe));
+        recalc();
+        return el("article", { class: "card ev-card", id: "ev-" + x.user_id, tabindex: "-1" }, [
+          el("div", { class: "ev-head" }, [el("h3", { text: x.name }), el("span", { class: "qz-st rs-" + k, text: label }), el("span", { class: "small muted", text: fmtWhen(x.submitted_at) + " 제출" + (x.published ? (x.seen_at ? " · 학생 확인함" : " · 학생 아직 확인 안 함") : "") })]),
+          await recAudioEl(x.path), el("div", { class: "ev-grid" }, items),
+          el("div", { class: "ev-sum" }, [el("span", { text: "합계" }), totalEl]),
+          el("label", { text: "종합 의견" }), overall, el("div", { class: "row-actions" }, [bSave, bPub, bRe]), msg]);
+      }));
+      fill(box, el("div", { class: "stat-grid" }, [stat("전체 수강생", list.length), stat("제출", sub.length), stat("미제출", list.length - sub.length), stat("피드백 대기", cnt("todo") + cnt("draft")), stat("피드백 완료", cnt("ok")), stat("재제출 요청", cnt("wait"))]),
+        el("section", { class: "card" }, [el("h3", { text: "학생별 제출" }), el("p", { class: "small muted", text: "이름을 누르면 그 학생의 녹음 재생 · 평가 칸으로 갑니다." }),
+          el("div", { class: "tbl-wrap" }, [el("table", { class: "qz-table rc-table" }, [el("thead", null, [el("tr", null, ["이름", "상태", "제출 시각", "점수", "학생 확인"].map(h => el("th", { text: h })))]), el("tbody", null, rows)])])]),
+        sub.length ? el("h3", { class: "ev-h", text: "녹음 평가 (성조 30 · 발음 30 · 억양 · 리듬 20 · 유창성 · 표현 20)" }) : el("p", { class: "muted", text: "아직 제출한 학생이 없습니다." }), ...cards);
+      if (focusUid) { const card = document.getElementById("ev-" + focusUid); if (card) { card.scrollIntoView({ block: "start" }); const m = card.querySelector("[role=status]"); if (m) m.textContent = "저장했습니다."; } }
+    }
+    draw(); window.scrollTo(0, 0);
   }
 
   // 같은 단계 안: 어휘 점수 낮은 순 → 차트 순위 → ID
