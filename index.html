@@ -2402,6 +2402,71 @@
   .ml-list a:hover { background: rgba(255,255,255,.55); }
   .ml-t { font-weight: 700; color: var(--sv-ink, #2B3654); } .ml-s { font-size: 13.5px; color: var(--sv-muted, #76819A); }
   @media (max-width: 760px) { .course-grid { grid-template-columns: 1fr; } }
+
+  /* 18단계: 프레젠테이션 모드(강의실 대형 화면) */
+  body.presenting { overflow: hidden; }
+  .pz { position: fixed; inset: 0; z-index: 1000; display: grid; grid-template-rows: auto 1fr auto auto; background: #EEF1F6; color: #2B3654; font-size: clamp(16px, 1.3vw, 24px); }
+  .pz-top { display: flex; gap: 16px; align-items: baseline; padding: 14px 28px 0; color: #76819A; font-weight: 700; font-size: .8em; }
+  .pz-ltitle { color: #2B3654; }
+  .pz-stage { overflow: auto; padding: 2vh 5vw 2vh; }
+  .pz-slide { max-width: 1500px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; gap: 2vh; }
+  .pz-h { margin: 0; font-size: clamp(30px, 3vw, 56px); font-weight: 800; letter-spacing: -0.02em; color: #2B3654; }
+  .pz-list { margin: 0; padding-left: 1.2em; font-size: 1.6em; line-height: 1.7; }
+  .pz-text { white-space: pre-line; font-size: 1.35em; line-height: 1.8; margin: 0; }
+  .pz-muted { color: #76819A; font-size: 1.1em; margin: 0; } .pz-muted.small { font-size: .9em; }
+  .pz-kick { color: #6E63D9; font-weight: 800; margin: 0; } .pz-song { font-size: clamp(44px, 5vw, 96px); font-weight: 900; margin: 0; line-height: 1.05; } .pz-artist { font-size: 1.4em; color: #4A5573; margin: 0; }
+  .pz-lyrwrap { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 3vw; align-items: start; min-height: 0; }
+  .pz-lyr { margin: 0; padding: 0 0 0 1.6em; max-height: 64vh; overflow: auto; display: grid; gap: .35em; }
+  .pz-lyr li { padding: .35em .6em; border-radius: 14px; cursor: pointer; font-size: 1.25em; line-height: 1.45; }
+  .pz-lyr li .vi { display: block; font-weight: 700; } .pz-lyr li .ko { display: block; color: #76819A; font-size: .8em; }
+  .pz-lyr li.on { background: #FFFFFF; box-shadow: 6px 6px 16px rgba(160,172,194,.5), -6px -6px 16px #FFFFFF; color: #2B3654; }
+  .pz-lyr li.on .vi { color: #5B50C6; }
+  .pz-detail { position: sticky; top: 0; padding: 2vh 2vw; border-radius: 24px; background: #EEF1F6; box-shadow: 9px 9px 22px rgba(160,172,194,.55), -9px -9px 22px #FFFFFF; display: grid; gap: 1.2vh; }
+  .pz-d-vi { font-size: 1.5em; font-weight: 800; margin: 0; } .pz-d-ko { font-size: 1.3em; margin: 0; color: #4A5573; }
+  .pz-tones { display: flex; flex-wrap: wrap; gap: .5em; }
+  .pz-tone { display: inline-flex; flex-direction: column; align-items: center; padding: .35em .7em; border-radius: 12px; background: #FFFFFF; box-shadow: 3px 3px 8px rgba(160,172,194,.45); }
+  .pz-tone b { font-size: 1.1em; } .pz-tone small { font-size: .7em; color: #6E63D9; font-weight: 700; }
+  .pz-tone.t-huyền small { color: #2E7DB8; } .pz-tone.t-sắc small { color: #C2410C; } .pz-tone.t-hỏi small { color: #7C3AED; } .pz-tone.t-ngã small { color: #BE185D; } .pz-tone.t-nặng small { color: #15803D; } .pz-tone.t-ngang small { color: #475569; }
+  .pz-vocab, .pz-tonegrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2vh 2vw; }
+  .pz-vc { padding: 2vh 1.6vw; border-radius: 22px; background: #EEF1F6; box-shadow: 8px 8px 20px rgba(160,172,194,.55), -8px -8px 20px #FFFFFF; display: grid; gap: .6vh; }
+  .pz-vc b { font-size: 1.7em; color: #2B3654; } .pz-vc span { font-size: 1.15em; color: #4A5573; }
+  .pz-legend { display: flex; flex-wrap: wrap; gap: .6em; margin-top: 1vh; }
+  .pz-one { text-align: center; padding: 5vh 2vw; border-radius: 28px; background: #EEF1F6; box-shadow: 9px 9px 22px rgba(160,172,194,.55), -9px -9px 22px #FFFFFF; }
+  .pz-one-n { color: #76819A; margin: 0 0 1vh; font-weight: 700; } .pz-one-vi { font-size: clamp(32px, 3.4vw, 64px); font-weight: 800; margin: 0; color: #2B3654; } .pz-one-ko { font-size: 1.4em; color: #4A5573; margin: 1.5vh 0 0; }
+  .pz-row { display: flex; justify-content: center; gap: 1vw; flex-wrap: wrap; }
+  .pz-quiz { text-align: center; padding: 6vh 2vw; border-radius: 28px; background: #EEF1F6; box-shadow: 9px 9px 22px rgba(160,172,194,.55), -9px -9px 22px #FFFFFF; display: grid; gap: 2vh; justify-items: center; }
+  .pz-qw { font-size: clamp(44px, 5vw, 96px); font-weight: 900; margin: 0; } .pz-qa { font-size: 1.6em; margin: 0; color: #76819A; } .pz-qa.on { color: #5B50C6; font-weight: 800; }
+  .pz-dock { position: fixed; z-index: 1001; border-radius: 18px; overflow: hidden; background: #000; box-shadow: 0 18px 40px rgba(40,50,80,.25); transition: all .25s ease; }
+  .pz-dock > div, .pz-dock iframe { width: 100%; height: 100%; display: block; }
+  .pz-dock.big { left: 50%; top: 22vh; transform: translateX(-50%); width: min(1100px, 80vw, calc(56vh * 16 / 9)); aspect-ratio: 16 / 9; height: auto; }
+  .pz-dock.mini { right: 24px; bottom: 96px; width: 300px; height: 169px; }
+  .pz-dock.hide { right: 24px; bottom: 96px; width: 300px; height: 169px; opacity: 0; pointer-events: none; }
+  .pz-prog { height: 6px; background: rgba(160,172,194,.35); } .pz-prog i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #8F86EC, #5E53C9); transition: width .25s ease; }
+  .pz-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 24px 16px; background: #EEF1F6; }
+  .pz .pz-b { min-height: 46px; padding: 0 16px; border-radius: 14px; border: 0; background: #EEF1F6; color: #43507A; font: inherit; font-size: 15px; font-weight: 800; cursor: pointer;
+    box-shadow: 5px 5px 12px rgba(160,172,194,.5), -5px -5px 12px #FFFFFF; }
+  .pz .pz-b:active { box-shadow: inset 4px 4px 10px rgba(160,172,194,.5), inset -4px -4px 10px #FFFFFF; }
+  .pz .pz-b:disabled { opacity: .45; cursor: default; }
+  .pz .pz-play { background: linear-gradient(135deg, #8F86EC, #5E53C9); color: #FFFFFF; }
+  .pz .pz-mode[aria-pressed="true"] { box-shadow: inset 4px 4px 10px rgba(160,172,194,.5), inset -4px -4px 10px #FFFFFF; color: #5B50C6; }
+  .pz-count { min-width: 64px; text-align: center; font-weight: 800; font-size: 15px; }
+  .pz-jump, .pz-sec { min-height: 46px; border-radius: 14px; border: 0; background: #EEF1F6; box-shadow: inset 4px 4px 10px rgba(160,172,194,.5), inset -4px -4px 10px #FFFFFF; padding: 0 12px; font: inherit; font-size: 15px; color: #2B3654; }
+  .pz-sec { width: 76px; } .pz-secw { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 700; color: #4A5573; }
+  .pz-toast { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); margin: 0; padding: 10px 18px; border-radius: 14px; background: #2B3654; color: #FFFFFF; font-size: 15px; opacity: 0; transition: opacity .2s ease; pointer-events: none; z-index: 1002; }
+  .pz-toast.on { opacity: 1; }
+  .pz *:focus-visible { outline: 3px solid rgba(110,99,217,.6); outline-offset: 2px; }
+  .sl-list { list-style: none; margin: 6px 0; padding: 0; display: grid; gap: 10px; }
+  .sl-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 16px; background: rgba(255,255,255,.45); }
+  .sl-no { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; background: #E4E2FA; color: #5B50C6; }
+  .sl-name { font-weight: 700; flex: 1 1 160px; } .sl-acts { display: inline-flex; gap: 6px; margin-left: auto; }
+  .sl-custom { flex: 1 1 100%; display: grid; gap: 6px; }
+  .we-sl-h { margin-top: 18px !important; }
+  @media (max-width: 900px) { .pz-lyrwrap { grid-template-columns: 1fr; } .pz-detail { position: static; } .pz-dock.big { top: 26vh; width: 92vw; } }
+  .pz .pz-jump { width: auto !important; max-width: min(340px, 28vw) !important; flex: 0 1 auto; min-height: 46px !important; }
+  .pz .pz-sec { width: 76px !important; flex: none; }
+  .pz-bar { flex-wrap: nowrap; overflow-x: auto; }
+  .pz-bar .pz-b { flex: none; white-space: nowrap; }
+  @media (max-width: 900px) { .pz-bar { flex-wrap: wrap; } }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet">
@@ -3970,7 +4035,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
           el("div", { class: "cw-head" }, [el("span", { class: "wk-no", text: n + "주차" }), el("span", { class: "cw-state " + (r.published ? "on" : "off"), text: r.published ? "게시됨" : "비공개" })]),
           el("p", { class: "cw-title", text: r.title || "(강의 제목 없음)" }),
           el("p", { class: "cw-song", lang: "vi", text: s ? "♪ " + s.title + " — " + s.artist : "곡 미지정" }),
-          el("div", { class: "row-actions cw-acts" }, [el("a", { class: "btn primary", href: "#/course/" + cid + "/week/" + n, text: "편집" }), el("a", { class: "btn", href: "#/lecture/" + cid + "/" + n, text: "미리보기" })])]);
+          el("div", { class: "row-actions cw-acts" }, [el("a", { class: "btn primary", href: "#/course/" + cid + "/week/" + n, text: "편집" }), el("a", { class: "btn", href: "#/lecture/" + cid + "/" + n, text: "미리보기" }), el("a", { class: "btn", href: "#/present/" + cid + "/" + n, text: "발표", "aria-label": n + "주차 프레젠테이션 시작" })])]);
       }));
     }
     draw(); window.scrollTo(0, 0);
@@ -4005,12 +4070,46 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       const pron = ta("we-pron", "성조 및 발음 설명", r.pron_notes, 4000, "", 5);
       const summ = ta("we-sum", "학습 정리", r.summary, 3000, "", 3);
       const pub = el("input", { type: "checkbox", id: "we-pub" }); pub.checked = !!r.published;
+      // 18단계: 프레젠테이션 슬라이드 구성
+      let slides = normSlides(r.slides);
+      const autoSec = el("input", { type: "number", id: "we-auto", min: "5", max: "300", value: r.auto_sec || 20 });
+      const slideBox = el("ol", { class: "sl-list" });
+      const addSel = el("select", { id: "we-sl-add", "aria-label": "다시 넣을 기본 슬라이드" });
+      function drawSlides() {
+        slideBox.replaceChildren(...slides.map((s, i) => {
+          const up = el("button", { type: "button", class: "small-btn", text: "↑", "aria-label": (i + 1) + "번 슬라이드 위로" }); up.disabled = i === 0;
+          const dn = el("button", { type: "button", class: "small-btn", text: "↓", "aria-label": (i + 1) + "번 슬라이드 아래로" }); dn.disabled = i === slides.length - 1;
+          const del = el("button", { type: "button", class: "small-btn danger", text: "삭제", "aria-label": (i + 1) + "번 슬라이드 삭제" }); del.disabled = slides.length <= 1;
+          up.addEventListener("click", () => { [slides[i - 1], slides[i]] = [slides[i], slides[i - 1]]; drawSlides(); });
+          dn.addEventListener("click", () => { [slides[i + 1], slides[i]] = [slides[i], slides[i + 1]]; drawSlides(); });
+          del.addEventListener("click", () => { slides.splice(i, 1); drawSlides(); });
+          const kids = [el("span", { class: "sl-no", text: String(i + 1) }), el("span", { class: "sl-name", text: slideTitle(s) })];
+          if (s.k === "custom") {
+            const ti = el("input", { type: "text", maxlength: "80", value: s.title || "", "aria-label": (i + 1) + "번 슬라이드 제목" }); ti.addEventListener("input", () => { s.title = ti.value; });
+            const bo = el("textarea", { rows: "3", maxlength: "2000", "aria-label": (i + 1) + "번 슬라이드 내용" }); bo.value = s.body || ""; bo.addEventListener("input", () => { s.body = bo.value; });
+            kids.push(el("div", { class: "sl-custom" }, [ti, bo]));
+          }
+          kids.push(el("span", { class: "sl-acts" }, [up, dn, del]));
+          return el("li", { class: "sl-row" }, kids);
+        }));
+        const missing = SLIDE_DEFS.filter(([k]) => !slides.some(s => s.k === k));
+        addSel.replaceChildren(el("option", { value: "", text: missing.length ? "지운 기본 슬라이드 다시 넣기…" : "기본 슬라이드가 모두 들어 있습니다" }), ...missing.map(([k, n]) => el("option", { value: k, text: n })));
+        addSel.disabled = !missing.length;
+      }
+      addSel.addEventListener("change", () => { if (addSel.value) { slides.push({ k: addSel.value }); drawSlides(); } });
+      const addCustom = el("button", { type: "button", text: "직접 만든 슬라이드 추가" });
+      addCustom.addEventListener("click", () => { if (slides.length >= 40) return; slides.push({ k: "custom", title: "새 슬라이드", body: "" }); drawSlides(); });
+      const resetSl = el("button", { type: "button", text: "기본 10장으로 되돌리기" });
+      resetSl.addEventListener("click", () => { slides = normSlides(null); drawSlides(); });
+      drawSlides();
       const msg = el("p", { role: "status" });
       const save = el("button", { type: "button", class: "primary", text: "저장" });
       save.addEventListener("click", async () => {
         const row = { class_id: cid, week_no: n, title: title.value.trim() || null, song_id: sel.value ? Number(sel.value) : null,
           goals: goals[1].value.trim() || null, song_intro: intro[1].value.trim() || null, vocab: vocab[1].value.trim() || null,
-          pron_notes: pron[1].value.trim() || null, summary: summ[1].value.trim() || null, published: pub.checked, updated_at: new Date().toISOString() };
+          pron_notes: pron[1].value.trim() || null, summary: summ[1].value.trim() || null, published: pub.checked, updated_at: new Date().toISOString(),
+          slides: slides.map(s => s.k === "custom" ? { k: "custom", title: String(s.title || "").slice(0, 80), body: String(s.body || "").slice(0, 2000) } : { k: s.k }),
+          auto_sec: Math.max(5, Math.min(300, parseInt(autoSec.value, 10) || 20)) };
         save.disabled = true; msg.textContent = "저장하는 중…";
         try { await Server.saveCourseWeek(row); r = row; msg.textContent = "저장했습니다." + (row.published ? " 수강생에게 게시되었습니다." : " (비공개 — 수강생에게는 아직 보이지 않습니다)"); }
         catch (e) { msg.textContent = "저장하지 못했습니다: " + e.message; }
@@ -4020,8 +4119,12 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         el("label", { for: "we-title", text: "강의 제목" }), title,
         el("label", { for: "we-song-q", text: "오늘의 노래 (185곡에서 선택)" }), q, sel, songInfo,
         ...goals, ...intro, ...vocab, ...pron, ...summ,
+        el("h3", { class: "we-sl-h", text: "프레젠테이션 슬라이드" }),
+        el("p", { class: "small muted", text: "강의실 화면에 띄울 순서입니다. ↑ ↓로 순서를 바꾸고, 필요 없는 슬라이드는 지우고, 직접 만든 슬라이드를 더할 수 있습니다." }),
+        slideBox, el("div", { class: "row-actions" }, [addSel, addCustom, resetSl]),
+        el("label", { for: "we-auto", text: "자동 넘김 간격(초) — 기본은 수동 넘김, 자동은 프레젠테이션 화면에서 켭니다" }), autoSec,
         el("label", { class: "check we-pub" }, [pub, el("span", { text: " 게시 — 수강생에게 이 강의를 보여 줍니다" })]),
-        el("div", { class: "row-actions" }, [save, el("a", { class: "btn", href: "#/lecture/" + cid + "/" + n, text: "미리보기" })]), msg]));
+        el("div", { class: "row-actions" }, [save, el("a", { class: "btn", href: "#/lecture/" + cid + "/" + n, text: "미리보기" }), el("a", { class: "btn", href: "#/present/" + cid + "/" + n, text: "프레젠테이션 시작" })]), msg]));
     })();
     window.scrollTo(0, 0);
   }
@@ -4050,7 +4153,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       if (r.vocab) nodes.push(sec("핵심 어휘와 표현", [el("ul", { class: "lec-vocab" }, lines(r.vocab).map(x => { const k = x.split(/\s+[-–—:]\s+/); return el("li", null, [el("b", { lang: "vi", text: k[0] }), k[1] ? el("span", { text: k.slice(1).join(" - ") }) : null].filter(Boolean)); }))]));
       if (r.pron_notes) nodes.push(sec("성조 및 발음", [el("p", { class: "lec-text", text: r.pron_notes })]));
       if (r.summary) nodes.push(sec("학습 정리", [el("p", { class: "lec-text", text: r.summary })]));
-      if (manage) nodes.push(el("div", { class: "row-actions" }, [el("a", { class: "btn primary", href: "#/course/" + cid + "/week/" + n, text: "이 주차 편집" })]));
+      if (manage) nodes.splice(2, 0, el("div", { class: "row-actions" }, [el("a", { class: "btn primary", href: "#/present/" + cid + "/" + n, text: "▶ 프레젠테이션 시작" }), el("a", { class: "btn", href: "#/course/" + cid + "/week/" + n, text: "이 주차 편집" })]));
       fill(box, ...nodes);
     })();
     window.scrollTo(0, 0);
@@ -4071,6 +4174,185 @@ if (typeof module !== "undefined") module.exports = UploadKit;
           return el("li", null, [el("a", { href: "#/lecture/" + cid + "/" + r.week_no }, [el("span", { class: "wk-no", text: r.week_no + "주차" }), el("span", { class: "ml-t", text: r.title || r.week_no + "주차 강의" }), s ? el("span", { class: "ml-s", lang: "vi", text: "♪ " + s.title }) : null].filter(Boolean))]); }))].filter(Boolean));
     })));
     const first = view.firstElementChild; if (first && first.nextSibling) view.insertBefore(sec, first.nextSibling); else view.appendChild(sec);
+  }
+
+  /* ----- 18단계: 오프라인 강의용 프레젠테이션 모드 ----- */
+  const SLIDE_DEFS = [["goals", "오늘의 학습 목표"], ["song", "오늘의 노래 소개"], ["listen", "노래 듣기"], ["lyrics", "베트남어 가사"], ["translation", "가사와 한국어 번역"],
+    ["vocab", "핵심 어휘"], ["tones", "성조 및 발음 분석"], ["shadow", "따라 부르기 · 쉐도잉"], ["quiz", "확인 퀴즈"], ["summary", "학습 정리"]];
+  const SLIDE_NAME = Object.fromEntries(SLIDE_DEFS);
+  const TONE_KO = { ngang: "평평하게(성조 부호 없음)", huyền: "낮게 내려가며", sắc: "높게 올라가며", hỏi: "내렸다가 올리며(물음표 모양)", ngã: "꺾이듯 올리며(물결 모양)", nặng: "낮고 짧게 끊으며" };
+  function normSlides(v) {
+    const arr = Array.isArray(v) ? v.filter(s => s && (SLIDE_NAME[s.k] || s.k === "custom")).map(s => Object.assign({}, s)) : [];
+    return arr.length ? arr : SLIDE_DEFS.map(([k]) => ({ k }));
+  }
+  function slideTitle(s) { return s.k === "custom" ? (s.title || "직접 만든 슬라이드") : SLIDE_NAME[s.k]; }
+  let presentCleanup = null;
+  function exitPresent() { if (presentCleanup) { const f = presentCleanup; presentCleanup = null; f(); } }
+  function renderPresent(cid, n) {
+    exitPresent();
+    const c = Repo.getClasses().find(x => x.id === cid);
+    if (!c || !canManageCourse(cid)) { setView([el("a", { class: "btn", href: "#/classes", text: "← 교과목" }), el("p", { class: "bad", text: "이 강의를 발표할 권한이 없습니다." })], "classes"); return; }
+    setView([el("p", { class: "muted", text: "프레젠테이션을 여는 중…" })], "classes");
+    (async () => {
+      let r = null;
+      try { r = (await Server.courseWeek(cid, n))[0] || null; } catch (e) { setView([el("p", { class: "bad", text: "불러오지 못했습니다: " + e.message })], "classes"); return; }
+      if (!r) { setView([el("a", { class: "btn", href: "#/course/" + cid, text: "← 주차별 강의" }), el("p", { class: "muted", text: "아직 작성한 강의가 없습니다. [편집]에서 먼저 작성하세요." })], "classes"); return; }
+      if (location.hash !== "#/present/" + cid + "/" + n) return;
+      buildPresentation(c, n, r);
+    })();
+  }
+  function buildPresentation(c, n, r) {
+    const song = r.song_id ? Repo.getSong(r.song_id) : null;
+    const lyr = song ? Repo.getLyrics(song.id) : [];
+    const vid = song && song.videoUrl ? youtubeId(song.videoUrl) : null;
+    const lines = (x) => String(x || "").split(/\n+/).map(v => v.trim()).filter(Boolean);
+    const vocab = lines(r.vocab).map(x => { const k = x.split(/\s+[-–—:]\s+/); return { w: k[0], m: k.slice(1).join(" - ") }; });
+    const slides = normSlides(r.slides);
+    const st = { i: 0, auto: false, sec: Math.max(5, Math.min(300, r.auto_sec || 20)), start: Date.now(), playing: false, hi: 0, q: 0, reveal: false, player: null, stopAt: null };
+    const back = "#/lecture/" + c.id + "/" + n;
+    // --- 틀
+    const stage = el("div", { class: "pz-stage", "aria-live": "polite" });
+    const dock = el("div", { class: "pz-dock hide" }, [el("div", { id: "pz-yt" })]);
+    const prog = el("div", { class: "pz-prog" }, [el("i")]);
+    const counter = el("span", { class: "pz-count" });
+    const jump = el("select", { class: "pz-jump", "aria-label": "슬라이드 바로 가기" }, slides.map((s, k) => el("option", { value: String(k), text: (k + 1) + ". " + slideTitle(s) })));
+    const bPrev = el("button", { type: "button", class: "pz-b", text: "◀", "aria-label": "이전 슬라이드(←)" });
+    const bNext = el("button", { type: "button", class: "pz-b", text: "▶", "aria-label": "다음 슬라이드(→)" });
+    const bPlay = el("button", { type: "button", class: "pz-b pz-play", text: "♪ 재생", "aria-label": "노래 재생 · 일시정지(P)" }); bPlay.disabled = !vid;
+    const bMode = el("button", { type: "button", class: "pz-b pz-mode", "aria-pressed": "false" });
+    const secIn = el("input", { type: "number", class: "pz-sec", min: "5", max: "300", value: String(st.sec), "aria-label": "자동 넘김 간격(초)" });
+    const bFull = el("button", { type: "button", class: "pz-b", text: "⛶ 전체 화면", "aria-label": "전체 화면(F)" });
+    const bExit = el("button", { type: "button", class: "pz-b", text: "✕ 나가기", "aria-label": "프레젠테이션 나가기(Esc)" });
+    const toast = el("p", { class: "pz-toast", role: "status" });
+    const bar = el("div", { class: "pz-bar" }, [bPrev, counter, bNext, jump, bPlay, bMode, el("span", { class: "pz-secw" }, [secIn, el("span", { text: "초" })]), bFull, bExit]);
+    const root = el("div", { class: "pz", role: "dialog", "aria-modal": "true", "aria-label": c.name + " " + n + "주차 프레젠테이션" }, [
+      el("div", { class: "pz-top" }, [el("span", { class: "pz-course", text: c.name + " · " + n + "주차" }), el("span", { class: "pz-ltitle", text: r.title || "" })]), stage, dock, prog, bar, toast]);
+    document.body.appendChild(root); document.body.classList.add("presenting");
+    // --- 영상
+    function ensurePlayer() {
+      if (!vid) return Promise.reject(new Error("영상이 없는 곡입니다."));
+      if (st.player) return Promise.resolve(st.player);
+      return loadYouTubeApi().then(YT => new Promise((res) => {
+        st.player = new YT.Player("pz-yt", { videoId: vid, playerVars: { playsinline: 1, rel: 0, cc_load_policy: 0 },
+          events: { onReady: () => res(st.player), onStateChange: ev => { st.playing = ev.data === 1; bPlay.textContent = st.playing ? "⏸ 일시정지" : "♪ 재생"; placeDock(); } } });
+      }));
+    }
+    function togglePlay() {
+      ensurePlayer().then(p => { if (st.playing) p.pauseVideo(); else { st.stopAt = null; p.playVideo(); } }).catch(e => say(e.message));
+    }
+    function playLine(k) {
+      const l = lyr[k]; if (!l || typeof l.startTime !== "number") { say("이 줄은 아직 영상 시간이 맞춰지지 않았습니다(싱크 필요)."); return; }
+      const nx = lyr.slice(k + 1).find(x => typeof x.startTime === "number");
+      ensurePlayer().then(p => { p.seekTo(Math.max(0, l.startTime - 0.2), true); st.stopAt = nx ? nx.startTime : null; p.playVideo(); }).catch(e => say(e.message));
+    }
+    const poll = setInterval(() => {
+      if (st.player && st.stopAt != null && st.playing && st.player.getCurrentTime && st.player.getCurrentTime() >= st.stopAt) { st.player.pauseVideo(); st.stopAt = null; }
+      if (st.auto && !st.playing && Date.now() - st.start >= st.sec * 1000) { if (st.i < slides.length - 1) go(st.i + 1, true); else setAuto(false, "마지막 슬라이드라 자동 넘김을 멈췄습니다."); }
+    }, 250);
+    function placeDock() {
+      const cur = slides[st.i] && slides[st.i].k;
+      dock.className = "pz-dock " + (cur === "listen" && vid ? "big" : (st.player ? "mini" : "hide"));
+    }
+    // --- 슬라이드 그리기
+    function lyricList(withKo) {
+      if (!lyr.length) return el("p", { class: "pz-muted", text: song ? "이 곡은 아직 가사가 준비되지 않았습니다." : "이 주차에는 노래가 정해지지 않았습니다." });
+      const detail = el("div", { class: "pz-detail" });
+      const ol = el("ol", { class: "pz-lyr" + (withKo ? " both" : "") }, lyr.map((l, k) => {
+        const li = el("li", { class: k === st.hi ? "on" : "", tabindex: "0" }, [el("span", { class: "vi", lang: "vi", text: l.vietnamese })].concat(withKo ? [el("span", { class: "ko", text: l.korean || "" })] : []));
+        li.addEventListener("click", () => { st.hi = k; mark(); });
+        return li;
+      }));
+      function mark() {
+        [...ol.children].forEach((li, k) => li.classList.toggle("on", k === st.hi));
+        const li = ol.children[st.hi]; if (li) li.scrollIntoView({ block: "center", behavior: "smooth" });
+        const l = lyr[st.hi];
+        const syl = String(l.vietnamese).split(/\s+/).map(w => w.replace(/[^\p{L}]/gu, "")).filter(Boolean);
+        detail.replaceChildren(el("p", { class: "pz-d-vi", lang: "vi", text: (st.hi + 1) + ". " + l.vietnamese }), el("p", { class: "pz-d-ko", text: l.korean || "(번역 없음)" }),
+          el("div", { class: "pz-tones" }, syl.map(w => { const tn = VocabEngine.toneOf(w) || "확인 필요"; return el("span", { class: "pz-tone t-" + tn }, [el("b", { lang: "vi", text: w }), el("small", { text: tn })]); })),
+          el("button", { type: "button", class: "pz-b", text: "▶ 이 줄 듣기" }));
+        detail.lastChild.addEventListener("click", () => playLine(st.hi));
+      }
+      setTimeout(mark, 0);
+      stage._lyrMove = (d) => { st.hi = Math.max(0, Math.min(lyr.length - 1, st.hi + d)); mark(); };
+      return el("div", { class: "pz-lyrwrap" }, [ol, detail]);
+    }
+    function draw() {
+      const s = slides[st.i]; stage._lyrMove = null;
+      const H = (x) => el("h2", { class: "pz-h", text: x });
+      let body;
+      if (s.k === "goals") body = [H("오늘의 학습 목표"), lines(r.goals).length ? el("ul", { class: "pz-list" }, lines(r.goals).map(x => el("li", { text: x }))) : el("p", { class: "pz-muted", text: "학습 목표가 아직 없습니다." })];
+      else if (s.k === "song") body = song ? [el("p", { class: "pz-kick", text: "오늘의 노래" }), el("p", { class: "pz-song", lang: "vi", text: song.title }), el("p", { class: "pz-artist", lang: "vi", text: song.artist + (song.chartRank ? " · 차트 " + song.chartRank + "위" : "") }), r.song_intro ? el("p", { class: "pz-text", text: r.song_intro }) : null].filter(Boolean)
+        : [H("오늘의 노래"), el("p", { class: "pz-muted", text: "이 주차에는 노래가 정해지지 않았습니다." })];
+      else if (s.k === "listen") body = [H("노래 듣기"), vid ? el("p", { class: "pz-muted small", text: "아래 [♪ 재생] 또는 P 키로 재생 · 일시정지합니다. 재생 중에는 자동으로 넘어가지 않습니다." }) : el("p", { class: "pz-muted", text: "이 곡에는 영상이 없습니다." })];
+      else if (s.k === "lyrics") body = [H("베트남어 가사"), lyricList(false)];
+      else if (s.k === "translation") body = [H("가사와 한국어 번역"), lyricList(true)];
+      else if (s.k === "vocab") body = [H("핵심 어휘"), vocab.length ? el("div", { class: "pz-vocab" }, vocab.map(v => el("div", { class: "pz-vc" }, [el("b", { lang: "vi", text: v.w }), el("span", { text: v.m })]))) : el("p", { class: "pz-muted", text: "핵심 어휘가 아직 없습니다(주차 편집에서 등록)." })];
+      else if (s.k === "tones") body = [H("성조 및 발음 분석"), r.pron_notes ? el("p", { class: "pz-text", text: r.pron_notes }) : null,
+        vocab.length ? el("div", { class: "pz-tonegrid" }, vocab.map(v => el("div", { class: "pz-vc" }, [el("b", { lang: "vi", text: v.w }),
+          el("div", { class: "pz-tones" }, v.w.split(/\s+/).map(x => x.replace(/[^\p{L}]/gu, "")).filter(Boolean).map(x => { const tn = VocabEngine.toneOf(x) || "확인 필요"; return el("span", { class: "pz-tone t-" + tn }, [el("b", { lang: "vi", text: x }), el("small", { text: tn + (TONE_KO[tn] ? " · " + TONE_KO[tn] : "") })]); }))]))) : null,
+        el("div", { class: "pz-legend" }, Object.entries(TONE_KO).map(([k, d]) => el("span", { class: "pz-tone t-" + k }, [el("b", { text: k }), el("small", { text: d })])))].filter(Boolean);
+      else if (s.k === "shadow") {
+        if (!lyr.length) body = [H("따라 부르기 · 쉐도잉"), el("p", { class: "pz-muted", text: "가사가 있는 곡에서 쓸 수 있습니다." })];
+        else {
+          const one = el("div", { class: "pz-one" });
+          const drawOne = () => { const l = lyr[st.hi]; one.replaceChildren(el("p", { class: "pz-one-n", text: (st.hi + 1) + " / " + lyr.length }), el("p", { class: "pz-one-vi", lang: "vi", text: l.vietnamese }), el("p", { class: "pz-one-ko", text: l.korean || "" })); };
+          stage._lyrMove = (d) => { st.hi = Math.max(0, Math.min(lyr.length - 1, st.hi + d)); drawOne(); };
+          const pv = el("button", { type: "button", class: "pz-b", text: "↑ 이전 줄" }), nx = el("button", { type: "button", class: "pz-b", text: "↓ 다음 줄" }), ls = el("button", { type: "button", class: "pz-b pz-play", text: "▶ 이 줄 듣기" });
+          pv.addEventListener("click", () => stage._lyrMove(-1)); nx.addEventListener("click", () => stage._lyrMove(1)); ls.addEventListener("click", () => playLine(st.hi));
+          drawOne(); body = [H("따라 부르기 · 쉐도잉"), one, el("div", { class: "pz-row" }, [pv, ls, nx])];
+        }
+      }
+      else if (s.k === "quiz") {
+        if (!vocab.length) body = [H("확인 퀴즈"), el("p", { class: "pz-muted", text: "핵심 어휘를 등록하면 단어 카드 퀴즈로 쓸 수 있습니다." })];
+        else {
+          const card = el("div", { class: "pz-quiz" });
+          const drawQ = () => { const v = vocab[st.q]; const rv = el("button", { type: "button", class: "pz-b pz-play", text: st.reveal ? "다음 단어 →" : "정답 보기" });
+            rv.addEventListener("click", () => { if (!st.reveal) { st.reveal = true; } else { st.reveal = false; st.q = (st.q + 1) % vocab.length; } drawQ(); });
+            card.replaceChildren(el("p", { class: "pz-one-n", text: "단어 " + (st.q + 1) + " / " + vocab.length }), el("p", { class: "pz-qw", lang: "vi", text: v.w }), el("p", { class: "pz-qa" + (st.reveal ? " on" : ""), text: st.reveal ? (v.m || "(뜻을 적지 않음)") : "뜻은 무엇일까요?" }), rv); };
+          drawQ(); body = [H("확인 퀴즈"), card];
+        }
+      }
+      else if (s.k === "summary") body = [H("학습 정리"), r.summary ? el("p", { class: "pz-text", text: r.summary }) : el("p", { class: "pz-muted", text: "학습 정리가 아직 없습니다." })];
+      else body = [H(s.title || "슬라이드"), el("p", { class: "pz-text", text: s.body || "" })];
+      stage.replaceChildren(el("section", { class: "pz-slide k-" + s.k }, body));
+      counter.textContent = (st.i + 1) + " / " + slides.length; jump.value = String(st.i);
+      prog.firstChild.style.width = ((st.i + 1) / slides.length * 100) + "%";
+      bPrev.disabled = st.i === 0; bNext.disabled = st.i === slides.length - 1;
+      placeDock();
+      if (s.k === "listen" && vid) ensurePlayer().catch(e => say(e.message));
+    }
+    function go(k, fromAuto) {
+      if (!fromAuto && st.auto) setAuto(false, "직접 조작해서 자동 넘김을 멈추고 수동으로 바꿨습니다.");
+      st.i = Math.max(0, Math.min(slides.length - 1, k)); st.start = Date.now(); draw();
+    }
+    function setAuto(on, why) {
+      st.auto = on; st.start = Date.now();
+      bMode.setAttribute("aria-pressed", on ? "true" : "false"); bMode.textContent = on ? "자동 넘김 켜짐" : "수동 넘김";
+      if (why) say(why);
+    }
+    let toastT = null;
+    function say(x) { toast.textContent = x; toast.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => toast.classList.remove("on"), 2800); }
+    bPrev.addEventListener("click", () => go(st.i - 1)); bNext.addEventListener("click", () => go(st.i + 1));
+    jump.addEventListener("change", () => go(Number(jump.value)));
+    bPlay.addEventListener("click", togglePlay);
+    bMode.addEventListener("click", () => { const on = !st.auto; setAuto(on, on ? "자동 넘김을 켰습니다(" + st.sec + "초). 노래 재생 중에는 넘어가지 않습니다." : "수동 넘김으로 바꿨습니다."); });
+    secIn.addEventListener("change", () => { st.sec = Math.max(5, Math.min(300, parseInt(secIn.value, 10) || 20)); secIn.value = st.sec; st.start = Date.now(); });
+    bFull.addEventListener("click", () => { if (document.fullscreenElement) document.exitFullscreen(); else if (root.requestFullscreen) root.requestFullscreen().catch(() => say("이 브라우저에서는 전체 화면을 쓸 수 없습니다.")); });
+    bExit.addEventListener("click", () => { location.hash = back; });
+    function onKey(ev) {
+      if (ev.target && /^(INPUT|SELECT|TEXTAREA)$/.test(ev.target.tagName)) return;
+      if (ev.key === "ArrowRight" || ev.key === "PageDown") { ev.preventDefault(); go(st.i + 1); }
+      else if (ev.key === "ArrowLeft" || ev.key === "PageUp") { ev.preventDefault(); go(st.i - 1); }
+      else if (ev.key === "Home") { ev.preventDefault(); go(0); } else if (ev.key === "End") { ev.preventDefault(); go(slides.length - 1); }
+      else if ((ev.key === "ArrowDown" || ev.key === "ArrowUp") && stage._lyrMove) { ev.preventDefault(); stage._lyrMove(ev.key === "ArrowDown" ? 1 : -1); }
+      else if (ev.key === "p" || ev.key === "P") { ev.preventDefault(); togglePlay(); }
+      else if (ev.key === "f" || ev.key === "F") { ev.preventDefault(); bFull.click(); }
+      else if (ev.key === "Escape" && !document.fullscreenElement) { ev.preventDefault(); location.hash = back; }
+    }
+    document.addEventListener("keydown", onKey);
+    presentCleanup = () => { clearInterval(poll); document.removeEventListener("keydown", onKey); try { if (st.player && st.player.destroy) st.player.destroy(); } catch (e) {}
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); root.remove(); document.body.classList.remove("presenting"); };
+    setAuto(false); draw(); bNext.focus();
   }
 
   // 같은 단계 안: 어휘 점수 낮은 순 → 차트 순위 → ID
@@ -7801,6 +8083,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
   let currentRoute = null;
   function route() {
     if (currentRoute === "list") listScrollY = window.scrollY;
+    if (!/^#\/present\//.test(location.hash || "")) exitPresent(); // 프레젠테이션에서 다른 화면으로 가면 닫는다
     const h = location.hash || "#/";
     const loggedIn = !!Server.profile();
     const need = (cond, msg) => { if (cond) return true; setView([el("h2", { text: "권한 없음" }), el("p", { class: "bad", text: msg })], ""); return false; };
@@ -7825,6 +8108,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     else if ((m = h.match(/^#\/words\/(\d+)$/))) { if (login()) { currentRoute = "words"; renderWords(Number(m[1])); } }
     else if ((m = h.match(/^#\/course\/([0-9a-f-]{36})$/))) { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "course"; renderCourseWeeks(m[1]); } }
     else if ((m = h.match(/^#\/course\/([0-9a-f-]{36})\/week\/(\d+)$/))) { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "course-week"; renderWeekEditor(m[1], Number(m[2])); } }
+    else if ((m = h.match(/^#\/present\/([0-9a-f-]{36})\/(\d+)$/))) { if (login() && need(Server.canTeach(), "교수자만 발표할 수 있습니다.")) { currentRoute = "present"; renderPresent(m[1], Number(m[2])); } }
     else if ((m = h.match(/^#\/lecture\/([0-9a-f-]{36})\/(\d+)$/))) { if (login()) { currentRoute = "lecture"; renderLecture(m[1], Number(m[2])); } }
     else if (h === "#/t") { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "t-home"; renderTeachHome(); } }
     else if (h === "#/t/attendance") { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "t-att"; renderTeachAttendance(); } }
