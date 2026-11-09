@@ -2467,6 +2467,37 @@
   .pz-bar { flex-wrap: nowrap; overflow-x: auto; }
   .pz-bar .pz-b { flex: none; white-space: nowrap; }
   @media (max-width: 900px) { .pz-bar { flex-wrap: wrap; } }
+
+  /* 19단계: 확인 퀴즈 */
+  .qz-ed { margin-top: 22px; display: grid; gap: 10px; max-width: 900px; }
+  .qz-list, .qz-items, .qz-rate, .qz-grades { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+  .qz-q { display: grid; gap: 8px; padding: 14px; border-radius: 18px; background: rgba(255,255,255,.45); }
+  .qz-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; } .qz-head select { width: auto !important; }
+  .qz-pts { width: 70px !important; } .qz-pts-w { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+  .qz-opts { display: grid; gap: 8px; } .qz-opts.ox { grid-template-columns: repeat(2, max-content); gap: 18px; }
+  .qz-opt { display: flex; align-items: center; gap: 10px; } .qz-opt input[type=text] { flex: 1; }
+  .qz-set { display: grid; gap: 8px; margin-top: 6px; } .qz-set input[type=datetime-local] { max-width: 280px; }
+  .qz-item, .qz-res { padding: 14px 16px; border-radius: 18px; background: rgba(255,255,255,.5); display: grid; gap: 10px; }
+  .qz-prompt { margin: 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; font-weight: 700; line-height: 1.6; }
+  .qz-type { font-size: 12.5px; font-weight: 800; color: #5B50C6; background: #E4E2FA; padding: 3px 10px; border-radius: 999px; }
+  .qz-choices { display: grid; gap: 8px; } .qz-choices.ox { grid-template-columns: repeat(2, minmax(0, 160px)); }
+  .qz-choice { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 12px; border-radius: 14px; background: rgba(255,255,255,.6); cursor: pointer; }
+  .qz-choice:has(input:checked) { box-shadow: inset 0 0 0 2px #6E63D9; }
+  .qz-res.ok .qz-mark { color: #15803D; } .qz-res.no .qz-mark { color: #B42318; } .qz-res.wait .qz-mark { color: #B45309; }
+  .qz-mark { font-weight: 800; } .qz-line { margin: 0; } .qz-ex { margin: 0; padding: 10px 12px; border-radius: 12px; background: rgba(228,226,250,.55); white-space: pre-line; }
+  .qz-pt { margin: 0; text-align: right; }
+  .qz-score { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; } .qz-score strong { font-size: 28px; color: #5B50C6; }
+  .qz-table { width: 100%; } .tbl-wrap { overflow-x: auto; }
+  .qz-st { font-size: 12.5px; font-weight: 800; padding: 4px 10px; border-radius: 999px; }
+  .qz-st.ok { color: #15803D; background: #DFF3EA; } .qz-st.wait { color: #B45309; background: #FEF3C7; } .qz-st.none { color: #6B7280; background: #ECEEF3; }
+  .qz-rate li { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; } .qz-rate li b { margin-left: auto; }
+  .qz-grade { padding: 12px 14px; border-radius: 16px; background: rgba(255,255,255,.5); display: grid; gap: 6px; } .qz-grade.wait { box-shadow: inset 0 0 0 2px #F5C76B; }
+  .cw-quiz { margin: 0; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; font-size: 13px; color: var(--sv-muted, #76819A); } .cw-quiz a { font-weight: 800; }
+  .pz-qq { font-size: clamp(26px, 2.6vw, 48px); font-weight: 800; margin: 0; white-space: pre-line; }
+  .pz-qopts { list-style: upper-alpha; text-align: left; margin: 0 auto; padding-left: 2em; display: grid; gap: 1.2vh; font-size: 1.5em; min-width: min(700px, 80%); }
+  .pz-qopts.ox { list-style: none; padding: 0; grid-template-columns: repeat(2, 1fr); text-align: center; font-size: 2.4em; font-weight: 900; }
+  .pz-qopts li { padding: .4em .8em; border-radius: 16px; } .pz-qopts li.ok { background: #DFF3EA; color: #15803D; font-weight: 800; box-shadow: 0 0 0 3px #86D3AE; }
+  .pz-qx { font-size: 1.15em; color: #4A5573; margin: 0; white-space: pre-line; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet">
@@ -3011,6 +3042,15 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       saveCourseWeek: (row) => run(c => c.from("class_weeks").upsert(row).select("week_no")),
       saveCourseWeeks: (rows) => run(c => c.from("class_weeks").upsert(rows).select("week_no")),
       myLectures: () => run(c => c.from("class_weeks").select("class_id,week_no,song_id,title,published").eq("published", true).order("week_no")),
+      // 19단계: 확인 퀴즈(모두 서버 함수 — 정답은 제출 뒤에만 받는다)
+      quizSave: (cid, n, qs) => run(c => c.rpc("quiz_save", { p_class: cid, p_week: n, p_questions: qs })),
+      quizAdmin: (cid, n) => run(c => c.rpc("quiz_admin_list", { p_class: cid, p_week: n })),
+      quizForStudent: (cid, n) => run(c => c.rpc("quiz_for_student", { p_class: cid, p_week: n })),
+      quizSubmit: (cid, n, answers) => run(c => c.rpc("quiz_submit", { p_class: cid, p_week: n, p_answers: answers })),
+      quizMyResult: (cid, n) => run(c => c.rpc("quiz_my_result", { p_class: cid, p_week: n })),
+      quizResults: (cid, n) => run(c => c.rpc("quiz_results", { p_class: cid, p_week: n })),
+      quizGrade: (aid, qid, ok) => run(c => c.rpc("quiz_grade", { p_attempt: aid, p_question: qid, p_correct: ok })),
+      quizCourseSummary: (cid) => run(c => c.rpc("quiz_course_summary", { p_class: cid })),
       myMemberships: () => run(c => c.from("class_members").select("class_id,joined_at").eq("user_id", session.user.id)),
       createClass: (name) => run(c => c.rpc("create_class", { p_name: name })),
       joinClass: (code) => run(c => c.rpc("join_class", { p_code: code })),
@@ -4026,15 +4066,17 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       el("p", { class: "small muted", text: "주차마다 강의 제목 · 학습 목표 · 노래(185곡 중 선택) · 핵심 어휘 · 발음 · 성조 설명을 정하고 [게시]하면 수강생에게 보입니다." }),
       el("div", { class: "row-actions" }, [copy]), msg, box], "classes");
     async function draw() {
-      let rows = [];
-      try { rows = await Server.courseWeeks(cid); } catch (e) { fill(box, el("p", { class: "bad", text: "불러오지 못했습니다: " + e.message })); return; }
-      const by = new Map(rows.map(r => [r.week_no, r]));
+      let rows = [], qsum = [];
+      try { [rows, qsum] = await Promise.all([Server.courseWeeks(cid), Server.quizCourseSummary(cid).catch(() => [])]); } catch (e) { fill(box, el("p", { class: "bad", text: "불러오지 못했습니다: " + e.message })); return; }
+      const by = new Map(rows.map(r => [r.week_no, r])), qby = new Map((qsum || []).map(x => [x.week_no, x]));
       fill(box, ...Array.from({ length: c.weeks_count || 15 }, (_, i) => {
         const n = i + 1, r = by.get(n) || {}, s = r.song_id ? Repo.getSong(r.song_id) : null;
         return el("article", { class: "card cw-card" + (r.published ? " is-pub" : "") }, [
           el("div", { class: "cw-head" }, [el("span", { class: "wk-no", text: n + "주차" }), el("span", { class: "cw-state " + (r.published ? "on" : "off"), text: r.published ? "게시됨" : "비공개" })]),
           el("p", { class: "cw-title", text: r.title || "(강의 제목 없음)" }),
           el("p", { class: "cw-song", lang: "vi", text: s ? "♪ " + s.title + " — " + s.artist : "곡 미지정" }),
+          qby.get(n) ? el("p", { class: "cw-quiz" }, [el("span", { text: "퀴즈 " + qby.get(n).questions + "문항" + (qby.get(n).published ? "" : " (비공개)") + " · 제출 " + qby.get(n).submitted + "/" + qby.get(n).members + "명" + (qby.get(n).avg_pct != null ? " · 평균 " + qby.get(n).avg_pct + "%" : "") + (qby.get(n).review ? " · 채점 대기 " + qby.get(n).review : "") }),
+            el("a", { href: "#/course/" + cid + "/week/" + n + "/quiz", text: "결과" })]) : null,
           el("div", { class: "row-actions cw-acts" }, [el("a", { class: "btn primary", href: "#/course/" + cid + "/week/" + n, text: "편집" }), el("a", { class: "btn", href: "#/lecture/" + cid + "/" + n, text: "미리보기" }), el("a", { class: "btn", href: "#/present/" + cid + "/" + n, text: "발표", "aria-label": n + "주차 프레젠테이션 시작" })])]);
       }));
     }
@@ -4124,7 +4166,8 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         slideBox, el("div", { class: "row-actions" }, [addSel, addCustom, resetSl]),
         el("label", { for: "we-auto", text: "자동 넘김 간격(초) — 기본은 수동 넘김, 자동은 프레젠테이션 화면에서 켭니다" }), autoSec,
         el("label", { class: "check we-pub" }, [pub, el("span", { text: " 게시 — 수강생에게 이 강의를 보여 줍니다" })]),
-        el("div", { class: "row-actions" }, [save, el("a", { class: "btn", href: "#/lecture/" + cid + "/" + n, text: "미리보기" }), el("a", { class: "btn", href: "#/present/" + cid + "/" + n, text: "프레젠테이션 시작" })]), msg]));
+        el("div", { class: "row-actions" }, [save, el("a", { class: "btn", href: "#/lecture/" + cid + "/" + n, text: "미리보기" }), el("a", { class: "btn", href: "#/present/" + cid + "/" + n, text: "프레젠테이션 시작" })]), msg]),
+        quizEditorCard(cid, n, r));
     })();
     window.scrollTo(0, 0);
   }
@@ -4152,6 +4195,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         : [el("p", { class: "muted", text: "이 곡은 아직 가사가 준비되지 않았습니다." })]));
       if (r.vocab) nodes.push(sec("핵심 어휘와 표현", [el("ul", { class: "lec-vocab" }, lines(r.vocab).map(x => { const k = x.split(/\s+[-–—:]\s+/); return el("li", null, [el("b", { lang: "vi", text: k[0] }), k[1] ? el("span", { text: k.slice(1).join(" - ") }) : null].filter(Boolean)); }))]));
       if (r.pron_notes) nodes.push(sec("성조 및 발음", [el("p", { class: "lec-text", text: r.pron_notes })]));
+      nodes.push(lectureQuizSection(cid, n, manage));
       if (r.summary) nodes.push(sec("학습 정리", [el("p", { class: "lec-text", text: r.summary })]));
       if (manage) nodes.splice(2, 0, el("div", { class: "row-actions" }, [el("a", { class: "btn primary", href: "#/present/" + cid + "/" + n, text: "▶ 프레젠테이션 시작" }), el("a", { class: "btn", href: "#/course/" + cid + "/week/" + n, text: "이 주차 편집" })]));
       fill(box, ...nodes);
@@ -4198,10 +4242,13 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       try { r = (await Server.courseWeek(cid, n))[0] || null; } catch (e) { setView([el("p", { class: "bad", text: "불러오지 못했습니다: " + e.message })], "classes"); return; }
       if (!r) { setView([el("a", { class: "btn", href: "#/course/" + cid, text: "← 주차별 강의" }), el("p", { class: "muted", text: "아직 작성한 강의가 없습니다. [편집]에서 먼저 작성하세요." })], "classes"); return; }
       if (location.hash !== "#/present/" + cid + "/" + n) return;
-      buildPresentation(c, n, r);
+      let qz = [];
+      try { qz = await Server.quizAdmin(cid, n) || []; } catch (e) { qz = []; }
+      buildPresentation(c, n, r, qz);
     })();
   }
-  function buildPresentation(c, n, r) {
+  function buildPresentation(c, n, r, qz) {
+    qz = qz || [];
     const song = r.song_id ? Repo.getSong(r.song_id) : null;
     const lyr = song ? Repo.getLyrics(song.id) : [];
     const vid = song && song.videoUrl ? youtubeId(song.videoUrl) : null;
@@ -4302,6 +4349,21 @@ if (typeof module !== "undefined") module.exports = UploadKit;
           drawOne(); body = [H("따라 부르기 · 쉐도잉"), one, el("div", { class: "pz-row" }, [pv, ls, nx])];
         }
       }
+      else if (s.k === "quiz" && qz.length) {
+        const card = el("div", { class: "pz-quiz" });
+        const drawQ = () => { const q = qz[st.q % qz.length], showA = st.reveal;
+          const opts = (q.qtype === "ox" ? ["O", "X"] : (q.options || []));
+          const isChoice = ["mc", "meaning", "tone", "ox"].includes(q.qtype);
+          const ansIdx = q.qtype === "ox" ? (String(q.answer).toUpperCase() === "X" ? 1 : 0) : Number(q.answer);
+          const rv = el("button", { type: "button", class: "pz-b pz-play", text: showA ? "다음 문제 →" : "정답 보기" });
+          rv.addEventListener("click", () => { if (!st.reveal) st.reveal = true; else { st.reveal = false; st.q = (st.q + 1) % qz.length; } drawQ(); });
+          fill(card, el("p", { class: "pz-one-n", text: "문제 " + (st.q % qz.length + 1) + " / " + qz.length + " · " + QTYPE_NAME[q.qtype] }), el("p", { class: "pz-qq", text: q.prompt }),
+            isChoice ? el("ol", { class: "pz-qopts" + (q.qtype === "ox" ? " ox" : "") }, opts.map((o, k) => el("li", { class: showA && k === ansIdx ? "ok" : "", lang: "vi", text: o }))) : null,
+            showA && !isChoice ? el("p", { class: "pz-qa on", text: q.qtype === "blank" ? "정답: " + String(q.answer).split("|").join(" / ") : "모범 답안: " + q.answer }) : null,
+            showA && q.explanation ? el("p", { class: "pz-qx", text: q.explanation }) : null, rv);
+        };
+        drawQ(); body = [H("확인 퀴즈"), card];
+      }
       else if (s.k === "quiz") {
         if (!vocab.length) body = [H("확인 퀴즈"), el("p", { class: "pz-muted", text: "핵심 어휘를 등록하면 단어 카드 퀴즈로 쓸 수 있습니다." })];
         else {
@@ -4353,6 +4415,187 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     presentCleanup = () => { clearInterval(poll); document.removeEventListener("keydown", onKey); try { if (st.player && st.player.destroy) st.player.destroy(); } catch (e) {}
       if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); root.remove(); document.body.classList.remove("presenting"); };
     setAuto(false); draw(); bNext.focus();
+  }
+
+  /* ----- 19단계: 확인 퀴즈 ----- */
+  const QTYPES = [["mc", "객관식"], ["ox", "OX"], ["blank", "빈칸 채우기"], ["meaning", "단어 뜻 맞히기"], ["tone", "성조 구분하기"], ["translate", "문장 해석하기"]];
+  const QTYPE_NAME = Object.fromEntries(QTYPES);
+  const TONE_OPTS = ["ngang", "huyền", "sắc", "hỏi", "ngã", "nặng"];
+  const QZ_ERR = { quiz_closed: "마감 시간이 지나 제출할 수 없습니다.", no_retake: "이 퀴즈는 한 번만 제출할 수 있습니다.", quiz_not_open: "아직 열리지 않은 퀴즈입니다.", no_questions: "문제가 없습니다." };
+  function qzErr(e) { const m = String(e && e.message || e); const k = Object.keys(QZ_ERR).find(x => m.includes(x)); return k ? QZ_ERR[k] : m; }
+  function newId() { if (window.crypto && crypto.randomUUID) return crypto.randomUUID(); const b = crypto.getRandomValues(new Uint8Array(16)); b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128; const h = [...b].map(x => x.toString(16).padStart(2, "0")).join(""); return h.slice(0, 8) + "-" + h.slice(8, 12) + "-" + h.slice(12, 16) + "-" + h.slice(16, 20) + "-" + h.slice(20); }
+  function toLocalInput(iso) { if (!iso) return ""; const d = new Date(iso); const p = (x) => String(x).padStart(2, "0"); return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + "T" + p(d.getHours()) + ":" + p(d.getMinutes()); }
+  function fmtWhen(iso) { if (!iso) return ""; const d = new Date(iso); return d.toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }); }
+  function qzAnswerText(q, v) { if (v == null || v === "") return "(답 없음)"; if (["mc", "meaning", "tone"].includes(q.qtype)) return (q.options || [])[Number(v)] != null ? q.options[Number(v)] : "(답 없음)"; return String(v); }
+  function qzCorrectText(q) { if (["mc", "meaning", "tone"].includes(q.qtype)) return (q.options || [])[Number(q.answer)] || ""; if (q.qtype === "blank") return String(q.answer).split("|").map(x => x.trim()).filter(Boolean).join(" / "); return q.answer || ""; }
+  // 주차 편집: 문제 만들기
+  function quizEditorCard(cid, n, r) {
+    const card = el("section", { class: "card qz-ed" }, [el("h3", { text: "확인 퀴즈" }), el("p", { class: "muted", text: "불러오는 중…" })]);
+    (async () => {
+      let qs = [];
+      try { qs = (await Server.quizAdmin(cid, n)) || []; } catch (e) { fill(card, el("h3", { text: "확인 퀴즈" }), el("p", { class: "bad", text: "불러오지 못했습니다: " + e.message })); return; }
+      qs = qs.map(q => Object.assign({}, q, { options: (q.options || []).slice(), explanation: q.explanation || "" }));
+      const list = el("ol", { class: "qz-list" }), msg = el("p", { role: "status" });
+      const qpub = el("input", { type: "checkbox", id: "qz-pub" }); qpub.checked = !!r.quiz_published;
+      const qret = el("input", { type: "checkbox", id: "qz-retake" }); qret.checked = r.quiz_retake !== false;
+      const qdue = el("input", { type: "datetime-local", id: "qz-due", value: toLocalInput(r.quiz_due) });
+      const addType = el("select", { id: "qz-add-type", "aria-label": "추가할 문제 유형" }, QTYPES.map(([k, v]) => el("option", { value: k, text: v })));
+      const addBtn = el("button", { type: "button", text: "문제 추가" });
+      function blankQ(type) { const q = { id: newId(), qtype: type, prompt: "", options: [], answer: "", explanation: "", points: 1 };
+        if (type === "tone") { q.options = TONE_OPTS.slice(); } else if (type === "mc" || type === "meaning") { q.options = ["", "", "", ""]; } else if (type === "ox") { q.answer = "O"; } return q; }
+      addBtn.addEventListener("click", () => { if (qs.length >= 50) return; qs.push(blankQ(addType.value)); draw(); const last = list.lastElementChild; if (last) last.querySelector("textarea").focus(); });
+      function qRow(q, i) {
+        const type = el("select", { "aria-label": (i + 1) + "번 문제 유형" }, QTYPES.map(([k, v]) => el("option", { value: k, text: v }))); type.value = q.qtype;
+        type.addEventListener("change", () => { const nq = blankQ(type.value); q.qtype = nq.qtype; if (!["mc", "meaning", "tone"].includes(q.qtype)) q.options = []; else if (q.qtype === "tone") q.options = TONE_OPTS.slice(); else if (q.options.length < 2) q.options = nq.options; q.answer = nq.answer; draw(); });
+        const prompt = el("textarea", { rows: "2", maxlength: "1000", "aria-label": (i + 1) + "번 문제", placeholder: { mc: "문제", ox: "맞으면 O, 틀리면 X를 고르는 문장", blank: "빈칸은 ___ 로 표시: Anh ___ em (그리워하다)", meaning: "nhớ 의 뜻은?", tone: "nhớ 의 성조는?", translate: "해석할 베트남어 문장" }[q.qtype] });
+        prompt.value = q.prompt; prompt.addEventListener("input", () => { q.prompt = prompt.value; });
+        let body;
+        if (["mc", "meaning", "tone"].includes(q.qtype)) {
+          body = el("div", { class: "qz-opts" }, q.options.map((o, k) => {
+            const rd = el("input", { type: "radio", name: "ans-" + q.id, "aria-label": (k + 1) + "번 보기를 정답으로" }); rd.checked = String(k) === String(q.answer); rd.addEventListener("change", () => { q.answer = String(k); });
+            const tx = el("input", { type: "text", maxlength: "200", value: o, "aria-label": (k + 1) + "번 보기", placeholder: (k + 1) + "번 보기" }); tx.addEventListener("input", () => { q.options[k] = tx.value; });
+            const rm = el("button", { type: "button", class: "small-btn", text: "−", "aria-label": (k + 1) + "번 보기 지우기" }); rm.disabled = q.options.length <= 2;
+            rm.addEventListener("click", () => { q.options.splice(k, 1); if (Number(q.answer) === k) q.answer = ""; else if (Number(q.answer) > k) q.answer = String(Number(q.answer) - 1); draw(); });
+            return el("label", { class: "qz-opt" }, [rd, tx, rm]);
+          }).concat(q.options.length < 6 ? [(() => { const b = el("button", { type: "button", class: "small-btn", text: "+ 보기 추가" }); b.addEventListener("click", () => { q.options.push(""); draw(); }); return b; })()] : []));
+        } else if (q.qtype === "ox") {
+          body = el("div", { class: "qz-opts ox" }, ["O", "X"].map(v => { const rd = el("input", { type: "radio", name: "ans-" + q.id, value: v }); rd.checked = String(q.answer).toUpperCase() === v; rd.addEventListener("change", () => { q.answer = v; }); return el("label", { class: "qz-opt" }, [rd, el("span", { text: "정답 " + v })]); }));
+        } else if (q.qtype === "blank") {
+          const a = el("input", { type: "text", maxlength: "500", value: q.answer, placeholder: "정답 — 여러 개 인정하려면 | 로 구분 (예: nhớ|nhớ em)", "aria-label": (i + 1) + "번 정답" }); a.addEventListener("input", () => { q.answer = a.value; }); body = a;
+        } else {
+          const a = el("textarea", { rows: "2", maxlength: "500", placeholder: "모범 답안 — 제출 뒤 학생에게 보여 주고, 점수는 교수자가 결과 화면에서 매깁니다", "aria-label": (i + 1) + "번 모범 답안" }); a.value = q.answer; a.addEventListener("input", () => { q.answer = a.value; }); body = a;
+        }
+        const ex = el("textarea", { rows: "2", maxlength: "1500", placeholder: "해설(제출 뒤에 보입니다)", "aria-label": (i + 1) + "번 해설" }); ex.value = q.explanation || ""; ex.addEventListener("input", () => { q.explanation = ex.value; });
+        const pts = el("input", { type: "number", min: "1", max: "20", value: q.points || 1, class: "qz-pts", "aria-label": (i + 1) + "번 배점" }); pts.addEventListener("change", () => { q.points = Math.max(1, Math.min(20, parseInt(pts.value, 10) || 1)); pts.value = q.points; });
+        const up = el("button", { type: "button", class: "small-btn", text: "↑" }); up.disabled = i === 0; up.addEventListener("click", () => { [qs[i - 1], qs[i]] = [qs[i], qs[i - 1]]; draw(); });
+        const dn = el("button", { type: "button", class: "small-btn", text: "↓" }); dn.disabled = i === qs.length - 1; dn.addEventListener("click", () => { [qs[i + 1], qs[i]] = [qs[i], qs[i + 1]]; draw(); });
+        const del = el("button", { type: "button", class: "small-btn danger", text: "삭제" }); del.addEventListener("click", () => { qs.splice(i, 1); draw(); });
+        return el("li", { class: "qz-q" }, [el("div", { class: "qz-head" }, [el("span", { class: "sl-no", text: String(i + 1) }), type, el("span", { class: "qz-pts-w" }, [pts, el("span", { text: "점" })]), el("span", { class: "sl-acts" }, [up, dn, del])]),
+          prompt, body, ex]);
+      }
+      function draw() { list.replaceChildren(...qs.map(qRow)); if (!qs.length) list.appendChild(el("li", { class: "muted qz-empty", text: "아직 문제가 없습니다. 유형을 고르고 [문제 추가]를 누르세요." })); }
+      function validate() {
+        for (let i = 0; i < qs.length; i++) { const q = qs[i], no = (i + 1) + "번 문제: ";
+          if (!q.prompt.trim()) return no + "문제 내용을 적어 주세요.";
+          if (["mc", "meaning", "tone"].includes(q.qtype)) { if (q.options.filter(o => o.trim()).length < 2 || q.options.some(o => !o.trim())) return no + "보기를 2개 이상, 빈칸 없이 적어 주세요."; if (q.answer === "" || !(Number(q.answer) >= 0 && Number(q.answer) < q.options.length)) return no + "정답 보기를 골라 주세요."; }
+          if (q.qtype === "ox" && !["O", "X"].includes(String(q.answer).toUpperCase())) return no + "정답 O / X를 골라 주세요.";
+          if ((q.qtype === "blank" || q.qtype === "translate") && !String(q.answer).trim()) return no + (q.qtype === "blank" ? "정답을 적어 주세요." : "모범 답안을 적어 주세요.");
+        } return null;
+      }
+      const save = el("button", { type: "button", class: "primary", text: "퀴즈 저장" });
+      save.addEventListener("click", async () => {
+        const bad = validate(); if (bad) { msg.textContent = bad; return; }
+        if (qpub.checked && !qs.length) { msg.textContent = "문제가 없으면 퀴즈를 게시할 수 없습니다."; return; }
+        save.disabled = true; msg.textContent = "저장하는 중…";
+        try {
+          await Server.quizSave(cid, n, qs.map(q => ({ id: q.id, qtype: q.qtype, prompt: q.prompt.trim(), options: q.options.map(o => o.trim()), answer: String(q.answer).trim(), explanation: (q.explanation || "").trim(), points: q.points || 1 })));
+          const due = qdue.value ? new Date(qdue.value).toISOString() : null;
+          await Server.saveCourseWeek({ class_id: cid, week_no: n, quiz_published: qpub.checked, quiz_retake: qret.checked, quiz_due: due });
+          Object.assign(r, { quiz_published: qpub.checked, quiz_retake: qret.checked, quiz_due: due });
+          msg.textContent = "퀴즈를 저장했습니다(" + qs.length + "문항)." + (qpub.checked ? (r.published ? " 수강생이 풀 수 있습니다." : " 강의가 아직 비공개라 수강생에게는 강의를 게시한 뒤 보입니다.") : " (퀴즈 비공개)");
+        } catch (e) { msg.textContent = "저장하지 못했습니다: " + e.message; }
+        save.disabled = false;
+      });
+      draw();
+      fill(card, el("h3", { text: "확인 퀴즈" }), el("p", { class: "small muted", text: "객관식 · OX · 단어 뜻 · 성조는 고른 보기로, 빈칸은 적은 정답과 비교해 자동 채점됩니다(대소문자 · 띄어쓰기는 무시, 성조 부호는 구분). 문장 해석은 결과 화면에서 교수자가 채점합니다." }),
+        list, el("div", { class: "row-actions" }, [addType, addBtn]),
+        el("div", { class: "qz-set" }, [el("label", { class: "check" }, [qpub, el("span", { text: " 퀴즈 게시(강의가 게시된 경우 수강생이 풉니다)" })]),
+          el("label", { class: "check" }, [qret, el("span", { text: " 재응시 허용" })]),
+          el("label", { for: "qz-due", text: "마감 일시(비우면 마감 없음)" }), qdue]),
+        el("div", { class: "row-actions" }, [save, el("a", { class: "btn", href: "#/course/" + cid + "/week/" + n + "/quiz", text: "퀴즈 결과 보기" })]), msg);
+    })();
+    return card;
+  }
+  // 강의 페이지: 퀴즈 풀기 · 결과
+  function lectureQuizSection(cid, n, manage) {
+    const sec = el("section", { class: "card lec-sec qz" }, [el("h3", { text: "확인 퀴즈" }), el("p", { class: "muted", text: "불러오는 중…" })]);
+    (async () => {
+      if (manage) {
+        let qs = []; try { qs = (await Server.quizAdmin(cid, n)) || []; } catch (e) {}
+        fill(sec, el("h3", { text: "확인 퀴즈" }), el("p", { class: "muted", text: qs.length ? qs.length + "문항 — 수강생에게는 이 자리에 퀴즈가 나옵니다." : "아직 문제가 없습니다." }),
+          el("div", { class: "row-actions" }, [el("a", { class: "btn", href: "#/course/" + cid + "/week/" + n, text: "문제 편집" }), el("a", { class: "btn", href: "#/course/" + cid + "/week/" + n + "/quiz", text: "결과 보기" })]));
+        return;
+      }
+      let info;
+      try { info = await Server.quizForStudent(cid, n); } catch (e) { sec.remove(); return; }
+      if (!info || !info.available || !(info.questions || []).length) { sec.remove(); return; }
+      let last = null; if (info.attempts) { try { last = await Server.quizMyResult(cid, n); } catch (e) {} }
+      if (last) showResult(last); else showForm();
+      function head() { const k = [el("h3", { text: "확인 퀴즈" }), el("p", { class: "small muted", text: info.questions.length + "문항 · " + info.questions.reduce((a, q) => a + (q.points || 1), 0) + "점" + (info.due ? " · 마감 " + fmtWhen(info.due) : "") + (info.retake ? " · 재응시 가능" : " · 한 번만 제출") })]; return k; }
+      function showForm() {
+        if (info.closed) { fill(sec, ...head(), el("p", { class: "bad", text: QZ_ERR.quiz_closed })); return; }
+        const inputs = {};
+        const items = info.questions.map((q, i) => {
+          let body;
+          if (["mc", "meaning", "tone", "ox"].includes(q.qtype)) {
+            const opts = q.qtype === "ox" ? ["O", "X"] : (q.options || []);
+            body = el("div", { class: "qz-choices" + (q.qtype === "ox" ? " ox" : ""), role: "radiogroup", "aria-label": (i + 1) + "번 보기" }, opts.map((o, k) => { const v = q.qtype === "ox" ? o : String(k);
+              const rd = el("input", { type: "radio", name: "qa-" + q.id, value: v }); rd.addEventListener("change", () => { inputs[q.id] = v; });
+              return el("label", { class: "qz-choice" }, [rd, el("span", { lang: "vi", text: o })]); }));
+          } else if (q.qtype === "blank") { const x = el("input", { type: "text", maxlength: "200", "aria-label": (i + 1) + "번 답", lang: "vi", placeholder: "답을 적으세요" }); x.addEventListener("input", () => { inputs[q.id] = x.value; }); body = x; }
+          else { const x = el("textarea", { rows: "3", maxlength: "500", "aria-label": (i + 1) + "번 해석", placeholder: "한국어로 해석해 보세요" }); x.addEventListener("input", () => { inputs[q.id] = x.value; }); body = x; }
+          return el("li", { class: "qz-item" }, [el("p", { class: "qz-prompt" }, [el("span", { class: "qz-type", text: QTYPE_NAME[q.qtype] + " · " + (q.points || 1) + "점" }), el("span", { lang: "vi", text: q.prompt })]), body]);
+        });
+        const msg = el("p", { role: "status" }), sub = el("button", { type: "button", class: "primary", text: "제출하기" });
+        sub.addEventListener("click", async () => {
+          const blank = info.questions.filter(q => !String(inputs[q.id] || "").trim()).length;
+          if (blank && !window.confirm(blank + "문항에 답하지 않았습니다. 그대로 제출할까요?")) return;
+          sub.disabled = true; msg.textContent = "채점하는 중…";
+          try { const res = await Server.quizSubmit(cid, n, inputs); info.attempts = res.attempts; showResult(res); }
+          catch (e) { sub.disabled = false; msg.textContent = qzErr(e); }
+        });
+        fill(sec, ...head(), el("ol", { class: "qz-items" }, items), el("div", { class: "row-actions" }, [sub]), msg);
+      }
+      function showResult(res) {
+        const det = res.detail || [];
+        const items = det.map((d, i) => el("li", { class: "qz-res " + (d.correct === true ? "ok" : d.correct === false ? "no" : "wait") }, [
+          el("p", { class: "qz-prompt" }, [el("span", { class: "qz-mark", text: d.correct === true ? "✓ 정답" : d.correct === false ? "✗ 오답" : "⏳ 교수자 확인 중" }), el("span", { lang: "vi", text: d.prompt })]),
+          el("p", { class: "qz-line" }, [el("b", { text: "내 답 " }), el("span", { lang: "vi", text: qzAnswerText(d, d.given) })]),
+          d.correct !== true ? el("p", { class: "qz-line" }, [el("b", { text: d.qtype === "translate" ? "모범 답안 " : "정답 " }), el("span", { lang: "vi", text: qzCorrectText(d) })]) : null,
+          d.explanation ? el("p", { class: "qz-ex", text: d.explanation }) : null, el("p", { class: "qz-pt small muted", text: d.earned + " / " + d.points + "점" })].filter(Boolean)));
+        const again = el("button", { type: "button", text: "다시 풀기" }); again.addEventListener("click", showForm);
+        fill(sec, ...head(), el("div", { class: "qz-score" }, [el("strong", { text: res.score + " / " + res.max + "점" }), el("span", { text: res.submitted_at ? "제출 " + fmtWhen(res.submitted_at) : "방금 제출했습니다" })]),
+          res.needs_review ? el("p", { class: "notice", text: "문장 해석 문항은 교수자가 확인한 뒤 점수에 반영됩니다." }) : null,
+          el("ol", { class: "qz-items" }, items),
+          el("div", { class: "row-actions" }, info.retake && !info.closed ? [again] : [el("p", { class: "small muted", text: info.closed ? "마감되어 다시 풀 수 없습니다." : "이 퀴즈는 한 번만 제출할 수 있습니다." })]));
+      }
+    })();
+    return sec;
+  }
+  // 교수자: 주차별 퀴즈 결과
+  function renderQuizResults(cid, n) {
+    const c = Repo.getClasses().find(x => x.id === cid);
+    const back = el("a", { class: "btn", href: "#/course/" + cid, text: "← 주차별 강의" });
+    if (!c || !canManageCourse(cid)) { setView([back, el("p", { class: "bad", text: "이 교과목을 관리할 권한이 없습니다." })], "classes"); return; }
+    const box = el("div", null, [el("p", { class: "muted", text: "불러오는 중…" })]);
+    setView([back, el("p", { class: "kicker", text: c.name + " · " + n + "주차" }), el("h2", { text: n + "주차 퀴즈 결과" }), box], "classes");
+    async function draw() {
+      let d; try { d = await Server.quizResults(cid, n); } catch (e) { fill(box, el("p", { class: "bad", text: "불러오지 못했습니다: " + e.message })); return; }
+      const qs = d.questions || [], st = d.students || [];
+      if (!qs.length) { fill(box, el("p", { class: "muted", text: "이 주차에는 아직 퀴즈 문제가 없습니다." }), el("a", { class: "btn primary", href: "#/course/" + cid + "/week/" + n, text: "문제 만들기" })); return; }
+      const done = st.filter(s => s.last), pcts = done.filter(s => s.last.max > 0).map(s => s.last.score * 100 / s.last.max);
+      const avg = pcts.length ? Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length) : null;
+      const rate = qs.map(q => { const got = done.map(s => (s.last.detail || []).find(x => x.id === q.id)).filter(Boolean); const ok = got.filter(x => x.correct === true).length; return { q, n: got.length, ok }; });
+      const rows = st.map(s => el("tr", null, [el("td", { text: s.name }), el("td", { text: s.last ? s.last.score + " / " + s.last.max : "—" }), el("td", { text: s.last ? fmtWhen(s.last.submitted_at) : "—" }),
+        el("td", { text: s.attempts ? String(s.attempts) : "0" }), el("td", null, [el("span", { class: "qz-st " + (!s.last ? "none" : s.last.needs_review ? "wait" : "ok"), text: !s.last ? "미제출" : s.last.needs_review ? "채점 대기" : "채점 완료" })])]));
+      const grading = done.flatMap(s => (s.last.detail || []).filter(x => x.qtype === "translate").map(x => {
+        const ok = el("button", { type: "button", class: "small-btn" + (x.correct === true ? " primary" : ""), text: "맞음" }), no = el("button", { type: "button", class: "small-btn" + (x.correct === false ? " danger" : ""), text: "틀림" });
+        const go = async (v) => { ok.disabled = no.disabled = true; try { await Server.quizGrade(s.last.id, x.id, v); draw(); } catch (e) { ok.disabled = no.disabled = false; window.alert(e.message); } };
+        ok.addEventListener("click", () => go(true)); no.addEventListener("click", () => go(false));
+        return el("li", { class: "qz-grade " + (x.correct === null ? "wait" : "") }, [el("p", { class: "qz-line" }, [el("b", { text: s.name + " · " }), el("span", { lang: "vi", text: x.prompt })]),
+          el("p", { class: "qz-line" }, [el("b", { text: "학생 답 " }), el("span", { text: x.given || "(답 없음)" })]), el("p", { class: "qz-line small muted" }, [el("b", { text: "모범 답안 " }), el("span", { text: x.answer })]),
+          el("div", { class: "row-actions" }, [ok, no, el("span", { class: "small muted", text: x.correct === null ? "아직 채점 안 함" : x.correct ? "맞음으로 채점" : "틀림으로 채점" })])]);
+      }));
+      fill(box, el("div", { class: "stat-grid" }, [el("div", { class: "stat" }, [el("span", { text: "제출" }), el("strong", { text: done.length + " / " + st.length + "명" })]),
+          el("div", { class: "stat" }, [el("span", { text: "평균" }), el("strong", { text: avg == null ? "—" : avg + "%" })]),
+          el("div", { class: "stat" }, [el("span", { text: "문항" }), el("strong", { text: qs.length + "개" })]),
+          el("div", { class: "stat" }, [el("span", { text: "채점 대기" }), el("strong", { text: done.filter(s => s.last.needs_review).length + "명" })])]),
+        el("section", { class: "card" }, [el("h3", { text: "학생별 결과" }), el("div", { class: "tbl-wrap" }, [el("table", { class: "qz-table" }, [el("thead", null, [el("tr", null, ["이름", "점수", "제출", "응시", "상태"].map(x => el("th", { text: x })))]), el("tbody", null, rows)])])]),
+        el("section", { class: "card" }, [el("h3", { text: "문항별 정답률" }), el("ol", { class: "qz-rate" }, rate.map(x => el("li", null, [el("span", { class: "qz-type", text: QTYPE_NAME[x.q.qtype] }), el("span", { lang: "vi", text: x.q.prompt }),
+          el("b", { text: x.q.qtype === "translate" ? "교수자 채점" : x.n ? Math.round(x.ok * 100 / x.n) + "% (" + x.ok + "/" + x.n + ")" : "—" })])))]),
+        grading.length ? el("section", { class: "card" }, [el("h3", { text: "문장 해석 채점" }), el("ol", { class: "qz-grades" }, grading)]) : null);
+    }
+    draw(); window.scrollTo(0, 0);
   }
 
   // 같은 단계 안: 어휘 점수 낮은 순 → 차트 순위 → ID
@@ -8107,6 +8350,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     else if ((m = h.match(/^#\/song\/(\d+)\/sing\/([\w-]+)$/))) { if (login()) { currentRoute = "song"; practiceSong = Number(m[1]); renderSong(Number(m[1]), { singLineId: m[2], singOnly: true }); } }
     else if ((m = h.match(/^#\/words\/(\d+)$/))) { if (login()) { currentRoute = "words"; renderWords(Number(m[1])); } }
     else if ((m = h.match(/^#\/course\/([0-9a-f-]{36})$/))) { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "course"; renderCourseWeeks(m[1]); } }
+    else if ((m = h.match(/^#\/course\/([0-9a-f-]{36})\/week\/(\d+)\/quiz$/))) { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "course-quiz"; renderQuizResults(m[1], Number(m[2])); } }
     else if ((m = h.match(/^#\/course\/([0-9a-f-]{36})\/week\/(\d+)$/))) { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "course-week"; renderWeekEditor(m[1], Number(m[2])); } }
     else if ((m = h.match(/^#\/present\/([0-9a-f-]{36})\/(\d+)$/))) { if (login() && need(Server.canTeach(), "교수자만 발표할 수 있습니다.")) { currentRoute = "present"; renderPresent(m[1], Number(m[2])); } }
     else if ((m = h.match(/^#\/lecture\/([0-9a-f-]{36})\/(\d+)$/))) { if (login()) { currentRoute = "lecture"; renderLecture(m[1], Number(m[2])); } }
