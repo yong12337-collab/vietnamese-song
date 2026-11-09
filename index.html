@@ -2498,6 +2498,20 @@
   .pz-qopts.ox { list-style: none; padding: 0; grid-template-columns: repeat(2, 1fr); text-align: center; font-size: 2.4em; font-weight: 900; }
   .pz-qopts li { padding: .4em .8em; border-radius: 16px; } .pz-qopts li.ok { background: #DFF3EA; color: #15803D; font-weight: 800; box-shadow: 0 0 0 3px #86D3AE; }
   .pz-qx { font-size: 1.15em; color: #4A5573; margin: 0; white-space: pre-line; }
+
+  /* 20단계: 웹 녹음 · 녹음 과제 */
+  .rw { display: grid; gap: 10px; padding: 14px; border-radius: 18px; background: rgba(255,255,255,.5); }
+  .rw-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .rw-time { font-variant-numeric: tabular-nums; font-weight: 800; min-width: 92px; }
+  .rw-dot { width: 12px; height: 12px; border-radius: 50%; background: #CBD2DE; } .rw-dot.on { background: #E5484D; box-shadow: 0 0 0 4px rgba(229,72,77,.18); animation: rw-pulse 1.2s ease-in-out infinite; }
+  @keyframes rw-pulse { 50% { opacity: .45; } }
+  @media (prefers-reduced-motion: reduce) { .rw-dot.on { animation: none; } }
+  .rw-audio { width: 100%; max-width: 520px; }
+  .rc-status { margin: 0; } .rc-status.none b { color: #6B7280; } .rc-status.submitted b, .rc-status.reviewed b { color: #15803D; } .rc-status.resubmit b { color: #B45309; }
+  .rc-mine { display: grid; gap: 6px; } .rc-lines { margin-top: 4px; }
+  .rw [hidden], .rw button[hidden], .rw audio[hidden] { display: none !important; }
+  .rc-ed { margin-top: 22px; display: grid; gap: 10px; max-width: 900px; }
+  .rc-ed input[type=datetime-local] { max-width: 280px; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet">
@@ -3051,6 +3065,10 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       quizResults: (cid, n) => run(c => c.rpc("quiz_results", { p_class: cid, p_week: n })),
       quizGrade: (aid, qid, ok) => run(c => c.rpc("quiz_grade", { p_attempt: aid, p_question: qid, p_correct: ok })),
       quizCourseSummary: (cid) => run(c => c.rpc("quiz_course_summary", { p_class: cid })),
+      // 20단계: 주차별 녹음 과제
+      weekRecSubmit: (cid, n, rid) => run(c => c.rpc("week_rec_submit", { p_class: cid, p_week: n, p_recording: rid })),
+      weekRecMine: (cid, n) => run(c => c.rpc("week_rec_mine", { p_class: cid, p_week: n })),
+      weekRecList: (cid, n) => run(c => c.rpc("week_rec_list", { p_class: cid, p_week: n })),
       myMemberships: () => run(c => c.from("class_members").select("class_id,joined_at").eq("user_id", session.user.id)),
       createClass: (name) => run(c => c.rpc("create_class", { p_name: name })),
       joinClass: (code) => run(c => c.rpc("join_class", { p_code: code })),
@@ -4077,6 +4095,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
           el("p", { class: "cw-song", lang: "vi", text: s ? "♪ " + s.title + " — " + s.artist : "곡 미지정" }),
           qby.get(n) ? el("p", { class: "cw-quiz" }, [el("span", { text: "퀴즈 " + qby.get(n).questions + "문항" + (qby.get(n).published ? "" : " (비공개)") + " · 제출 " + qby.get(n).submitted + "/" + qby.get(n).members + "명" + (qby.get(n).avg_pct != null ? " · 평균 " + qby.get(n).avg_pct + "%" : "") + (qby.get(n).review ? " · 채점 대기 " + qby.get(n).review : "") }),
             el("a", { href: "#/course/" + cid + "/week/" + n + "/quiz", text: "결과" })]) : null,
+          r.rec_enabled ? el("p", { class: "cw-quiz" }, [el("span", { text: "녹음 과제" + (r.rec_due ? " · 마감 " + fmtWhen(r.rec_due) : "") }), el("a", { href: "#/course/" + cid + "/week/" + n + "/rec", text: "녹음" })]) : null,
           el("div", { class: "row-actions cw-acts" }, [el("a", { class: "btn primary", href: "#/course/" + cid + "/week/" + n, text: "편집" }), el("a", { class: "btn", href: "#/lecture/" + cid + "/" + n, text: "미리보기" }), el("a", { class: "btn", href: "#/present/" + cid + "/" + n, text: "발표", "aria-label": n + "주차 프레젠테이션 시작" })])]);
       }));
     }
@@ -4167,7 +4186,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         el("label", { for: "we-auto", text: "자동 넘김 간격(초) — 기본은 수동 넘김, 자동은 프레젠테이션 화면에서 켭니다" }), autoSec,
         el("label", { class: "check we-pub" }, [pub, el("span", { text: " 게시 — 수강생에게 이 강의를 보여 줍니다" })]),
         el("div", { class: "row-actions" }, [save, el("a", { class: "btn", href: "#/lecture/" + cid + "/" + n, text: "미리보기" }), el("a", { class: "btn", href: "#/present/" + cid + "/" + n, text: "프레젠테이션 시작" })]), msg]),
-        quizEditorCard(cid, n, r));
+        recEditorCard(cid, n, r), quizEditorCard(cid, n, r));
     })();
     window.scrollTo(0, 0);
   }
@@ -4196,6 +4215,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       if (r.vocab) nodes.push(sec("핵심 어휘와 표현", [el("ul", { class: "lec-vocab" }, lines(r.vocab).map(x => { const k = x.split(/\s+[-–—:]\s+/); return el("li", null, [el("b", { lang: "vi", text: k[0] }), k[1] ? el("span", { text: k.slice(1).join(" - ") }) : null].filter(Boolean)); }))]));
       if (r.pron_notes) nodes.push(sec("성조 및 발음", [el("p", { class: "lec-text", text: r.pron_notes })]));
       nodes.push(lectureQuizSection(cid, n, manage));
+      if (r.rec_enabled || manage) nodes.push(lectureRecSection(cid, n, manage, r, s, lyr));
       if (r.summary) nodes.push(sec("학습 정리", [el("p", { class: "lec-text", text: r.summary })]));
       if (manage) nodes.splice(2, 0, el("div", { class: "row-actions" }, [el("a", { class: "btn primary", href: "#/present/" + cid + "/" + n, text: "▶ 프레젠테이션 시작" }), el("a", { class: "btn", href: "#/course/" + cid + "/week/" + n, text: "이 주차 편집" })]));
       fill(box, ...nodes);
@@ -4596,6 +4616,162 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         grading.length ? el("section", { class: "card" }, [el("h3", { text: "문장 해석 채점" }), el("ol", { class: "qz-grades" }, grading)]) : null);
     }
     draw(); window.scrollTo(0, 0);
+  }
+
+  /* ----- 20단계: 웹 녹음 · 주차별 녹음 과제 ----- */
+  const REC_LIMIT = 3 * 1024 * 1024; // 저장소 파일 한도(20단계 SQL)
+  const REC_ERR = { rec_closed: "마감 시간이 지나 제출할 수 없습니다.", rec_not_open: "아직 열리지 않은 녹음 과제입니다.", not_your_recording: "본인 녹음만 제출할 수 있습니다." };
+  function recErr(e) { const m = String(e && e.message || e); const k = Object.keys(REC_ERR).find(x => m.includes(x)); if (k) return REC_ERR[k]; if (/size|large|exceed|413/i.test(m)) return "파일이 너무 큽니다(3MB 이하). 조금 짧게 다시 녹음해 주세요."; return m; }
+  function fmtSec(s) { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+  function pickRecMime() {
+    if (typeof MediaRecorder === "undefined" || !MediaRecorder.isTypeSupported) return "";
+    for (const m of ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"]) if (MediaRecorder.isTypeSupported(m)) return m;
+    return "";
+  }
+  // 브라우저 녹음기: 시작 → 중지 → 들어 보기 → 다시 녹음 → 제출
+  function recorderWidget(maxSec, onSubmit) {
+    const st = { stream: null, rec: null, chunks: [], blob: null, url: null, t0: 0, stopT: null, tick: null };
+    const time = el("span", { class: "rw-time", "aria-live": "off", text: "0:00 / " + fmtSec(maxSec) });
+    const dot = el("span", { class: "rw-dot", "aria-hidden": "true" });
+    const audio = el("audio", { controls: "", class: "rw-audio", preload: "metadata" }); audio.hidden = true;
+    const msg = el("p", { class: "small", role: "status" });
+    const bStart = el("button", { type: "button", class: "primary", text: "● 녹음 시작" });
+    const bStop = el("button", { type: "button", text: "■ 중지" });
+    const bRedo = el("button", { type: "button", text: "다시 녹음하기" });
+    const bSend = el("button", { type: "button", class: "primary", text: "제출하기" });
+    function show(state) { bStart.hidden = state !== "idle"; bStop.hidden = state !== "rec"; bRedo.hidden = state !== "done"; bSend.hidden = state !== "done"; audio.hidden = state !== "done"; dot.classList.toggle("on", state === "rec"); }
+    function release() { clearTimeout(st.stopT); clearInterval(st.tick); if (st.stream) st.stream.getTracks().forEach(tr => tr.stop()); st.stream = null; }
+    async function start() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === "undefined") { msg.textContent = "이 브라우저는 녹음을 지원하지 않습니다. 최신 Chrome · Safari · Edge를 써 주세요."; return; }
+      msg.textContent = "마이크 권한을 확인하는 중…";
+      try { st.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+      catch (e) {
+        msg.textContent = { NotAllowedError: "마이크 권한이 거부되었습니다. 주소창 왼쪽의 자물쇠(또는 설정)에서 마이크를 허용한 뒤 다시 눌러 주세요.", NotFoundError: "마이크를 찾을 수 없습니다. 마이크가 연결되어 있는지 확인해 주세요.",
+          NotReadableError: "다른 앱이 마이크를 쓰고 있습니다. 그 앱을 닫고 다시 눌러 주세요.", SecurityError: "보안 연결(https)에서만 녹음할 수 있습니다." }[e.name] || ("녹음을 시작하지 못했습니다: " + e.message); return;
+      }
+      const mime = pickRecMime(), opt = { audioBitsPerSecond: 48000 }; if (mime) opt.mimeType = mime;
+      try { st.rec = new MediaRecorder(st.stream, opt); } catch (e) { try { st.rec = new MediaRecorder(st.stream); } catch (e2) { release(); msg.textContent = "녹음기를 만들지 못했습니다: " + e2.message; return; } }
+      st.chunks = [];
+      st.rec.ondataavailable = ev => { if (ev.data && ev.data.size) st.chunks.push(ev.data); };
+      st.rec.onstop = () => {
+        release();
+        const type = (st.rec.mimeType || mime || "audio/webm");
+        st.blob = new Blob(st.chunks, { type });
+        if (!st.blob.size) { msg.textContent = "녹음된 소리가 없습니다. 다시 녹음해 주세요."; show("idle"); return; }
+        if (st.url) URL.revokeObjectURL(st.url); st.url = URL.createObjectURL(st.blob); audio.src = st.url;
+        const secs = (Date.now() - st.t0) / 1000;
+        if (st.blob.size > REC_LIMIT) { msg.textContent = "녹음 파일이 너무 큽니다(" + (st.blob.size / 1048576).toFixed(1) + "MB, 한도 3MB). 조금 짧게 다시 녹음해 주세요."; show("done"); bSend.hidden = true; return; }
+        msg.textContent = "녹음 완료(" + fmtSec(secs) + ", " + Math.round(st.blob.size / 1024) + "KB). 들어 본 뒤 [제출하기]를 누르세요."; show("done");
+      };
+      st.rec.start(1000); st.t0 = Date.now(); show("rec"); msg.textContent = "녹음 중… 다 부르면 [■ 중지]를 누르세요.";
+      st.tick = setInterval(() => { time.textContent = fmtSec((Date.now() - st.t0) / 1000) + " / " + fmtSec(maxSec); }, 250);
+      st.stopT = setTimeout(() => { if (st.rec && st.rec.state === "recording") { st.rec.stop(); msg.textContent = "최대 길이(" + fmtSec(maxSec) + ")가 되어 녹음을 멈췄습니다."; } }, maxSec * 1000);
+    }
+    function stop() { if (st.rec && st.rec.state === "recording") st.rec.stop(); }
+    bStart.addEventListener("click", start); bStop.addEventListener("click", stop);
+    bRedo.addEventListener("click", () => { audio.pause(); st.blob = null; time.textContent = "0:00 / " + fmtSec(maxSec); start(); });
+    bSend.addEventListener("click", async () => {
+      if (!st.blob) return; bSend.disabled = bRedo.disabled = true; msg.textContent = "올리는 중…";
+      try { await onSubmit(st.blob); } catch (e) { msg.textContent = "제출하지 못했습니다: " + recErr(e); }
+      bSend.disabled = bRedo.disabled = false;
+    });
+    viewCleanups.push(() => { try { if (st.rec && st.rec.state === "recording") st.rec.stop(); } catch (e) {} release(); if (st.url) URL.revokeObjectURL(st.url); });
+    show("idle");
+    return el("div", { class: "rw" }, [el("div", { class: "rw-row" }, [dot, time, bStart, bStop, bRedo, bSend]), audio, msg]);
+  }
+  async function recAudioEl(path) {
+    const a = el("audio", { controls: "", preload: "none", class: "rw-audio" });
+    try { a.src = await Server.recordingUrl({ path }); } catch (e) { return el("p", { class: "bad small", text: "녹음을 불러오지 못했습니다: " + e.message }); }
+    return a;
+  }
+  const REC_STATUS = { submitted: "제출 완료", resubmit: "재제출 요청", reviewed: "평가 완료" };
+  // 주차 편집: 녹음 과제 설정
+  function recEditorCard(cid, n, r) {
+    const s = r.song_id ? Repo.getSong(r.song_id) : null, lyr = s ? Repo.getLyrics(s.id) : [];
+    const on = el("input", { type: "checkbox", id: "rc-on" }); on.checked = !!r.rec_enabled;
+    const guide = el("textarea", { id: "rc-guide", rows: "3", maxlength: "2000", placeholder: "예: 후렴(5~8줄)을 원곡을 들으며 따라 불러 녹음하세요. 성조에 주의하세요." }); guide.value = r.rec_guide || "";
+    const opt = (sel) => [el("option", { value: "", text: "지정 안 함" })].concat(lyr.map((l, i) => el("option", { value: String(i + 1), lang: "vi", text: (i + 1) + ". " + l.vietnamese.slice(0, 40) })));
+    const from = el("select", { id: "rc-from" }, opt()), to = el("select", { id: "rc-to" }, opt());
+    from.value = r.rec_from ? String(r.rec_from) : ""; to.value = r.rec_to ? String(r.rec_to) : "";
+    const due = el("input", { type: "datetime-local", id: "rc-due", value: toLocalInput(r.rec_due) });
+    const max = el("input", { type: "number", id: "rc-max", min: "30", max: "180", value: r.rec_max_sec || 120 });
+    const msg = el("p", { role: "status" }), save = el("button", { type: "button", class: "primary", text: "녹음 과제 저장" });
+    save.addEventListener("click", async () => {
+      let f = from.value ? Number(from.value) : null, tt = to.value ? Number(to.value) : null;
+      if (f && tt && tt < f) [f, tt] = [tt, f]; if (f && !tt) tt = f; if (tt && !f) f = tt;
+      const row = { class_id: cid, week_no: n, rec_enabled: on.checked, rec_guide: guide.value.trim() || null, rec_from: f, rec_to: tt,
+        rec_due: due.value ? new Date(due.value).toISOString() : null, rec_max_sec: Math.max(30, Math.min(180, parseInt(max.value, 10) || 120)) };
+      save.disabled = true; msg.textContent = "저장하는 중…";
+      try { await Server.saveCourseWeek(row); Object.assign(r, row); max.value = row.rec_max_sec; msg.textContent = "녹음 과제를 저장했습니다." + (row.rec_enabled ? (r.published ? " 수강생이 녹음해 제출할 수 있습니다." : " 강의를 게시하면 수강생에게 보입니다.") : " (사용 안 함)"); }
+      catch (e) { msg.textContent = "저장하지 못했습니다: " + e.message; }
+      save.disabled = false;
+    });
+    return el("section", { class: "card rc-ed" }, [el("h3", { text: "녹음 과제" }),
+      el("p", { class: "small muted", text: "학생은 강의 페이지에서 브라우저로 바로 녹음해 제출합니다(프로그램 설치 없음). 파일은 저장소에 보관되고 학생 본인과 이 교과목 교수자만 들을 수 있습니다." }),
+      el("label", { class: "check" }, [on, el("span", { text: " 이 주차에 녹음 과제 내기" })]),
+      el("label", { for: "rc-guide", text: "과제 안내" }), guide,
+      lyr.length ? el("div", { class: "course-grid" }, [el("div", null, [el("label", { for: "rc-from", text: "지정 가사 — 시작 줄" }), from]), el("div", null, [el("label", { for: "rc-to", text: "끝 줄" }), to]),
+        el("div", null, [el("label", { for: "rc-max", text: "최대 길이(초, 30~180)" }), max])]) : el("div", null, [el("label", { for: "rc-max", text: "최대 길이(초, 30~180)" }), max]),
+      el("label", { for: "rc-due", text: "마감 일시(비우면 마감 없음)" }), due,
+      el("div", { class: "row-actions" }, [save, el("a", { class: "btn", href: "#/course/" + cid + "/week/" + n + "/rec", text: "제출 현황 보기" })]), msg]);
+  }
+  // 강의 페이지: 녹음 과제(학생 녹음 · 제출 / 교수자 요약)
+  function lectureRecSection(cid, n, manage, r, song, lyr) {
+    const sec = el("section", { class: "card lec-sec rc" }, [el("h3", { text: "녹음 과제" }), el("p", { class: "muted", text: "불러오는 중…" })]);
+    const lines = (r.rec_from && lyr.length) ? lyr.slice(r.rec_from - 1, r.rec_to || r.rec_from) : [];
+    const info = () => [r.rec_guide ? el("p", { class: "lec-text", text: r.rec_guide }) : null,
+      lines.length ? el("ol", { class: "lec-lyrics rc-lines", start: String(r.rec_from) }, lines.map(l => el("li", null, [el("span", { class: "vi", lang: "vi", text: l.vietnamese }), el("span", { class: "ko", text: l.korean || "" })]))) : null,
+      el("p", { class: "small muted", text: "최대 " + fmtSec(r.rec_max_sec || 120) + (r.rec_due ? " · 마감 " + fmtWhen(r.rec_due) : " · 마감 없음") })];
+    (async () => {
+      if (manage) {
+        fill(sec, el("h3", { text: "녹음 과제" }), ...(r.rec_enabled ? info() : [el("p", { class: "muted", text: "이 주차에는 녹음 과제를 내지 않았습니다." })]),
+          el("div", { class: "row-actions" }, [el("a", { class: "btn", href: "#/course/" + cid + "/week/" + n, text: "녹음 과제 설정" }), r.rec_enabled ? el("a", { class: "btn", href: "#/course/" + cid + "/week/" + n + "/rec", text: "제출 현황" }) : null]));
+        return;
+      }
+      async function draw(note) {
+        let mine = null; try { mine = await Server.weekRecMine(cid, n); } catch (e) {}
+        const closed = r.rec_due && Date.now() > new Date(r.rec_due).getTime();
+        const status = el("p", { class: "rc-status " + (mine ? mine.status : "none") }, [el("b", { text: mine ? REC_STATUS[mine.status] || mine.status : "미제출" }),
+          mine ? el("span", { text: " · " + fmtWhen(mine.submitted_at) + " 제출" }) : null].filter(Boolean));
+        const kids = [el("h3", { text: "녹음 과제" }), ...info(), status];
+        if (note) kids.push(el("p", { class: "notice", role: "status", text: note }));
+        if (mine) kids.push(el("div", { class: "rc-mine" }, [el("span", { class: "small muted", text: "내가 제출한 녹음" }), await recAudioEl(mine.path)]));
+        if (closed) kids.push(el("p", { class: "bad", text: "마감되어 더 이상 제출할 수 없습니다." }));
+        else {
+          kids.push(el("p", { class: "small", text: mine ? "다시 녹음해서 제출하면 새 녹음으로 바뀝니다." : "원곡을 들으며 연습한 뒤 녹음해 제출하세요." }));
+          kids.push(recorderWidget(r.rec_max_sec || 120, async (blob) => {
+            const rec = await Server.uploadRecording(blob, song ? song.id : null, null);
+            await Server.weekRecSubmit(cid, n, rec.id);
+            await draw("제출했습니다. 교수자가 듣고 피드백을 남기면 여기서 확인할 수 있습니다.");
+          }));
+        }
+        fill(sec, ...kids);
+      }
+      draw();
+    })();
+    return sec;
+  }
+  // 교수자: 주차별 녹음 제출 현황
+  function renderWeekRecordings(cid, n) {
+    const c = Repo.getClasses().find(x => x.id === cid);
+    const back = el("a", { class: "btn", href: "#/course/" + cid, text: "← 주차별 강의" });
+    if (!c || !canManageCourse(cid)) { setView([back, el("p", { class: "bad", text: "이 교과목을 관리할 권한이 없습니다." })], "classes"); return; }
+    const box = el("div", null, [el("p", { class: "muted", text: "불러오는 중…" })]);
+    setView([back, el("p", { class: "kicker", text: c.name + " · " + n + "주차" }), el("h2", { text: n + "주차 녹음 과제 제출 현황" }), box], "classes");
+    (async () => {
+      let list; try { list = await Server.weekRecList(cid, n); } catch (e) { fill(box, el("p", { class: "bad", text: "불러오지 못했습니다: " + e.message })); return; }
+      const sub = list.filter(x => x.path);
+      const rows = list.map(x => { const cell = el("td");
+        if (x.path) { const b = el("button", { type: "button", class: "small-btn", text: "▶ 듣기" }); b.addEventListener("click", async () => { b.disabled = true; const a = await recAudioEl(x.path); cell.replaceChildren(a); if (a.play) a.play().catch(() => {}); }); cell.appendChild(b); }
+        else cell.textContent = "—";
+        return el("tr", null, [el("td", { text: x.name }), el("td", null, [el("span", { class: "qz-st " + (x.path ? (x.status === "resubmit" ? "wait" : "ok") : "none"), text: x.path ? REC_STATUS[x.status] || x.status : "미제출" })]),
+          el("td", { text: x.submitted_at ? fmtWhen(x.submitted_at) : "—" }), el("td", { text: x.size_bytes ? Math.round(x.size_bytes / 1024) + "KB" : "—" }), cell]); });
+      fill(box, el("div", { class: "stat-grid" }, [el("div", { class: "stat" }, [el("span", { text: "전체 수강생" }), el("strong", { text: list.length + "명" })]),
+          el("div", { class: "stat" }, [el("span", { text: "제출" }), el("strong", { text: sub.length + "명" })]), el("div", { class: "stat" }, [el("span", { text: "미제출" }), el("strong", { text: (list.length - sub.length) + "명" })])]),
+        el("section", { class: "card" }, [el("h3", { text: "학생별 제출" }), el("div", { class: "tbl-wrap" }, [el("table", { class: "qz-table rc-table" }, [el("thead", null, [el("tr", null, ["이름", "상태", "제출 시각", "크기", "녹음"].map(x => el("th", { text: x })))]), el("tbody", null, rows)])])]),
+        el("p", { class: "small muted", text: "평가 항목별 점수와 피드백은 다음 단계(교수자 녹음 평가)에서 이 화면에 더해집니다." }));
+    })();
+    window.scrollTo(0, 0);
   }
 
   // 같은 단계 안: 어휘 점수 낮은 순 → 차트 순위 → ID
@@ -8350,6 +8526,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     else if ((m = h.match(/^#\/song\/(\d+)\/sing\/([\w-]+)$/))) { if (login()) { currentRoute = "song"; practiceSong = Number(m[1]); renderSong(Number(m[1]), { singLineId: m[2], singOnly: true }); } }
     else if ((m = h.match(/^#\/words\/(\d+)$/))) { if (login()) { currentRoute = "words"; renderWords(Number(m[1])); } }
     else if ((m = h.match(/^#\/course\/([0-9a-f-]{36})$/))) { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "course"; renderCourseWeeks(m[1]); } }
+    else if ((m = h.match(/^#\/course\/([0-9a-f-]{36})\/week\/(\d+)\/rec$/))) { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "course-rec"; renderWeekRecordings(m[1], Number(m[2])); } }
     else if ((m = h.match(/^#\/course\/([0-9a-f-]{36})\/week\/(\d+)\/quiz$/))) { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "course-quiz"; renderQuizResults(m[1], Number(m[2])); } }
     else if ((m = h.match(/^#\/course\/([0-9a-f-]{36})\/week\/(\d+)$/))) { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "course-week"; renderWeekEditor(m[1], Number(m[2])); } }
     else if ((m = h.match(/^#\/present\/([0-9a-f-]{36})\/(\d+)$/))) { if (login() && need(Server.canTeach(), "교수자만 발표할 수 있습니다.")) { currentRoute = "present"; renderPresent(m[1], Number(m[2])); } }
