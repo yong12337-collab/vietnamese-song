@@ -2534,6 +2534,23 @@
   .sh-bar { display: grid; gap: 10px; }
   .sh-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .sh-link { flex: 1 1 320px; min-width: 0; font-size: 13.5px !important; }
+
+  /* 23단계: 대시보드 */
+  .pg { display: grid; gap: 6px; } .pg-bar { height: 10px; border-radius: 99px; background: rgba(160,172,194,.3); overflow: hidden; }
+  .pg-bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #8F86EC, #5E53C9); } .pg-t { font-size: 13.5px; font-weight: 700; color: #4A5573; }
+  .learner-summary, .teacher-courses { margin: 16px 0 10px; display: grid; gap: 12px; }
+  .ls-card { display: grid; gap: 10px; } .ls-head { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .ls-next, .ls-fb { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-height: 44px; padding: 8px 12px; border-radius: 14px; text-decoration: none; font-weight: 700; }
+  .ls-next { background: rgba(228,226,250,.6); color: #3F3591; } .ls-fb { background: #FEF3C7; color: #7A4B00; } .ls-ok { color: #15803D; margin: 0; }
+  .ml-row { display: grid; grid-template-columns: minmax(0, 2.2fr) repeat(3, minmax(0, 1fr)) auto; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 14px; }
+  .ml-row.now { box-shadow: inset 0 0 0 2px rgba(110,99,217,.45); } .ml-row a { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; text-decoration: none; min-height: 44px; }
+  .ml-c { display: grid; } .ml-c small { color: #76819A; font-size: 11.5px; } .ml-c b { font-size: 13.5px; } .ml-new { color: #B45309; }
+  .ml-done { font-size: 12.5px; font-weight: 800; color: #6B7280; } .ml-row.done .ml-done { color: #15803D; }
+  .ml-list { display: grid; gap: 6px; margin-top: 8px; }
+  .dash-table td, .dash-table th { white-space: nowrap; } .dash-now td { background: rgba(228,226,250,.45); } .dash-miss { color: #B42318; white-space: normal !important; min-width: 160px; }
+  .tc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+  .tc-card { display: grid; gap: 6px; text-decoration: none; color: inherit; } .tc-go { font-weight: 800; color: #5B50C6; }
+  @media (max-width: 760px) { .ml-row { grid-template-columns: 1fr 1fr 1fr; } .ml-row a { grid-column: 1 / -1; } .ml-done { grid-column: 1 / -1; } }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet">
@@ -3102,6 +3119,9 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       // 21단계: 녹음 평가 · 피드백
       weekRecGrade: (cid, n, uid, ev, mode) => run(c => c.rpc("week_rec_grade", { p_class: cid, p_week: n, p_user: uid, p_eval: ev, p_mode: mode })),
       weekRecSeen: (cid, n) => run(c => c.rpc("week_rec_seen", { p_class: cid, p_week: n })),
+      // 23단계: 대시보드 집계
+      courseDashboard: (cid) => run(c => c.rpc("course_dashboard", { p_class: cid })),
+      myCourseProgress: () => run(c => c.rpc("my_course_progress")),
       myMemberships: () => run(c => c.from("class_members").select("class_id,joined_at").eq("user_id", session.user.id)),
       createClass: (name) => run(c => c.rpc("create_class", { p_name: name })),
       joinClass: (code) => run(c => c.rpc("join_class", { p_code: code })),
@@ -4115,7 +4135,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     });
     setView([back, el("p", { class: "kicker", text: (courseLabel(c) || "교과목") + " · " + (c.weeks_count || 15) + "주" }), el("h2", { text: c.name + " — 주차별 강의" }),
       el("p", { class: "small muted", text: "주차마다 강의 제목 · 학습 목표 · 노래(185곡 중 선택) · 핵심 어휘 · 발음 · 성조 설명을 정하고 [게시]하면 수강생에게 보입니다." }),
-      el("div", { class: "row-actions" }, [copy]), msg, box], "classes");
+      el("div", { class: "row-actions" }, [el("a", { class: "btn primary", href: "#/course/" + cid + "/dash", text: "교과목 대시보드" }), copy]), msg, box], "classes");
     async function draw() {
       let rows = [], qsum = [];
       try { [rows, qsum] = await Promise.all([Server.courseWeeks(cid), Server.quizCourseSummary(cid).catch(() => [])]); } catch (e) { fill(box, el("p", { class: "bad", text: "불러오지 못했습니다: " + e.message })); return; }
@@ -4256,23 +4276,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     })();
     window.scrollTo(0, 0);
   }
-  // 수강생 '주차별 학습' 위: 내 교과목의 게시된 강의
-  async function addMyLectures() {
-    const view = document.getElementById("view"); if (!view) return;
-    let rows = [];
-    try { rows = await Server.myLectures(); } catch (e) { return; }
-    rows = rows.filter(r => Repo.memberOf(r.class_id));
-    if (!rows.length || document.body.dataset.route !== "weeks") return;
-    const by = new Map(); rows.forEach(r => { if (!by.has(r.class_id)) by.set(r.class_id, []); by.get(r.class_id).push(r); });
-    const sec = el("section", { class: "my-lectures" }, [el("h3", { text: "내 교과목 강의" })].concat([...by].map(([cid, list]) => {
-      const c = Repo.getClasses().find(x => x.id === cid) || { name: "교과목" };
-      return el("div", { class: "card ml-course" }, [el("p", { class: "ml-name", text: c.name + (courseLabel(c) ? " · " + courseLabel(c) : "") }),
-        c.description ? el("p", { class: "small muted", text: c.description }) : null,
-        el("ul", { class: "ml-list" }, list.map(r => { const s = r.song_id ? Repo.getSong(r.song_id) : null;
-          return el("li", null, [el("a", { href: "#/lecture/" + cid + "/" + r.week_no }, [el("span", { class: "wk-no", text: r.week_no + "주차" }), el("span", { class: "ml-t", text: r.title || r.week_no + "주차 강의" }), s ? el("span", { class: "ml-s", lang: "vi", text: "♪ " + s.title }) : null].filter(Boolean))]); }))].filter(Boolean));
-    })));
-    const first = view.firstElementChild; if (first && first.nextSibling) view.insertBefore(sec, first.nextSibling); else view.appendChild(sec);
-  }
+
 
   /* ----- 18단계: 오프라인 강의용 프레젠테이션 모드 ----- */
   const SLIDE_DEFS = [["goals", "오늘의 학습 목표"], ["song", "오늘의 노래 소개"], ["listen", "노래 듣기"], ["lyrics", "베트남어 가사"], ["translation", "가사와 한국어 번역"],
@@ -4941,6 +4945,123 @@ if (typeof module !== "undefined") module.exports = UploadKit;
           + "<p>최대 " + E(fmtSec(r.rec_max_sec || 120)) + (r.rec_due ? " · 마감 " + E(new Date(r.rec_due).toLocaleString("ko-KR")) : "") + " · 웹앱의 강의 페이지에서 녹음해 제출하세요.<\/p><p><a href=\"" + E(lectureLink(c.id, n)) + "\">웹앱에서 이 강의 열기<\/a><\/p>" : "")
       + sec("학습 정리", P(r.summary))
       + "<footer>노래로 배우는 베트남어 · " + E(new Date().toLocaleDateString("ko-KR")) + " 내보냄 · 수업용 자료(가사 포함 — 수강생에게만 배포)<\/footer><\/main><\/body><\/html>";
+  }
+
+  /* ----- 23단계: 교수자 · 학습자 통합 대시보드 ----- */
+  function courseWeekNow(c) {
+    const d = Math.floor((new Date(todayStr() + "T00:00:00") - new Date(semesterStart() + "T00:00:00")) / 86400000);
+    return d < 0 ? 0 : Math.min(c.weeks_count || 15, Math.floor(d / 7) + 1);
+  }
+  // 주차 완료: 그 주차에 열린 과제(퀴즈 · 녹음)를 모두 냈으면 완료. 과제가 없는 주차는 진행률에서 뺀다.
+  function weekState(w) {
+    const quizDone = !w.quiz || !!w.quiz_last, recDone = !w.rec || w.rec_status === "submitted" || w.rec_status === "reviewed";
+    return { has: !!(w.quiz || w.rec), done: quizDone && recDone, quizDone, recDone };
+  }
+  function newFeedback(w) { return !!(w.rec && !w.rec_seen && (w.rec_published || w.rec_status === "resubmit")); }
+  function quizCell(w) { if (!w.quiz) return "—"; if (!w.quiz_last) return "미응시"; return w.quiz_last.score + " / " + w.quiz_last.max + "점" + (w.quiz_last.review ? " (채점 대기)" : ""); }
+  function recCell(w) {
+    if (!w.rec) return "—"; if (!w.rec_status) return "미제출"; if (w.rec_status === "resubmit") return "재제출 요청";
+    return w.rec_published ? "평가 " + w.rec_total + "점" : "제출(평가 대기)";
+  }
+  function progressBar(done, total) {
+    const pct = total ? Math.round(done * 100 / total) : 0;
+    return el("div", { class: "pg" }, [el("div", { class: "pg-bar", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": "100", "aria-valuenow": String(pct), "aria-label": "학습 진행률" }, [el("i", { style: "width:" + pct + "%" })]),
+      el("span", { class: "pg-t", text: total ? "완료 " + done + " / " + total + "주차 · " + pct + "%" : "아직 과제가 열린 주차가 없습니다" })]);
+  }
+  // 학습자: 출석 화면 위 요약 카드(다음에 할 일 · 새 피드백)
+  async function addLearnerSummary() {
+    let list = []; try { list = await Server.myCourseProgress(); } catch (e) { return; }
+    const view = document.getElementById("view"); if (!view || !list.length || document.body.dataset.route !== "checkin") return;
+    const cards = list.map(c => {
+      const now = courseWeekNow(c), tasks = c.weeks.filter(w => weekState(w).has), done = tasks.filter(w => weekState(w).done).length;
+      const todo = c.weeks.filter(w => weekState(w).has && !weekState(w).done && (now === 0 || w.week_no <= now));
+      const fb = c.weeks.filter(newFeedback);
+      const kids = [el("div", { class: "ls-head" }, [el("b", { text: c.name }), el("span", { class: "small muted", text: [courseLabel(c), now ? "현재 " + now + "주차" : "학기 시작 전"].filter(Boolean).join(" · ") })]), progressBar(done, tasks.length)];
+      if (fb.length) kids.push(el("a", { class: "ls-fb", href: "#/lecture/" + c.class_id + "/" + fb[0].week_no, text: "새 피드백 " + fb.length + "개 — " + fb.map(w => w.week_no + "주차").join(", ") + " 확인하기 →" }));
+      if (todo.length) { const w = todo[0], st = weekState(w);
+        kids.push(el("a", { class: "ls-next", href: "#/lecture/" + c.class_id + "/" + w.week_no }, [el("span", { class: "wk-no", text: w.week_no + "주차" }),
+          el("span", { text: [st.quizDone ? null : "퀴즈 미응시", st.recDone ? null : (w.rec_status === "resubmit" ? "녹음 재제출 요청" : "녹음 미제출")].filter(Boolean).join(" · ") + " → 지금 하기" })])); }
+      else if (tasks.length) kids.push(el("p", { class: "small ls-ok", text: "지금까지 열린 과제를 모두 냈습니다 ✓" }));
+      return el("div", { class: "card ls-card" }, kids);
+    });
+    const sec = el("section", { class: "learner-summary" }, [el("h3", { text: "내 교과목" })].concat(cards, [el("a", { class: "small", href: "#/weeks", text: "주차별 학습 현황 자세히 보기 →" })]));
+    const first = view.firstElementChild; if (first && first.nextSibling) view.insertBefore(sec, first.nextSibling); else view.appendChild(sec);
+  }
+  // 학습자: '주차별 학습' 위 — 교과목별 학습 현황 표(이전 주차도 다시 열람)
+  async function addMyLectures() {
+    const view = document.getElementById("view"); if (!view) return;
+    let list = []; try { list = await Server.myCourseProgress(); } catch (e) { return; }
+    list = list.filter(c => c.weeks.length);
+    if (!list.length || document.body.dataset.route !== "weeks") return;
+    const sec = el("section", { class: "my-lectures" }, [el("h3", { text: "내 교과목 학습 현황" })].concat(list.map(c => {
+      const now = courseWeekNow(c), tasks = c.weeks.filter(w => weekState(w).has), done = tasks.filter(w => weekState(w).done).length;
+      const rows = c.weeks.map(w => { const st = weekState(w), s = w.song_id ? Repo.getSong(w.song_id) : null;
+        return el("div", { class: "ml-row" + (w.week_no === now ? " now" : "") + (st.has && st.done ? " done" : "") }, [
+          el("a", { href: "#/lecture/" + c.class_id + "/" + w.week_no }, [el("span", { class: "wk-no", text: w.week_no + "주차" }), el("span", { class: "ml-t", text: w.title || w.week_no + "주차 강의" }), s ? el("span", { class: "ml-s", lang: "vi", text: "♪ " + s.title }) : null].filter(Boolean)),
+          el("span", { class: "ml-c" }, [el("small", { text: "퀴즈" }), el("b", { text: quizCell(w) })]),
+          el("span", { class: "ml-c" }, [el("small", { text: "녹음" }), el("b", { text: recCell(w) })]),
+          el("span", { class: "ml-c" }, [el("small", { text: "피드백" }), newFeedback(w) ? el("b", { class: "ml-new", text: "새 피드백" }) : el("b", { text: w.rec && (w.rec_published || w.rec_status === "resubmit") ? "확인함" : "—" })]),
+          el("span", { class: "ml-done", "aria-label": st.has ? (st.done ? "완료" : "미완료") : "과제 없음", text: st.has ? (st.done ? "✓ 완료" : "진행 중") : "열람" })]); });
+      return el("div", { class: "card ml-course" }, [el("p", { class: "ml-name", text: c.name + (courseLabel(c) ? " · " + courseLabel(c) : "") + (now ? " · 현재 " + now + "주차" : "") }),
+        c.description ? el("p", { class: "small muted", text: c.description }) : null, progressBar(done, tasks.length),
+        el("div", { class: "ml-list" }, rows)].filter(Boolean));
+    })));
+    const first = view.firstElementChild; if (first && first.nextSibling) view.insertBefore(sec, first.nextSibling); else view.appendChild(sec);
+  }
+  // 교수자: 교과목 대시보드
+  function renderCourseDash(cid) {
+    const c = Repo.getClasses().find(x => x.id === cid);
+    const back = el("a", { class: "btn", href: "#/course/" + cid, text: "← 주차별 강의" });
+    if (!c || !canManageCourse(cid)) { setView([back, el("p", { class: "bad", text: "이 교과목을 관리할 권한이 없습니다." })], "classes"); return; }
+    const box = el("div", null, [el("p", { class: "muted", text: "불러오는 중…" })]);
+    setView([back, el("p", { class: "kicker", text: c.name + (courseLabel(c) ? " · " + courseLabel(c) : "") }), el("h2", { text: "교과목 대시보드" }), box], "classes");
+    (async () => {
+      let d; try { d = await Server.courseDashboard(cid); } catch (e) { fill(box, el("p", { class: "bad", text: "불러오지 못했습니다: " + e.message })); return; }
+      const now = courseWeekNow(c), W = d.weeks || [], S = d.students || [], m = d.members || 0;
+      const due = W.filter(w => w.published && (now === 0 || w.week_no <= now));
+      const qW = W.filter(w => w.published && w.quiz), rW = W.filter(w => w.published && w.rec);
+      const avgs = qW.map(w => w.quiz_avg).filter(v => v != null);
+      const sum = (k) => W.reduce((a, w) => a + (w[k] || 0), 0);
+      const stat = (label, v) => el("div", { class: "stat" }, [el("span", { text: label }), el("strong", { text: v })]);
+      const rate = (a, b) => b ? a + " / " + b + " (" + Math.round(a * 100 / b) + "%)" : "—";
+      const wRows = W.map(w => el("tr", { class: w.week_no === now ? "dash-now" : "" }, [el("td", { text: w.week_no + "주차" + (w.week_no === now ? " (이번 주)" : "") }),
+        el("td", null, [el("a", { href: "#/lecture/" + cid + "/" + w.week_no, text: w.title || (w.published ? "(제목 없음)" : "—") }), w.published ? null : el("span", { class: "small muted", text: " 비공개" })].filter(Boolean)),
+        el("td", null, w.quiz ? [el("a", { href: "#/course/" + cid + "/week/" + w.week_no + "/quiz", text: rate(w.quiz_submitted, m) }), el("span", { class: "small muted", text: w.quiz_avg != null ? " · 평균 " + w.quiz_avg + "%" : "" })] : [el("span", { text: "—" })]),
+        el("td", null, w.rec ? [el("a", { href: "#/course/" + cid + "/week/" + w.week_no + "/rec", text: rate(w.rec_submitted, m) })] : [el("span", { text: "—" })]),
+        el("td", { text: (w.fb_pending || w.resubmit || w.quiz_review) ? [w.fb_pending ? "녹음 평가 " + w.fb_pending : null, w.quiz_review ? "해석 채점 " + w.quiz_review : null, w.resubmit ? "재제출 " + w.resubmit : null].filter(Boolean).join(" · ") : "—" })]));
+      const sRows = S.map(s => {
+        const qd = new Set(s.quiz_weeks || []), rd = new Set(s.rec_weeks || []);
+        const miss = due.flatMap(w => [w.quiz && !qd.has(w.week_no) ? w.week_no + "주차 퀴즈" : null, w.rec && !rd.has(w.week_no) ? w.week_no + "주차 녹음" : null].filter(Boolean));
+        return el("tr", null, [el("td", { text: s.name }), el("td", { text: qW.length ? [...qd].filter(n => qW.some(w => w.week_no === n)).length + " / " + qW.length : "—" }),
+          el("td", { text: s.quiz_avg != null ? s.quiz_avg + "%" : "—" }), el("td", { text: rW.length ? [...rd].filter(n => rW.some(w => w.week_no === n)).length + " / " + rW.length : "—" }),
+          el("td", { text: s.rec_avg != null ? s.rec_avg + "점" : "—" }), el("td", { class: miss.length ? "dash-miss" : "", text: miss.length ? miss.join(", ") : "없음" }),
+          el("td", { text: s.fb_unseen ? s.fb_unseen + "개" : "—" })]);
+      });
+      fill(box, el("div", { class: "stat-grid" }, [stat("수강생", m + "명"), stat("현재 주차", now ? now + " / " + (c.weeks_count || 15) : "학기 전"),
+          stat("게시한 강의", W.filter(w => w.published).length + "개"), stat("퀴즈 평균", avgs.length ? Math.round(avgs.reduce((a, b) => a + b, 0) / avgs.length) + "%" : "—"),
+          stat("피드백 대기", sum("fb_pending") + "건"), stat("재제출 요청", sum("resubmit") + "건")]),
+        el("section", { class: "card" }, [el("h3", { text: "주차별 현황" }), el("div", { class: "tbl-wrap" }, [el("table", { class: "qz-table dash-table" }, [
+          el("thead", null, [el("tr", null, ["주차", "강의", "퀴즈 제출", "녹음 제출", "할 일"].map(h => el("th", { text: h })))]), el("tbody", null, wRows)])])]),
+        el("section", { class: "card" }, [el("h3", { text: "학생별 진행" }), el("p", { class: "small muted", text: "미제출은 게시된 주차 중 " + (now ? "이번 주(" + now + "주차)까지" : "전체") + "를 기준으로 셉니다." }),
+          el("div", { class: "tbl-wrap" }, [el("table", { class: "qz-table dash-table" }, [el("thead", null, [el("tr", null, ["이름", "퀴즈 응시", "퀴즈 평균", "녹음 제출", "녹음 평균", "미제출", "피드백 미확인"].map(h => el("th", { text: h })))]),
+            el("tbody", null, sRows.length ? sRows : [el("tr", null, [el("td", { colspan: "7", class: "muted", text: "아직 수강생이 없습니다." })])])])])]));
+    })();
+    window.scrollTo(0, 0);
+  }
+  // 교수자 첫 화면(반 현황) 위: 운영 중인 교과목 요약
+  async function addTeacherCourseCards() {
+    const view = document.getElementById("view"); if (!view) return;
+    const mine = Repo.getClasses().filter(c => !c.archived && canManageCourse(c.id));
+    if (!mine.length) return;
+    const data = await Promise.all(mine.map(c => Server.courseDashboard(c.id).then(d => [c, d]).catch(() => null)));
+    if (document.body.dataset.route !== "t-home") return;
+    const cards = data.filter(Boolean).map(([c, d]) => {
+      const W = d.weeks || [], sum = (k) => W.reduce((a, w) => a + (w[k] || 0), 0), now = courseWeekNow(c);
+      return el("a", { class: "card tc-card", href: "#/course/" + c.id + "/dash" }, [el("b", { text: c.name }), el("span", { class: "small muted", text: [courseLabel(c), now ? "현재 " + now + "주차" : "학기 전"].filter(Boolean).join(" · ") }),
+        el("span", { text: "수강생 " + (d.members || 0) + "명 · 피드백 대기 " + sum("fb_pending") + " · 재제출 " + sum("resubmit") + " · 해석 채점 " + sum("quiz_review") }), el("span", { class: "tc-go", text: "대시보드 →" })]);
+    });
+    const sec = el("section", { class: "teacher-courses" }, [el("h3", { text: "운영 중인 교과목" }), el("div", { class: "tc-grid" }, cards)]);
+    const first = view.firstElementChild; if (first && first.nextSibling) view.insertBefore(sec, first.nextSibling); else view.appendChild(sec);
   }
 
   // 같은 단계 안: 어휘 점수 낮은 순 → 차트 순위 → ID
@@ -7208,6 +7329,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     if (!pick) { noClassView("t-home"); return; }
     const box = el("div", null, [el("p", { class: "muted", text: "불러오는 중…" })]);
     setView([titleDeco([el("p", { class: "kicker", text: "안녕하세요, " + Server.profile().display_name + "님" }), el("h2", { text: "반 현황" })], "c_dance"), pick, box], "t-home");
+    addTeacherCourseCards();
     async function draw() {
       const [st, subs, asg, all] = await Promise.all([classStudents(), Server.listSubmissions(teachClass).catch(() => []), Server.classAssignments(teachClass).catch(() => []),
         Server.isAdmin() ? Server.profiles().catch(() => []) : Promise.resolve([])]);
@@ -7387,6 +7509,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     const todo = el("div", { class: "todo" });
     setView([titleDeco([el("p", { class: "kicker", text: "안녕하세요, " + Server.profile().display_name + "님" }), el("h2", { text: "출석 체크" })], "e_fighting"), box,
       el("h3", { text: "오늘 할 일" }), todo], "checkin");
+    addLearnerSummary();
     const T = todayStr(), me = Server.user().id;
     let justStamped = false;
     function draw(d) {
@@ -8699,6 +8822,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     else if ((m = h.match(/^#\/song\/(\d+)\/sing\/([\w-]+)$/))) { if (login()) { currentRoute = "song"; practiceSong = Number(m[1]); renderSong(Number(m[1]), { singLineId: m[2], singOnly: true }); } }
     else if ((m = h.match(/^#\/words\/(\d+)$/))) { if (login()) { currentRoute = "words"; renderWords(Number(m[1])); } }
     else if ((m = h.match(/^#\/course\/([0-9a-f-]{36})$/))) { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "course"; renderCourseWeeks(m[1]); } }
+    else if ((m = h.match(/^#\/course\/([0-9a-f-]{36})\/dash$/))) { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "course-dash"; renderCourseDash(m[1]); } }
     else if ((m = h.match(/^#\/course\/([0-9a-f-]{36})\/week\/(\d+)\/rec$/))) { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "course-rec"; renderWeekRecordings(m[1], Number(m[2])); } }
     else if ((m = h.match(/^#\/course\/([0-9a-f-]{36})\/week\/(\d+)\/quiz$/))) { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "course-quiz"; renderQuizResults(m[1], Number(m[2])); } }
     else if ((m = h.match(/^#\/course\/([0-9a-f-]{36})\/week\/(\d+)$/))) { if (login() && need(Server.canTeach(), "교수자만 볼 수 있습니다.")) { currentRoute = "course-week"; renderWeekEditor(m[1], Number(m[2])); } }
