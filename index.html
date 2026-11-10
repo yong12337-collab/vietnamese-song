@@ -2576,6 +2576,37 @@
   nav#mainNav a.big-item.nav-group .chick { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='3.2'/%3E%3Cpath d='M12 2.8v2.6M12 18.6v2.6M2.8 12h2.6M18.6 12h2.6M5.5 5.5l1.9 1.9M16.6 16.6l1.9 1.9M5.5 18.5l1.9-1.9M16.6 7.4l1.9-1.9'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='3.2'/%3E%3Cpath d='M12 2.8v2.6M12 18.6v2.6M2.8 12h2.6M18.6 12h2.6M5.5 5.5l1.9 1.9M16.6 16.6l1.9 1.9M5.5 18.5l1.9-1.9M16.6 7.4l1.9-1.9'/%3E%3C/svg%3E"); }
   nav#mainNav a.big-item.nav-group { display: flex; align-items: center; }
   nav#mainNav a.big-item.nav-group .nav-caret { margin-left: auto; }
+
+  /* 26단계: 표지 정리 — 오른쪽 위 로그인 · 제목 1/2 · 문구 삭제 · 기능 6개는 틀 없이 3×2 */
+  .c9-top { position: relative; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .c9-logo { width: 44px; height: 44px; border-radius: 13px; display: inline-flex; align-items: center; justify-content: center; font-size: 22px; color: #FFFFFF;
+    background: linear-gradient(135deg, #A18CF0, #6E5AD8); box-shadow: 0 6px 14px rgba(110,90,216,.3); }
+  .c9-auth { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+  .c9-top .c9-btn { width: auto !important; min-width: 0 !important; flex: none !important; min-height: 44px !important; height: auto !important; padding: 0 16px 0 10px !important;
+    font-size: 14.5px !important; border-radius: 12px !important; gap: 8px !important; box-shadow: 0 4px 10px rgba(110,90,216,.18) !important; transform: none !important; }
+  .c9-top .c9-btn .c9-g { width: 26px !important; height: 26px !important; flex: none; }
+  .c9-top .c9-btn .c9-g svg { width: 16px !important; height: 16px !important; }
+  .c9-top .c9-btn .c9-lbl { font-size: 14.5px !important; white-space: nowrap; }
+  .cover9 .c9-hero { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; }
+  .cover9 .c9-title .l1 { font-size: clamp(15px, min(1.9vw, 3.1vh), 32px) !important; }
+  .cover9 .c9-title .l2 { font-size: clamp(30px, min(4.8vw, 7.75vh), 84px) !important;
+    text-shadow: 0 1px 0 #AE93E1, 0 2px 0 #A083D7, 0 3px 0 #9272CB, 0 6px 10px rgba(110,90,190,.25) !important; }
+  .cover9 .c9-feats { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; max-width: 980px; width: 100%; margin-left: auto; margin-right: auto; column-gap: clamp(20px, 4vw, 56px) !important; row-gap: clamp(18px, 3vh, 34px) !important; }
+  .cover9 .c9-card, .cover9 .c9-card:hover, .cover9 .c9-card:focus-visible { background: transparent !important; border: 0 !important; box-shadow: none !important; transform: none !important; padding: 6px 4px !important; }
+  .cover9 .c9-card::before, .cover9 .c9-card::after { display: none !important; }
+  .cover9 .c9-card .c9-go, .cover9 .c9-card .c9-bar { display: none !important; }
+  .cover9 .c9-card:hover strong { color: #5B50C6; }
+  .cover9 .c9-card:focus-visible { outline: 3px solid rgba(110,99,217,.5) !important; outline-offset: 4px; border-radius: 14px !important; }
+  @media (max-width: 560px) {
+    .cover9 .c9-feats { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    .c9-top .c9-btn { padding: 0 12px 0 8px !important; font-size: 13.5px !important; } .c9-top .c9-btn .c9-lbl { font-size: 13.5px !important; }
+    .c9-logo { width: 38px; height: 38px; font-size: 19px; }
+  }
+  @media (max-width: 380px) { .c9-top .c9-btn .c9-g { display: none !important; } }
+  /* 26단계 보완: 큰 화면에서도 로그인은 화면 오른쪽 위 끝(위쪽 막대만 화면 전체 폭) · 작은 휴대폰은 간격을 줄여 한 화면에 */
+  .cover9 .c9-top { margin-left: min(0px, calc((100% - 100vw) / 2)); margin-right: min(0px, calc((100% - 100vw) / 2)); padding-left: max(0px, calc((100vw - 100%) / 2)); padding-right: max(0px, calc((100vw - 100%) / 2)); }
+  @media (min-width: 1700px) { .cover9 .c9-top { padding-left: 48px; padding-right: 48px; margin-left: calc((100% - 100vw) / 2 + 0px); margin-right: calc((100% - 100vw) / 2 + 0px); } }
+  @media (max-width: 560px) { .cover9 .c9-feats { row-gap: 10px !important; } .cover9 .c9-ico { width: 46px !important; height: 46px !important; font-size: 21px !important; } .cover9 .c9-card-p { font-size: 11.5px !important; } }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet">
@@ -4054,20 +4085,18 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     // 두 버튼 모두 기존 Google 로그인 그대로. 학습자 · 관리자 구분과 관리자 권한 확인은 로그인 뒤 서버(계정 권한)가 한다.
     const gBtn = (label, cls) => { const b = googleButton(label); b.className = "c9-btn " + cls;
       const g = el("span", { class: "c9-g", "aria-hidden": "true" }); g.innerHTML = GOOGLE_LOGO; b.replaceChildren(g, el("span", { class: "c9-lbl", text: label })); return b; };
-    const stu = gBtn("학습자 Google 로그인", "c9-stu");
-    const adm = gBtn("관리자 Google 로그인", "c9-adm");
+    const stu = gBtn("학습자 로그인", "c9-stu");
+    const adm = gBtn("관리자 로그인", "c9-adm");
+    // 26단계: 일반 웹페이지처럼 오른쪽 위에 로그인(왼쪽 위는 앱 아이콘)
+    const top = el("div", { class: "c9-top" }, [el("span", { class: "c9-brand", role: "img", "aria-label": "노래로 배우는 베트남어" }, [el("span", { class: "c9-logo", "aria-hidden": "true", text: "♫" })]),
+      el("div", { class: "c9-auth", role: "group", "aria-label": "로그인" }, [stu, adm])]);
     const deco = [["n", "♪", "n1"], ["n", "♫", "n2"], ["n", "♬", "n3"], ["n", "♩", "n4"], ["n", "♪", "n5"], ["n", "♫", "n6"],
       ["s", "", "s1"], ["s", "", "s2"], ["s", "", "s3"], ["s", "", "s4"], ["o", "", "o1"], ["o", "", "o2"], ["o", "", "o3"], ["o", "", "o4"]]
       .map(([k, x, c]) => el("span", { class: "c9-deco " + (k === "n" ? "c9-note " : k === "s" ? "c9-star " : "c9-orb ") + c, "aria-hidden": "true", text: x }));
     const eq = el("span", { class: "c9-eq", "aria-hidden": "true" }, [1, 2, 3, 4, 5].map(k => el("i", { class: "b" + k })));
     const hero = el("section", { class: "hero cover c9-hero" }, deco.concat([
       el("div", { class: "c9-copy", id: "c-login" }, [eq,
-        el("h2", { class: "c-title c9-title" }, [el("span", { class: "l1", text: "노래로 배우는" }), el("span", { class: "l2", text: "베트남어" })]),
-        el("p", { class: "c9-em", text: "좋아하는 노래로 시작하는 즐거운 베트남어!" }),
-        el("p", { class: "c9-desc", text: "베트남 인기 가요를 들으며 성조와 발음을 익히고, 가사의 의미까지 자연스럽게 배워보세요." }),
-        el("div", { class: "cta-row c9-cta" }, [stu, adm]),
-        el("p", { class: "c9-fine" }, [el("span", { text: "처음 로그인하면 가입 신청이 되고, 관리자가 승인하면 학습을 시작합니다." }),
-          el("a", { href: "#/login/teacher", class: "c9-emg", text: "관리자 비상 로그인(이메일)" })])])]));
+        el("h2", { class: "c-title c9-title" }, [el("span", { class: "l1", text: "노래로 배우는" }), el("span", { class: "l2", text: "베트남어" })])])]));
     const feats = [["🎵", "lav", "노래로 배우기", "실제 베트남 인기 가요로 듣고 배우는 학습", "#/learn"],
       ["🗣️", "pink", "성조 및 발음 연습", "베트남어 6성조와 발음을 한 줄씩 익혀요", "#/practice"],
       ["📖", "mint", "가사 해석하기", "베트남어 원문과 한국어 번역을 나란히 비교", "#/learn"],
@@ -4080,7 +4109,8 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         el("span", { class: "c9-go", "aria-hidden": "true", text: "→" })])));
     const nodes = [el("div", { class: "cover5 cover9" }, [
       el("div", { class: "c9-in" }, [
-        lockNotice ? el("p", { class: "lock-note c9-lock", role: "status", text: (() => { try { return sessionStorage.getItem("nbv-next") ? "공유받은 강의를 보려면 로그인하세요. 로그인하면 그 강의로 바로 이동합니다." : null; } catch (e) { return null; } })() || "로그인한 뒤에 쓸 수 있습니다. 아래에서 학습자 또는 관리자 Google 로그인을 눌러 주세요." }) : null,
+        top,
+        lockNotice ? el("p", { class: "lock-note c9-lock", role: "status", text: (() => { try { return sessionStorage.getItem("nbv-next") ? "공유받은 강의를 보려면 오른쪽 위에서 로그인하세요. 로그인하면 그 강의로 바로 이동합니다." : null; } catch (e) { return null; } })() || "로그인한 뒤에 쓸 수 있습니다. 오른쪽 위에서 학습자 또는 관리자 로그인을 눌러 주세요." }) : null,
         hero, cards])])];
     lockNotice = false;
     setView(nodes.filter(Boolean), "cover");
