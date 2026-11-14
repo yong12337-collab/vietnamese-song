@@ -3169,6 +3169,19 @@
   html body:not(.anon) .hello::before { filter: grayscale(1) contrast(1.15) !important; }
   html body:not(.anon) nav#mainNav .sub-item::before { color: #8A8A8A !important; border-color: #8A8A8A !important; background-color: #8A8A8A !important; }
   html body:not(.anon) header input, html body:not(.anon) .user-box input, html body:not(.anon) #view input { color: #111111 !important; border-color: #D6D6D6 !important; }
+
+  /* 37단계: 가사 자동 찾기(LRCLIB) 패널 */
+  .lrc-panel { display: grid; gap: 10px; margin: 12px 0; }
+  .lrc-q { display: grid; grid-template-columns: auto 1fr auto 1fr auto; gap: 8px 10px; align-items: center; }
+  .lrc-list { display: grid; gap: 10px; }
+  .lrc-item { border: 1px solid #E4E4E4; border-radius: 16px; padding: 12px 14px; display: grid; gap: 8px; background: #FFFFFF; }
+  .lrc-head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; }
+  .lrc-tag { font-size: 12.5px; font-weight: 800; padding: 3px 10px; border-radius: 999px; background: #F0F0F0; color: #555555; }
+  .lrc-tag.on { background: #111111; color: #FFFFFF; }
+  .lrc-prev { margin: 0; padding-left: 1.4em; display: grid; gap: 4px; font-size: 14px; }
+  .lrc-prev .lrc-time { display: inline-block; min-width: 52px; font-variant-numeric: tabular-nums; color: #6B6B6B; font-weight: 700; margin-right: 6px; }
+  .lrc-done:empty { display: none; } .lrc-done { padding: 10px 14px; border-radius: 12px; background: #F5F5F5; border: 1px solid #E2E2E2; }
+  @media (max-width: 640px) { .lrc-q { grid-template-columns: 1fr; } }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Serif+KR:wght@500;600;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
@@ -3674,6 +3687,8 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       insertSong: (row) => run(c => c.from("songs").insert(row).select(SONG_COLS)),
       deleteSong: (id) => run(c => c.from("songs").delete().eq("id", id)),
       insertOriginals: (rows) => run(c => c.from("lyric_originals").insert(rows)),
+      // 37단계: LRCLIB 가사 찾기(서버 중계 기능 — 로그인한 사용자만)
+      lrclib: (body) => run(c => c.functions.invoke("lrclib", { body })),
       // ---- 설정·단어장
       settings: () => run(c => c.from("app_settings").select("data").eq("id", 1)),
       saveSettings: (data) => run(c => c.from("app_settings").update({ data }).eq("id", 1).select("id")),
@@ -3978,6 +3993,17 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         const r = await Server.updateSong(id, row);
         if (r && r.length) { const s = songById.get(id); Object.assign(s, patch); notify(); }
         return !!(r && r.length);
+      },
+      // 37단계: 가져온 가사로 이 곡 가사를 통째로 바꾼다(줄별 시간이 있으면 함께). rows = [{ vi, verse, t }]
+      async replaceLyricsWithTimes(songId, rows) {
+        const list = rows.map((r, i) => ({ lineId: newLineId(), verse: r.verse || 1, vietnamese: r.vi, korean: "", translationStatus: null, lineNumber: i + 1 }));
+        if (!list.length) throw new Error("넣을 가사가 없습니다.");
+        await Server.saveLyrics(songId, list.map(l => ({ lineId: l.lineId, verse: l.verse, vietnamese: l.vietnamese, korean: l.korean, translationStatus: l.translationStatus })), []);
+        try { await Server.insertOriginals(list.map(l => ({ line_id: l.lineId, song_id: songId, line_number: l.lineNumber, verse: l.verse, vietnamese: l.vietnamese, korean: "", translation_status: null }))); } catch (e) { /* 원문 기록은 실패해도 가사는 그대로 */ }
+        await reloadSong(songId);
+        const times = {}; list.forEach((l, i) => { if (typeof rows[i].t === "number") times[l.lineId] = rows[i].t; });
+        if (Object.keys(times).length) await this.setSync(songId, times);
+        return list.length;
       },
       // 싱크: times의 키는 줄 번호 또는 줄 ID, 값은 초 또는 null
       async setSync(songId, times, offset) {
@@ -6011,13 +6037,124 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     return p;
   }
 
+
+  /* ----- 37단계: 가사 자동 찾기(LRCLIB) — LRC(시간 가사) · 일반 가사 읽기, 지금 가사에 시간만 맞추기 ----- */
+  function parseLRC(txt) {
+    const out = []; let verse = 1;
+    String(txt || "").replace(/\r\n?/g, "\n").split("\n").forEach(line => {
+      const tags = [...line.matchAll(/\[(\d{1,3}):(\d{1,2}(?:[.:]\d{1,3})?)\]/g)];
+      if (!tags.length) return;
+      const text = line.replace(/\[[^\]]*\]/g, "").trim();
+      tags.forEach(m => {
+        const t = Number(m[1]) * 60 + Number(String(m[2]).replace(":", "."));
+        if (!text) { if (out.length) verse++; return; }
+        out.push({ t: Math.round(t * 100) / 100, vi: text, verse });
+      });
+    });
+    out.sort((a, b) => a.t - b.t);
+    return normVerses(out);
+  }
+  function parsePlain(txt) {
+    const out = []; let verse = 1, gap = false;
+    String(txt || "").replace(/\r\n?/g, "\n").split("\n").forEach(line => {
+      const text = line.trim();
+      if (!text) { gap = true; return; }
+      if (gap && out.length) verse++; gap = false;
+      out.push({ t: null, vi: text, verse });
+    });
+    return out;
+  }
+  function normVerses(rows) { let prev = null, v = 0; rows.forEach(r => { if (r.verse !== prev) { v++; prev = r.verse; } r.verse = v; }); return rows; }
+  function lrcWords(s) { return String(s || "").normalize("NFC").toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, " ").split(/\s+/).filter(Boolean); }
+  function lrcSim(a, b) { const A = new Set(lrcWords(a)), B = new Set(lrcWords(b)); if (!A.size || !B.size) return 0; let n = 0; A.forEach(w => { if (B.has(w)) n++; }); return 2 * n / (A.size + B.size); }
+  // 지금 가사 줄(번역 유지)에 LRC 시간만 순서대로 맞춘다 — 반복되는 후렴도 앞에서부터 차례로
+  function matchLrcTimes(cur, lrc) {
+    const times = {}; let j = 0, matched = 0;
+    cur.forEach(l => {
+      let best = -1, bs = 0;
+      for (let k = j; k < Math.min(lrc.length, j + 5); k++) { const s = lrcSim(l.vietnamese, lrc[k].vi); if (s > bs) { bs = s; best = k; } }
+      if (best >= 0 && bs >= 0.6) { times[l.lineId] = lrc[best].t; j = best + 1; matched++; }
+    });
+    return { times, matched };
+  }
+
+  // 37단계: 가사 자동 찾기 패널(곡 화면 · 가사 준비 중 화면 둘 다에서 쓴다)
+  function buildLrcPanel(id) {
+    // 37단계: 가사 자동 찾기(LRCLIB) — 교사용. 서버 중계 기능(Supabase Edge Function 'lrclib')을 거쳐 찾는다
+    const lrcPanel = el("section", { class: "card lrc-panel", "aria-label": "가사 자동 찾기" }); lrcPanel.hidden = true;
+    const lrcBtn = el("button", { type: "button", class: "toggle", "aria-pressed": "false", text: "가사 자동 찾기 (LRCLIB)" });
+    lrcBtn.addEventListener("click", () => { const on = lrcPanel.hidden; lrcPanel.hidden = !on; lrcBtn.setAttribute("aria-pressed", String(on)); if (on) { drawLrc(); lrcPanel.scrollIntoView({ block: "nearest" }); } });
+    function reopenSong() { const y = window.scrollY; renderSong(id); window.scrollTo(0, y); }
+    function drawLrc() {
+      const s = Repo.getSong(id);
+      const qt = el("input", { type: "text", id: "lrc-t", lang: "vi", value: s.title || "" }), qa = el("input", { type: "text", id: "lrc-a", lang: "vi", value: s.artist || "" });
+      const go = el("button", { type: "button", class: "primary", text: "찾기" });
+      const list = el("div", { class: "lrc-list" }), msg = el("p", { class: "small", role: "status" });
+      async function search() {
+        go.disabled = true; msg.textContent = "LRCLIB에서 찾는 중…"; list.replaceChildren();
+        try {
+          let res = await Server.lrclib({ track_name: qt.value.trim(), artist_name: qa.value.trim() });
+          if (!Array.isArray(res) || !res.length) res = await Server.lrclib({ q: (qt.value + " " + qa.value).trim() });
+          res = (Array.isArray(res) ? res : []).filter(x => !x.instrumental && (x.syncedLyrics || x.plainLyrics));
+          res.sort((a, b) => (b.syncedLyrics ? 1 : 0) - (a.syncedLyrics ? 1 : 0));
+          res = res.slice(0, 12);
+          msg.textContent = res.length ? res.length + "개를 찾았습니다. 같은 곡인지 길이와 미리보기로 확인하고 고르세요." : "찾지 못했습니다. 곡명이나 가수의 철자(성조 부호 포함)를 바꿔 다시 찾아 보세요.";
+          list.replaceChildren(...res.map(item));
+        } catch (e) { msg.textContent = "찾지 못했습니다: " + (e.message || e); }
+        go.disabled = false;
+      }
+      function item(x) {
+        const lrc = parseLRC(x.syncedLyrics), rows = lrc.length ? lrc : parsePlain(x.plainLyrics);
+        const vd = Repo.getSong(id).durationSec, dd = vd && x.duration ? Math.round(x.duration - vd) : null;
+        const pv = el("ol", { class: "lrc-prev" }); pv.hidden = true;
+        const bPv = el("button", { type: "button", class: "small-btn", text: "미리보기" });
+        bPv.addEventListener("click", () => { pv.hidden = !pv.hidden; bPv.textContent = pv.hidden ? "미리보기" : "미리보기 닫기";
+          if (!pv.hidden && !pv.children.length) pv.replaceChildren(...rows.slice(0, 10).map(r => el("li", null, [r.t != null ? el("span", { class: "lrc-time", text: fmtClock(r.t) }) : null, el("span", { lang: "vi", text: r.vi })].filter(Boolean)))); });
+        const bAll = el("button", { type: "button", class: "small-btn primary", text: lrc.length ? "가사 · 시간 모두 넣기" : "가사 넣기(시간 없음)" });
+        bAll.addEventListener("click", async () => {
+          const have = Repo.getLyrics(id).length;
+          if (have && !window.confirm("지금 가사 " + have + "줄을 이 가사(" + rows.length + "줄)로 바꿉니다. 지금 줄의 한국어 번역은 사라집니다. 바꿀까요?")) return;
+          bAll.disabled = true; msg.textContent = "넣는 중…";
+          try { const n = await Repo.replaceLyricsWithTimes(id, rows); reopenSong(); setTimeout(() => { const st = document.querySelector(".lrc-done"); if (st) st.textContent = n + "줄을 넣었습니다" + (lrc.length ? "(줄별 시간 포함). 영상과 맞춰 보고 필요하면 [싱크 모드]에서 전체 보정하세요." : ". [싱크 모드]에서 스페이스바로 시간을 찍으세요."); }, 50); }
+          catch (e) { msg.textContent = "넣지 못했습니다: " + (e.message || e); bAll.disabled = false; }
+        });
+        const cur0 = Repo.getLyrics(id);
+        const bTimes = el("button", { type: "button", class: "small-btn", text: "시간만 가져오기(번역 유지)" });
+        bTimes.disabled = !lrc.length || !cur0.length;
+        if (!lrc.length) bTimes.title = "이 결과에는 시간 가사가 없습니다."; else if (!cur0.length) bTimes.title = "이 곡에 아직 가사가 없습니다.";
+        bTimes.addEventListener("click", async () => {
+          const cur = Repo.getLyrics(id), r = matchLrcTimes(cur, lrc);
+          if (!r.matched) { msg.textContent = "지금 가사와 맞는 줄을 찾지 못했습니다(가사가 다른 버전일 수 있어요)."; return; }
+          if (!window.confirm(cur.length + "줄 중 " + r.matched + "줄의 시작 시간을 넣습니다. 번역은 그대로 두고, 맞지 않은 줄은 [싱크 모드]에서 찍으면 됩니다. 넣을까요?")) return;
+          bTimes.disabled = true; msg.textContent = "넣는 중…";
+          try { await Repo.setSync(id, r.times); reopenSong(); setTimeout(() => { const st = document.querySelector(".lrc-done"); if (st) st.textContent = cur.length + "줄 중 " + r.matched + "줄의 시간을 넣었습니다(번역 유지)."; }, 50); }
+          catch (e) { msg.textContent = "넣지 못했습니다: " + (e.message || e); bTimes.disabled = false; }
+        });
+        return el("article", { class: "lrc-item" }, [
+          el("div", { class: "lrc-head" }, [el("b", { lang: "vi", text: x.trackName || x.name || "(제목 없음)" }),
+            el("span", { class: "small muted", lang: "vi", text: [x.artistName, x.albumName].filter(Boolean).join(" · ") }),
+            el("span", { class: "lrc-tag" + (lrc.length ? " on" : ""), text: lrc.length ? "시간 가사 " + lrc.length + "줄" : "일반 가사 " + rows.length + "줄" }),
+            el("span", { class: "small muted", text: (x.duration ? fmtClock(x.duration) : "길이 모름") + (dd != null ? " · 영상과 " + (dd === 0 ? "같은 길이" : (dd > 0 ? "+" : "") + dd + "초") : "") })]),
+          el("div", { class: "row-actions" }, [bPv, bAll, bTimes]), pv]);
+      }
+      go.addEventListener("click", search);
+      [qt, qa].forEach(inp => inp.addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); search(); } }));
+      fill(lrcPanel, el("h3", { text: "가사 자동 찾기 (LRCLIB · 교사용)" }),
+        el("p", { class: "small muted", text: "무료 공개 가사 저장소에서 곡명 · 가수로 찾아 줄별 시간까지 한 번에 넣습니다. 이미 번역이 있는 곡은 [시간만 가져오기]로 번역을 그대로 두고 시간만 넣을 수 있습니다. 뮤직비디오가 음원보다 늦게 시작하면 [싱크 모드]의 전체 보정(±초)으로 맞추세요." }),
+        el("div", { class: "lrc-q" }, [el("label", { for: "lrc-t", text: "곡명" }), qt, el("label", { for: "lrc-a", text: "가수" }), qa, go]), msg, list);
+    }
+    return { lrcBtn, lrcPanel, drawLrc };
+  }
   function renderSong(id, opts) {
     opts = opts || {};
     const song = Repo.getSong(id);
     const back = el("a", { class: "btn", href: "#/", text: "← 곡 목록" });
     if (!song) { setView([back, el("p", { text: "곡 ID " + id + "를 찾을 수 없습니다." })], "list"); return; }
     if (song.status !== "ready") {
-      setView([back, el("h2", { lang: "vi", text: song.title }), el("p", { class: "need", text: "준비 중인 곡입니다(가사 입력 필요)." })], "list");
+      // 37단계: 가사가 없는 곡 — 고칠 수 있는 사람(관리자 · 교수자)에게는 가사 자동 찾기를 바로 펼쳐 보여 준다
+      const nodes = [back, el("h2", { lang: "vi", text: song.title }), el("p", { class: "artist-line", lang: "vi", text: song.artist || "" }), el("p", { class: "need", text: "준비 중인 곡입니다(가사 입력 필요)." })];
+      if (Repo.canEdit(id)) { const lp = buildLrcPanel(id); lp.lrcPanel.hidden = false; lp.drawLrc(); nodes.push(el("p", { class: "lrc-done small", role: "status" }), lp.lrcPanel); }
+      setView(nodes, "list");
       return;
     }
 
@@ -6438,6 +6575,11 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       undoBtn.addEventListener("click", undoLast);
       const minus = el("button", { type: "button", text: "−0.5초" }), plus = el("button", { type: "button", text: "+0.5초" });
       minus.addEventListener("click", () => shiftOffset(-0.5)); plus.addEventListener("click", () => shiftOffset(0.5));
+      const minus2 = el("button", { type: "button", text: "−2초" }), plus2 = el("button", { type: "button", text: "+2초" });
+      minus2.addEventListener("click", () => shiftOffset(-2)); plus2.addEventListener("click", () => shiftOffset(2));
+      const sp1 = el("button", { type: "button", class: "toggle", "aria-pressed": String(syncRate === 1), text: "속도 1배" });
+      const sp75 = el("button", { type: "button", class: "toggle", "aria-pressed": String(syncRate === 0.75), text: "속도 0.75배" });
+      sp1.addEventListener("click", () => setSyncRate(1)); sp75.addEventListener("click", () => setSyncRate(0.75));
       const expBtn = el("button", { type: "button", text: "이 곡 싱크 내보내기", disabled: !done });
       expBtn.addEventListener("click", exportSync);
       const fileIn = el("input", { type: "file", accept: "application/json,.json", id: "sync-file" });
@@ -6453,9 +6595,10 @@ if (typeof module !== "undefined") module.exports = UploadKit;
              el("p", { class: "small", text: "가사 목록에서 [여기부터 찍기]로 다시 시작할 줄을 고를 수 있습니다." })]),
         !ready ? el("p", { class: "need small", text: "영상이 준비되면 누를 수 있습니다." }) : null,
         nextBtn,
-        el("div", { class: "row-actions" }, [undoBtn]),
+        el("p", { class: "small muted sync-keys", text: "단축키: 스페이스바 = 다음 줄 시작 · Backspace = 한 줄 되돌리기" }),
+        el("div", { class: "row-actions" }, [undoBtn, sp1, sp75]),
         el("p", { class: "small", text: "전체 보정: " + (off >= 0 ? "+" : "") + off.toFixed(1) + "초 (자막이 늦으면 −, 빠르면 +)" }),
-        el("div", { class: "row-actions" }, [minus, plus]),
+        el("div", { class: "row-actions" }, [minus2, minus, plus, plus2]),
         syncMsg,
         el("div", { class: "row-actions" }, [expBtn]),
         el("label", { for: "sync-file", text: "싱크 가져오기 (이 곡 싱크 파일)" }), fileIn, syncImportArea
@@ -6661,11 +6804,27 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       if (!syncOn) offOtherModes("sync");
       syncOn = !syncOn;
       syncBtn.setAttribute("aria-pressed", String(syncOn));
-      if (syncOn) { if (pointer === null) pointer = firstUnsynced(); if (repeat) stopRepeat(); drawSyncPanel(); }
+      if (syncOn) { ensureSyncKeys(); if (pointer === null) pointer = firstUnsynced(); if (repeat) stopRepeat(); drawSyncPanel(); }
       syncPanel.hidden = !syncOn;
       drawLyrics();
       if (syncOn) syncPanel.scrollIntoView({ block: "nearest" });
     });
+
+    const { lrcBtn, lrcPanel } = buildLrcPanel(id);
+    // 37단계: 싱크 모드 단축키(스페이스바 = 다음 줄 시작 · Backspace = 되돌리기) · 0.75배속
+    let syncKeysOn = false, syncRate = 1;
+    function ensureSyncKeys() {
+      if (syncKeysOn) return; syncKeysOn = true;
+      const onKey = (ev) => {
+        if (!syncOn) return;
+        const tg = ev.target; if (tg && /^(INPUT|TEXTAREA|SELECT)$/.test(tg.tagName)) return;
+        if (ev.key === " " || ev.code === "Space") { ev.preventDefault(); if (!nextBtn.disabled) nextBtn.click(); }
+        else if (ev.key === "Backspace") { ev.preventDefault(); undoLast(); }
+      };
+      document.addEventListener("keydown", onKey);
+      viewCleanups.push(() => document.removeEventListener("keydown", onKey));
+    }
+    function setSyncRate(r) { syncRate = r; try { if (player && player.setPlaybackRate) player.setPlaybackRate(r); } catch (e) {} drawSyncPanel(); }
 
     const mainNodes = [
       back,
@@ -6682,11 +6841,13 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       el("p", { class: "small muted", text: "영상 안에 유튜브 자체 자막이 함께 보이면 플레이어의 [CC] 버튼을 눌러 끄세요." }),
       playStatus,
       syncPanel,
+      lrcPanel,
+      el("p", { class: "lrc-done small", role: "status" }),
       durLine,
       rangePanel,
       summaryBox,
       // 교사용 편집 버튼은 이 곡을 고칠 수 있는 사람에게만 보인다(실제 허용은 서버 규칙이 정한다)
-      el("div", { class: "row-actions" }, [starBtn, toneBtn].concat(Repo.canEdit(id) ? [editBtn, syncBtn, lyricEditBtn, songDeleteButton(id)] : [])),
+      el("div", { class: "row-actions" }, [starBtn, toneBtn].concat(Repo.canEdit(id) ? [editBtn, syncBtn, lrcBtn, lyricEditBtn, songDeleteButton(id)] : [])),
       lineStatus,
       lyricsBox
     ];
