@@ -3689,6 +3689,12 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       insertOriginals: (rows) => run(c => c.from("lyric_originals").insert(rows)),
       // 37단계: LRCLIB 가사 찾기(서버 중계 기능 — 로그인한 사용자만)
       lrclib: (body) => run(c => c.functions.invoke("lrclib", { body })),
+      // 38단계: 가사 한국어 번역 초안(Claude · 서버 기능 'translate' — 관리자 · 교수자만)
+      translateLines: async (body) => {
+        const r = await client.functions.invoke("translate", { body });
+        if (r.error) { let code = ""; try { const j = await r.error.context.json(); code = (j && j.error) || ""; } catch (e) {} const er = new Error(code || r.error.message); er.code = code; throw er; }
+        return r.data;
+      },
       // ---- 설정·단어장
       settings: () => run(c => c.from("app_settings").select("data").eq("id", 1)),
       saveSettings: (data) => run(c => c.from("app_settings").update({ data }).eq("id", 1).select("id")),
@@ -4004,6 +4010,17 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         const times = {}; list.forEach((l, i) => { if (typeof rows[i].t === "number") times[l.lineId] = rows[i].t; });
         if (Object.keys(times).length) await this.setSync(songId, times);
         return list.length;
+      },
+      // 38단계: 번역 초안 넣기 — map = { lineId: 한국어 }. 비어 있던 줄에만, 'AI 번역'으로 표시(검수 대상)
+      async applyTranslations(songId, map) {
+        const cur = this.getLyrics(songId);
+        const list = cur.map(l => {
+          const ko = map[l.lineId];
+          const fill = typeof ko === "string" && ko.trim() && !(l.korean || "").trim();
+          return { lineId: l.lineId, verse: l.verse, vietnamese: l.vietnamese, korean: fill ? ko.trim() : (l.korean || ""), translationStatus: fill ? "AI 번역" : (l.translationStatus || null) };
+        });
+        await saveList(songId, list, []);
+        return list.filter((x, i) => x.korean !== (cur[i].korean || "")).length;
       },
       // 싱크: times의 키는 줄 번호 또는 줄 ID, 값은 초 또는 null
       async setSync(songId, times, offset) {
@@ -6115,7 +6132,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
           const have = Repo.getLyrics(id).length;
           if (have && !window.confirm("지금 가사 " + have + "줄을 이 가사(" + rows.length + "줄)로 바꿉니다. 지금 줄의 한국어 번역은 사라집니다. 바꿀까요?")) return;
           bAll.disabled = true; msg.textContent = "넣는 중…";
-          try { const n = await Repo.replaceLyricsWithTimes(id, rows); reopenSong(); setTimeout(() => { const st = document.querySelector(".lrc-done"); if (st) st.textContent = n + "줄을 넣었습니다" + (lrc.length ? "(줄별 시간 포함). 영상과 맞춰 보고 필요하면 [싱크 모드]에서 전체 보정하세요." : ". [싱크 모드]에서 스페이스바로 시간을 찍으세요."); }, 50); }
+          try { const n = await Repo.replaceLyricsWithTimes(id, rows); reopenSong(); setTimeout(() => { const st = document.querySelector(".lrc-done"); if (st) st.textContent = n + "줄을 넣었습니다" + (lrc.length ? "(줄별 시간 포함). 영상과 맞춰 보고 필요하면 [싱크 모드]에서 전체 보정하세요." : ". [싱크 모드]에서 스페이스바로 시간을 찍으세요.") + " 한국어 번역은 [번역 초안 만들기 (AI)]로 채울 수 있습니다."; }, 50); }
           catch (e) { msg.textContent = "넣지 못했습니다: " + (e.message || e); bAll.disabled = false; }
         });
         const cur0 = Repo.getLyrics(id);
@@ -6811,6 +6828,33 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     });
 
     const { lrcBtn, lrcPanel } = buildLrcPanel(id);
+    // 38단계: 번역이 비어 있는 줄을 AI(Claude)로 채운다 → 'AI 번역' 표시 → [가사 편집]의 'AI 번역 줄만 보기'로 검수
+    const trBtn = el("button", { type: "button", text: "번역 초안 만들기 (AI)" });
+    trBtn.addEventListener("click", async () => {
+      const cur = Repo.getLyrics(id), empty = cur.filter(l => !(l.korean || "").trim());
+      const st = () => document.querySelector(".lrc-done");
+      if (!empty.length) { if (st()) st().textContent = "번역이 비어 있는 줄이 없습니다. 고칠 줄은 [가사 편집]에서 직접 고치세요."; return; }
+      if (empty.length > 150) { if (st()) st().textContent = "한 번에 150줄까지 번역할 수 있습니다."; return; }
+      if (!window.confirm("번역이 비어 있는 " + empty.length + "줄을 AI로 번역합니다(30초~1분). 결과는 'AI 번역'으로 표시되니 꼭 검수해 주세요. 진행할까요?")) return;
+      trBtn.disabled = true; if (st()) st().textContent = "번역하는 중… (" + empty.length + "줄)";
+      try {
+        const s = Repo.getSong(id);
+        const res = await Server.translateLines({ title: s.title, artist: s.artist, lines: empty.map(l => l.vietnamese) });
+        if (!res || !Array.isArray(res.ko) || res.ko.length !== empty.length) throw new Error((res && res.error) || "번역 결과가 올바르지 않습니다.");
+        const map = {}; empty.forEach((l, i) => { map[l.lineId] = res.ko[i]; });
+        const n = await Repo.applyTranslations(id, map);
+        const y = window.scrollY; renderSong(id); window.scrollTo(0, y);
+        setTimeout(() => { const d = document.querySelector(".lrc-done"); if (d) d.textContent = n + "줄에 번역 초안을 넣었습니다('AI 번역' 표시). [가사 편집] → 'AI 번역 줄만 보기'로 검수하고 '검수 완료'로 바꿔 주세요."; }, 50);
+      } catch (e) {
+        const m = String((e && (e.context && e.context.status)) || "") + " " + String(e && e.message || e);
+        let body = ""; try { body = e && e.context && typeof e.context.json === "function" ? JSON.stringify(await e.context.json()) : ""; } catch (x) {}
+        const all = m + " " + body;
+        const msg = /no_key|503/.test(all) ? "아직 번역 API 키가 설정되지 않았습니다. Supabase → Edge Functions → Secrets 에 ANTHROPIC_API_KEY 를 넣어 주세요."
+          : /not_allowed|403/.test(all) ? "관리자 · 승인된 교수자만 번역 초안을 만들 수 있습니다."
+          : "번역하지 못했습니다: " + (e && e.message || e);
+        if (st()) st().textContent = msg; trBtn.disabled = false;
+      }
+    });
     // 37단계: 싱크 모드 단축키(스페이스바 = 다음 줄 시작 · Backspace = 되돌리기) · 0.75배속
     let syncKeysOn = false, syncRate = 1;
     function ensureSyncKeys() {
@@ -6847,7 +6891,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       rangePanel,
       summaryBox,
       // 교사용 편집 버튼은 이 곡을 고칠 수 있는 사람에게만 보인다(실제 허용은 서버 규칙이 정한다)
-      el("div", { class: "row-actions" }, [starBtn, toneBtn].concat(Repo.canEdit(id) ? [editBtn, syncBtn, lrcBtn, lyricEditBtn, songDeleteButton(id)] : [])),
+      el("div", { class: "row-actions" }, [starBtn, toneBtn].concat(Repo.canEdit(id) ? [editBtn, syncBtn, lrcBtn, trBtn, lyricEditBtn, songDeleteButton(id)] : [])),
       lineStatus,
       lyricsBox
     ];
