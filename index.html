@@ -3292,6 +3292,11 @@
   .cv-rv.in { opacity: 1; transform: none; }
   .cv-rvf { opacity: 0; transition: opacity .7s ease; transition-delay: var(--d, 0s); } .cv-rvf.in { opacity: 1; }
   @media (prefers-reduced-motion: reduce) { .cv-rv, .cv-rvf { opacity: 1 !important; transform: none !important; transition: none !important; } }
+
+  /* 47단계: 학생 관리 묶음 아이콘(사람) · 표지 슬라이드 점선은 카드에서 떨어뜨려 여유 있게 */
+  nav#mainNav a.big-item.nav-group.nav-people .chick { -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8' r='3.2'/%3E%3Cpath d='M3 19.5c.6-3.4 3-5.3 6-5.3s5.4 1.9 6 5.3'/%3E%3Ccircle cx='17' cy='9' r='2.4'/%3E%3Cpath d='M16.2 13.6c2.6-.3 4.4 1.4 4.9 4.4'/%3E%3C/svg%3E") !important; mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8' r='3.2'/%3E%3Cpath d='M3 19.5c.6-3.4 3-5.3 6-5.3s5.4 1.9 6 5.3'/%3E%3Ccircle cx='17' cy='9' r='2.4'/%3E%3Cpath d='M16.2 13.6c2.6-.3 4.4 1.4 4.9 4.4'/%3E%3C/svg%3E") !important; }
+  .cv-hero .cv-dash { left: -150px !important; bottom: -34px !important; width: clamp(110px, 9vw, 150px) !important; opacity: .85; }
+  @media (max-width: 1100px) { .cv-hero .cv-dash { left: -104px !important; bottom: -30px !important; } }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Serif+KR:wght@500;600;700&family=Caveat:wght@600;700&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
@@ -10118,37 +10123,36 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     }
     else if (!isActive(p)) kids.push(big("#/", "pending", "가입 승인 대기", "관리자 승인 후 사용"));
     else if (teacherMode()) {
+      // 47단계: 접고 펼치는 묶음(학생 관리 · 관리자 설정) — 묶음 안 화면을 보고 있으면 자동으로 펼친다
+      const navGroup = (id, keys, store, label, subText, icoCls, items) => {
+        let stored = null; try { stored = sessionStorage.getItem(store); } catch (e) {}
+        const open = keys.includes(document.body.dataset.route || "") || stored === "1";
+        const sub = el("div", { id, class: "nav-sub", role: "group", "aria-label": label }, items); sub.hidden = !open;
+        const toggle = el("a", { href: "#/" + id, role: "button", class: "big-item nav-group " + icoCls, "aria-expanded": open ? "true" : "false", "aria-controls": id }, [
+          el("span", { class: "chick nav-gear", "aria-hidden": "true" }),
+          el("span", { class: "bi-text" }, [el("span", { class: "bi-label", text: label }), el("span", { class: "bi-sub", text: subText })]),
+          el("span", { class: "nav-caret", "aria-hidden": "true", text: "▾" })]);
+        toggle.addEventListener("keydown", ev => { if (ev.key === " ") { ev.preventDefault(); toggle.click(); } });
+        toggle.addEventListener("click", ev => { ev.preventDefault(); const now = sub.hidden; sub.hidden = !now; toggle.setAttribute("aria-expanded", now ? "true" : "false");
+          try { sessionStorage.setItem(store, now ? "1" : "0"); } catch (e) {} });
+        return [toggle, sub];
+      };
+      // 순서: 대시보드 → 학생 관리(반 현황 · 출석 현황 · 학습 현황) → 강의 관리 → 교과목 관리 → 과제 → 단어장 → 열린 게시판 → 관리자 설정
       kids.push(
-        big("#/t", "t-home", "반 현황", "출석 · 접속 · 할 일"),
         big("#/dash", "dash", "대시보드", "교과목 운영 현황"),
+        ...navGroup("studentSub", ["t-home", "t-att", "t-prog"], "nbv-student-open", "학생 관리", "반 · 출석 · 학습 현황", "nav-people", [
+          tool("#/t", "t-home", "반 현황"), tool("#/t/attendance", "t-att", "출석 현황"), tool("#/t/progress", "t-prog", "학습 현황")]),
         big("#/lectures", "lectures", "강의 관리", "주차별 강의 · 퀴즈 · 녹음"),
-        big("#/t/attendance", "t-att", "출석 현황", "날짜별 도장"),
-        big("#/t/progress", "t-prog", "학습 현황", "핵심 단어 · 녹음"),
+        big("#/classes", "classes", "교과목 관리", "강의 · 반 코드 · 수강생"), ...(Server.isAdmin() ? [] : [big("#/admin/weeks", "admin-weeks", "주차별 곡", "1~15주차 곡 정하기")]),
         big("#/assign", "assign", "과제" + cnt(navCounts.toReview), "녹음 과제", "tassign"),
         small("#/assign", "assign", "과제 내기 · 제출 현황", "tassign"), small("#/submissions", "submissions", "제출된 녹음 듣기 · 피드백" + cnt(navCounts.toReview), "tassign"),
-        big("#/classes", "classes", "교과목 관리", "강의 · 반 코드 · 수강생"), ...(Server.isAdmin() ? [] : [big("#/admin/weeks", "admin-weeks", "주차별 곡", "1~15주차 곡 정하기")]),
         big("#/glossary", "glossary", "단어장", "핵심 단어 뜻"),
         big("#/board", "board", "열린 게시판", "반 글 보기"));
       if (Server.isAdmin()) {
-        // 25단계: 관리자 메뉴는 '관리자' 한 줄로 접어 두고, 누르면 아래에 하위 메뉴가 펼쳐진다(지금 관리자 화면이면 자동으로 펼침)
-        const ADMIN_KEYS = ["admin-users", "list", "admin-weeks", "add", "autofill", "settings", "admin-data", "embed"];
-        let stored = null; try { stored = sessionStorage.getItem("nbv-admin-open"); } catch (e) {}
-        const here = ADMIN_KEYS.includes(document.body.dataset.route || "");
-        const open = here || stored === "1";
-        const sub = el("div", { id: "adminSub", class: "nav-sub", role: "group", "aria-label": "관리자 메뉴" }, [
+        kids.push(...navGroup("adminSub", ["admin-users", "list", "admin-weeks", "add", "autofill", "settings", "admin-data", "embed"], "nbv-admin-open",
+          "관리자 설정" + cnt(navCounts.pending), "사용자 · 곡 · 설정", "nav-admin", [
           tool("#/admin/users", "admin-users", "학생·사용자 관리" + cnt(navCounts.pending)), tool("#/learn", "list", "곡 목록 · 가사 넣기"), tool("#/admin/weeks", "admin-weeks", "주차별 곡 관리"),
-          tool("#/add", "add", "곡 추가"), tool("#/admin/autofill", "autofill", "가사 일괄 채우기"), tool("#/settings", "settings", "설정"), tool("#/admin/data", "admin-data", "서버 데이터"), tool("#/embed-test", "embed", "임베드 시험표")]);
-        sub.hidden = !open;
-        const toggle = el("a", { href: "#/admin-menu", role: "button", class: "big-item nav-group", "aria-expanded": open ? "true" : "false", "aria-controls": "adminSub" }, [
-          el("span", { class: "chick nav-gear", "aria-hidden": "true" }),
-          el("span", { class: "bi-text" }, [el("span", { class: "bi-label", text: "관리자" + cnt(navCounts.pending) }), el("span", { class: "bi-sub", text: "사용자 · 곡 · 설정" })]),
-          el("span", { class: "nav-caret", "aria-hidden": "true", text: "▾" })]);
-        toggle.addEventListener("keydown", ev => { if (ev.key === " ") { ev.preventDefault(); toggle.click(); } });
-        toggle.addEventListener("click", (ev) => { ev.preventDefault();
-          const now = sub.hidden; sub.hidden = !now; toggle.setAttribute("aria-expanded", now ? "true" : "false");
-          try { sessionStorage.setItem("nbv-admin-open", now ? "1" : "0"); } catch (e) {}
-        });
-        kids.push(toggle, sub);
+          tool("#/add", "add", "곡 추가"), tool("#/admin/autofill", "autofill", "가사 일괄 채우기"), tool("#/settings", "settings", "설정"), tool("#/admin/data", "admin-data", "서버 데이터"), tool("#/embed-test", "embed", "임베드 시험표")]));
       }
       const sw = el("button", { type: "button", class: "mode-btn" }, [el("span", { class: "lbl", text: "학생 화면으로 보기" })]);
       sw.addEventListener("click", () => { viewAsLearner = true; renderNav(); location.hash = "#/checkin"; });
