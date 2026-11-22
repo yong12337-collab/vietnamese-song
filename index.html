@@ -3390,6 +3390,27 @@
   @media (min-width: 861px) { .cv-hero { grid-template-columns: auto auto !important; justify-content: center !important; column-gap: clamp(56px, 6.5vw, 120px) !important; }
     .cv-hero .cv-feat { justify-self: start !important; margin-left: 0 !important; width: 380px !important; } }
   .cv10 .cv-lede { margin-top: 12px !important; }
+
+  /* 54단계: 곡 화면 정리 — 오른쪽 '학습 포인트'는 틀 없이 줄 목록, 맨 위 연습 버튼은 작고 가볍게 */
+  html body #view .points { margin: 0 0 12px !important; }
+  html body #view .points li { border-bottom: 1px solid #EFEFEF; }
+  html body #view .points li:last-child { border-bottom: 0; }
+  html body #view .points button.point { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: grid !important; grid-template-columns: 46px 1fr; column-gap: 10px; row-gap: 2px;
+    align-items: baseline; padding: 10px 6px !important; border-radius: 10px !important; background: transparent !important; box-shadow: none !important; border: 0 !important; }
+  html body #view .points button.point:hover:not(:disabled) { background: #F6F6F6 !important; }
+  html body #view .points button.point:focus-visible { outline: 2px solid #111111; outline-offset: 1px; }
+  html body #view .points button.point:disabled { cursor: default; opacity: .55; }
+  html body #view .points .pt-time { grid-row: 1 / span 2; background: none !important; border: 0 !important; box-shadow: none !important; padding: 0 !important;
+    color: #9A9A9A !important; font-size: 12.5px !important; font-weight: 700; font-variant-numeric: tabular-nums; }
+  html body #view .points .pt-word { color: #111111 !important; font-size: 16px; font-weight: 800; line-height: 1.3; }
+  html body #view .points .pt-mean { margin: 0 !important; color: #6B6B6B !important; font-size: 13.5px !important; line-height: 1.45; white-space: normal; word-break: keep-all; overflow-wrap: anywhere; }
+  html body #view .aside-card .go-practice { font-size: 14px !important; min-height: 38px !important; padding: 0 16px !important; }
+  html body #view .practice2 { display: flex !important; flex-wrap: wrap; gap: 8px !important; margin: 10px 0 14px !important; }
+  html body #view .practice2 > button, html body #view .practice2 > .btn { min-height: 38px !important; height: 38px; padding: 0 18px !important; margin: 0 !important; font-size: 14px !important; font-weight: 700 !important;
+    border-radius: 999px !important; box-shadow: none !important; transform: none !important; width: auto !important; flex: 0 0 auto; }
+  html body #view .practice2 > button:not(.go-practice) { background: #111111 !important; color: #FFFFFF !important; border: 1.5px solid #111111 !important; }
+  html body #view .practice2 > .go-practice { background: #FFFFFF !important; color: #111111 !important; border: 1.5px solid #D6D6D6 !important; }
+  html body #view .practice2 > .go-practice:hover { border-color: #111111 !important; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Serif+KR:wght@500;600;700&family=Caveat:wght@600;700&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
@@ -6048,7 +6069,20 @@ if (typeof module !== "undefined") module.exports = UploadKit;
   // 학습자: 출석 화면 위 요약 카드(다음에 할 일 · 새 피드백)
   async function addLearnerSummary() {
     let list = []; try { list = await Server.myCourseProgress(); } catch (e) { return; }
-    const view = document.getElementById("view"); if (!view || !list.length || document.body.dataset.route !== "checkin") return;
+    const view = document.getElementById("view"); if (!view || document.body.dataset.route !== "checkin") return;
+    if (!list.length) {
+      if (Server.canTeach() || Repo.getClasses().some(c => Repo.memberOf(c.id))) return;
+      const code = el("input", { type: "text", id: "home-code", maxlength: "10", autocomplete: "off", placeholder: "예: K7P2QX", style: "text-transform:uppercase", "aria-label": "교과목 코드" });
+      const go = el("button", { type: "button", class: "primary", text: "수강 등록" }), msg = el("p", { class: "small", role: "status" });
+      go.addEventListener("click", async () => { go.disabled = true;
+        try { const r = await Server.joinClass(code.value); await Repo.initUser(); msg.textContent = "'" + r.name + "' 교과목에 수강 등록했습니다."; setTimeout(() => { if (document.body.dataset.route === "checkin") location.reload(); }, 900); }
+        catch (e) { msg.textContent = e.message || String(e); go.disabled = false; } });
+      code.addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); go.click(); } });
+      const sec = el("section", { class: "learner-summary join-prompt" }, [el("h3", { text: "내 교과목" }),
+        el("div", { class: "card ls-card" }, [el("p", { text: "아직 수강 등록한 교과목이 없습니다. 교수자가 알려 준 교과목 코드를 넣어 주세요." }), el("div", { class: "add-row" }, [code, go]), msg])]);
+      const first = view.firstElementChild; if (first && first.nextSibling) view.insertBefore(sec, first.nextSibling); else view.appendChild(sec);
+      return;
+    }
     const cards = list.map(c => {
       const now = courseWeekNow(c), tasks = c.weeks.filter(w => weekState(w).has), done = tasks.filter(w => weekState(w).done).length;
       const todo = c.weeks.filter(w => weekState(w).has && !weekState(w).done && (now === 0 || w.week_no <= now));
@@ -7259,7 +7293,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         const rp = el("button", { type: "button", class: "primary", disabled: !hasSync(), text: hasSync() ? "한 줄 반복 연습" : "한 줄 반복 연습 (자막 싱크 설정 필요)" });
         rp.addEventListener("click", () => { lineStatus.textContent = "가사 한 줄을 누르면 그 줄만 반복합니다. 다시 누르면 멈춥니다."; lyricsBox.scrollIntoView({ block: "start" }); });
         // 8단계: 핵심 단어 연습·따라 부르기 녹음은 [연습하기]로 옮김(교수자가 확인하는 연습). 여기서는 바로가기만.
-        return el("div", { class: "practice2", role: "group", "aria-label": "연습" }, [rp, el("a", { class: "btn go-practice", href: "#/practice/" + id, text: "연습하기 바로가기 →" })]);
+        return el("div", { class: "practice2", role: "group", "aria-label": "연습" }, [rp, el("a", { class: "btn go-practice", href: "#/practice/" + id + "/repeat", text: "연습하기 →" })]);
       })(),
       videoBox, subsBox,
       el("div", { class: "row-actions sub-modes", role: "group", "aria-label": "자막" }, modeBtns),
@@ -9414,25 +9448,26 @@ if (typeof module !== "undefined") module.exports = UploadKit;
   function renderClasses() {
     const status = el("div", { role: "status" });
     const code = el("input", { type: "text", id: "c-code", maxlength: "10", autocomplete: "off", placeholder: "예: K7P2QX", style: "text-transform:uppercase" });
-    const join = el("button", { type: "button", class: "primary", text: "반 참여" });
+    const join = el("button", { type: "button", class: "primary", text: "수강 등록" });
+    code.addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); join.click(); } });
     join.addEventListener("click", async () => {
-      try { const r = await Server.joinClass(code.value); await Repo.initUser(); flashMsg("'" + r.name + "' 반에 참여했습니다. 이 반의 곡이 목록에 보입니다."); }
+      try { const r = await Server.joinClass(code.value); await Repo.initUser(); flashMsg("'" + r.name + "' 교과목에 수강 등록했습니다. 이 교과목의 곡과 주차별 강의가 보입니다."); }
       catch (e) { status.replaceChildren(el("p", { class: "bad", text: e.message })); }
     });
     function flashMsg(m) { renderClasses(); document.querySelector("main [role=status]").replaceChildren(el("p", { class: "notice", text: m })); }
     const me = Server.user().id;
     const joined = Repo.getClasses().filter(c => Repo.memberOf(c.id));
     const joinedList = joined.length ? el("ul", { class: "word-list" }, joined.map(c => {
-      const leave = el("button", { type: "button", class: "small-btn", text: "나가기" });
+      const leave = el("button", { type: "button", class: "small-btn", text: "수강 취소" });
       leave.addEventListener("click", async () => {
-        if (leave.dataset.confirm !== "1") { leave.dataset.confirm = "1"; leave.textContent = "정말 나가기"; leave.classList.add("danger"); return; }
-        try { await Server.leaveClass(c.id); await Repo.initUser(); flashMsg("'" + c.name + "' 반에서 나왔습니다."); } catch (e) { status.replaceChildren(el("p", { class: "bad", text: e.message })); }
+        if (leave.dataset.confirm !== "1") { leave.dataset.confirm = "1"; leave.textContent = "정말 취소"; leave.classList.add("danger"); return; }
+        try { await Server.leaveClass(c.id); await Repo.initUser(); flashMsg("'" + c.name + "' 교과목 수강을 취소했습니다."); } catch (e) { status.replaceChildren(el("p", { class: "bad", text: e.message })); }
       });
       return el("li", null, [el("span", { class: "wl-word", text: c.name }), leave]);
-    })) : el("p", { class: "muted", text: "참여한 반이 없습니다." });
-    const nodes = [el("h2", { text: "반" }), status,
-      el("h3", { text: "반 코드로 참여" }), el("p", { class: "hint", text: "반 없이도 모든 학습 기능을 쓸 수 있습니다. 선생님이 알려준 반 코드를 넣으면 그 반의 곡과 피드백을 볼 수 있습니다." }),
-      el("div", { class: "add-row" }, [code, join]), el("h3", { text: "참여한 반" }), joinedList];
+    })) : el("p", { class: "muted", text: "아직 수강 등록한 교과목이 없습니다." });
+    const nodes = [el("h2", { text: Server.canTeach() ? "교과목 · 반" : "내 교과목" }), status,
+      el("h3", { text: "교과목 코드로 수강 등록" }), el("p", { class: "hint", text: "교수자가 알려 준 교과목 코드(6자리)를 넣으면 그 교과목의 주차별 강의 · 과제 · 피드백이 열립니다. 여러 교과목을 함께 들을 수 있습니다." }),
+      el("div", { class: "add-row" }, [code, join]), el("h3", { text: "수강 중인 교과목" }), joinedList];
     if (Server.canTeach()) {
       const name = el("input", { type: "text", id: "c-name", maxlength: "60", placeholder: "예: 노래로 배우는 베트남어" });
       const make = el("button", { type: "button", class: "primary", text: "반 만들기" });
@@ -10256,6 +10291,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         big("#/checkin", "checkin", "출석 체크", "오늘의 도장"),
         big("#/learn", "list", "전체 곡", "곡 목록 · 검색"),
         big("#/weeks", "weeks", "주차별 학습", "1~15주차 한 주 한 곡"),
+        big("#/classes", "classes", "내 교과목", "교과목 코드로 수강 등록"),
         big("#/practice", "practice", "연습하기", "반복 · 단어 · 녹음", "practice"),
         small("#/practice/pick/repeat", "practice-repeat", "한 줄 반복 연습", "practice"), small("#/practice/pick/words", "practice-words", "핵심 단어 연습", "practice"),
         small("#/practice/pick/sing", "practice-sing", "따라 부르기 녹음", "practice"), small("#/vault", "vault", "녹음 보관함", "practice"), small("#/review", "review", "오늘의 복습", "practice"),
@@ -10352,12 +10388,12 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     else if (h === "#/checkin") { if (login()) { currentRoute = "checkin"; renderCheckin(); } }
     else if (h === "#/learn") { if (login()) { currentRoute = "list"; renderList(); } }
     else if (h === "#/practice" || (m = h.match(/^#\/practice\/pick\/(repeat|words|sing)$/))) {
-      if (login()) { currentRoute = "practice"; const sid = defaultPracticeSong(); const tb = m ? m[1] : "words";
+      if (login()) { currentRoute = "practice"; const sid = defaultPracticeSong(); const tb = m ? m[1] : "repeat";
         if (sid) location.replace("#/practice/" + sid + "/" + tb); else renderPracticePick(tb); } }
     else if (h === "#/practice/songs") { if (login()) { currentRoute = "practice"; renderPracticePick(); } }
     else if (h === "#/vault") { if (login()) { currentRoute = "vault"; renderVault(); } }
     else if (h === "#/submit") { if (login()) { currentRoute = "submit"; renderSubmit(); } }
-    else if ((m = h.match(/^#\/practice\/(\d+)(?:\/(repeat|words|sing))?$/))) { if (login()) { currentRoute = "practice"; renderPracticeHub(Number(m[1]), m[2] || "words"); } }
+    else if ((m = h.match(/^#\/practice\/(\d+)(?:\/(repeat|words|sing))?$/))) { if (login()) { currentRoute = "practice"; renderPracticeHub(Number(m[1]), m[2] || "repeat"); } }
     else if (h === "#/board") { if (login()) { currentRoute = "board"; renderBoard(); } }
     else if ((m = h.match(/^#\/board\/([0-9a-f-]{36})$/))) { if (login()) { currentRoute = "board"; renderBoardPost(m[1]); } }
     else if ((m = h.match(/^#\/practice\/(\d+)\/(flash|meaning|blank|tone|game)$/))) { if (login()) { currentRoute = "practice"; renderPractice(Number(m[1]), m[2]); } }
