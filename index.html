@@ -5778,7 +5778,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     box-shadow: 0 26px 50px -30px rgba(46,84,190,.42), 0 6px 16px -8px rgba(46,84,190,.14), inset 0 1px 0 rgba(255,255,255,1); transition: transform .25s ease; }
   .hp .hp-key:hover { transform: translateY(-4px); }
   .hp .hp-key .hp-fico { width: 48px; height: 48px; } .hp .hp-key .hp-fico .hp-ico { width: 22px; height: 22px; }
-  .hp .hp-ken { margin-top: 16px; font-size: 12px; font-weight: 900; letter-spacing: .1em; color: var(--hp-blue2); }
+  .hp .hp-ken { margin-top: 0; font-size: 12px; font-weight: 900; letter-spacing: .1em; color: var(--hp-blue2); }
   .hp .hp-key h4, .hp .hp-vnote h4 { margin: 4px 0 0; font-size: 16px; font-weight: 800; letter-spacing: -0.02em; }
   .hp .hp-key p:last-child { margin-top: 8px; font-size: 13.5px; line-height: 1.65; color: var(--hp-ink2); word-break: keep-all; }
   .hp .hp-vnote { display: flex; gap: 18px; align-items: flex-start; margin-top: 28px; padding: 22px 26px; border-radius: 22px; background: linear-gradient(120deg, rgba(232,239,255,.95), rgba(244,238,255,.9)); border: 1px solid rgba(255,255,255,.98); box-shadow: inset 0 1px 0 #fff, 0 18px 40px -28px rgba(46,84,190,.45); }
@@ -6134,7 +6134,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
   .hp .ip-stage { grid-template-columns: auto minmax(0, 1fr); gap: clamp(18px, 2.4vw, 32px); }
   .hp .hp-stage .hp-sctl { grid-column: 1 / -1; justify-self: center; margin-top: 18px; padding-left: 0; }
   .hp .hp-stage { display: grid; }
-  .hp .hp-spause { display: none; }
+  .hp .hp-spause { display: inline-flex; }
   .hp .hp-scount { font-size: 13px; font-weight: 700; color: #6B625B; min-width: 40px; text-align: center; }
   .hp .hp-dot { width: 8px; height: 8px; background: #D6C7B7; } .hp .hp-dot.on { width: 8px; background: #C58A45; box-shadow: none; }
   .hp .hp-sarrow { color: #6B625B; }
@@ -6440,7 +6440,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
   const HP_TONE_KO = { ngang: "평평하게", huyền: "낮게 내려가며", sắc: "높이 올라가며", hỏi: "내려갔다 올라오며", ngã: "꺾이며 올라가며", nặng: "짧고 낮게 끊으며" };
   const HP_LV = ["입문", "초급", "중급", "고급"];
   const HP_SLIDES = [
-    { kick: "VIETNAMESE × MUSIC × LEARNING", l1: "어렵게 느껴지는 베트남어,", l2: "노래와 함께!", p: ["낯선 성조와 발음도 좋아하는 노래를 듣고, 가사를 이해하고,", "직접 따라 말하며 베트남어를 쉽고 재미있게 배워보세요."], tab: "lyrics" },
+    { kick: "VIETNAMESE × MUSIC × LEARNING", l1: "노래로 만나는 베트남어,", l2: "음악으로 이어지는 배움", p: ["낯선 성조와 발음도 좋아하는 노래를 듣고, 가사를 이해하고,", "직접 따라 말하며 베트남어를 쉽고 재미있게 배워보세요."], tab: "lyrics" },
     { kick: "TONES × PRONUNCIATION", l1: "여섯 개의 성조,", l2: "노래 한 줄씩 익혀요", p: ["베트남어 6성조와 발음을 노래 한 줄씩 듣고 따라 하며 익혀요.", "음절마다 성조 높낮이를 그림으로 함께 확인할 수 있어요."], tab: "tone" },
     { kick: "LYRICS × MEANING", l1: "베트남어 원문과 번역,", l2: "나란히 비교해요", p: ["가사의 베트남어 원문과 한국어 번역을 한 줄씩 나란히 보며,", "문장이 어떻게 이루어지는지 자연스럽게 이해해요."], tab: "lyrics" },
     { kick: "SHADOWING × RECORDING", l1: "구절마다 따라 읽고,", l2: "내 목소리로 녹음해요", p: ["노래를 들으며 구절별로 따라 읽는 쉐도잉으로 말하기를 연습하고,", "녹음 과제로 제출해 교수자의 피드백을 받아요."], tab: "lyrics" },
@@ -6522,7 +6522,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     const sNext = el("button", { type: "button", class: "hp-sarrow", "aria-label": "다음 소개" }, [hpIco("chev")]);
     const sCount = el("span", { class: "hp-scount" });
     const sPause = el("button", { type: "button", class: "hp-spause" });
-    let auto = !reduce, hover = false;
+    let auto = true, hover = false, holdUntil = 0;
     function drawPause() { sPause.replaceChildren(hpIco(auto ? "pause" : "play")); sPause.setAttribute("aria-label", auto ? "자동 넘김 멈추기" : "자동 넘김 다시 시작"); }
     sPause.addEventListener("click", () => { auto = !auto; drawPause(); });
     sPrev.addEventListener("click", () => { touch(); goSlide((S.slide + HP_SLIDES.length - 1) % HP_SLIDES.length); });
@@ -6533,8 +6533,8 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       el("div", { class: "hp-sctl" }, [sPrev, el("div", { class: "hp-dots", role: "group", "aria-label": "소개 고르기" }, dots), sNext, sCount, sPause])]);
     { const sc = hero.querySelector(".hp-sctl"), st = hero.querySelector(".hp-stage"); if (sc && st) st.appendChild(sc); }
     // 사용자가 직접 조작하면 자동 넘김을 멈춘다
-    function touch() { if (auto) { auto = false; drawPause(); } }
-    hero.addEventListener("mouseenter", () => { hover = true; }); hero.addEventListener("mouseleave", () => { hover = false; });
+    function touch() { holdUntil = Date.now() + 15000; }
+    { const st = hero.querySelector(".hp-stage") || hero; st.addEventListener("mouseenter", () => { hover = true; }); st.addEventListener("mouseleave", () => { hover = false; }); }
     let tx = null, ty = null;
     hero.addEventListener("touchstart", ev => { if (ev.target.closest(".hp-bar, .hp-ctrl")) { tx = null; return; } const t = ev.changedTouches[0]; tx = t.clientX; ty = t.clientY; }, { passive: true });
     hero.addEventListener("touchend", ev => { if (tx == null) return; const t = ev.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty; tx = null;
@@ -6789,8 +6789,8 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         el("div", { class: "cn-bubble rv", "data-rv": "pop" }, [el("p", { text: "베트남의 대중음악은 전통 음악문화와 서구 대중음악의 영향, 그리고 디지털 음악산업의 발전 속에서 다양한 모습으로 변화해 왔습니다. 오늘날 V-POP(Vietnamese Pop)은 발라드와 팝을 넘어 랩 · 힙합 · R&B · 인디 · EDM까지 아우르며, 젊은 음악가들은 세계적인 흐름을 받아들이면서도 베트남 고유의 언어와 문화, 전통 선율을 작품에 담아냅니다. 그래서 베트남 대중음악을 살펴보는 일은 노래 감상을 넘어, 베트남 사회와 젊은 세대의 감수성을 이해하는 한 가지 방법이 됩니다." })]),
         el("h3", { class: "cn-h rv", "data-rv": "up", text: "베트남 대중음악의 흐름" }),
         el("div", { class: "hp-filmwrap cn-screen rv", "data-rv": "projector" }, [film]),
-        el("h3", { class: "cn-h rv", "data-rv": "up", text: "오늘날의 V-POP을 이해하는 다섯 가지 키워드" }),
-        el("div", { class: "hp-keys" }, KEYS.map(([en, ko, p, ic], k) => el("article", { class: "hp-key rv", "data-rv": "up", style: "--d:" + (k * 0.08) + "s" }, [el("span", { class: "hp-fico" }, [hpIco(ic)]), el("p", { class: "hp-ken", text: en }), el("h4", { text: ko }), el("p", { text: p })])))]),
+        el("h3", { class: "cn-h rv", "data-rv": "up", text: "좋아하는 노래로 시작하는 베트남어" }),
+        el("div", { class: "hp-keys" }, KEYS.map(([en, ko, p, ic], k) => el("article", { class: "hp-key rv", "data-rv": "up", style: "--d:" + (k * 0.08) + "s" }, [el("p", { class: "hp-ken", text: en }), el("h4", { text: ko }), el("p", { text: p })])))]),
       el("div", { class: "cn-seats", "aria-hidden": "true" }, [0, 1].map(r => el("div", { class: "cn-row r" + r }, Array.from({ length: 16 }, () => el("i")))))]);
     const foot = el("footer", { class: "hp-foot" }, [el("div", { class: "hp-foot-in" }, [
       el("div", null, [el("p", { class: "hp-fbrand" }, [hpIco("wave", "hp-logo-wave"), el("span", { text: "노래 베트남어" })]), el("p", { class: "hp-fp", text: "베트남 노래로 배우는 대학 베트남어 · 듣기 · 성조 · 어휘 · 문화" })]),
@@ -6825,7 +6825,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     const onScroll = () => head.classList.toggle("scrolled", window.scrollY > 6);
     window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
     viewCleanups.push(() => window.removeEventListener("scroll", onScroll));
-    const timer = setInterval(() => { if (auto && !hover && !S.playing && !document.hidden) goSlide((S.slide + 1) % HP_SLIDES.length); }, 7000);
+    const timer = setInterval(() => { if (auto && !hover && Date.now() > holdUntil && !S.playing && !document.hidden && document.body.dataset.route === "cover") goSlide((S.slide + 1) % HP_SLIDES.length); }, 7000);
     viewCleanups.push(() => { clearInterval(timer); stopVideo(); });
     Server.homeShowcase().then(r => { S.songs = r.songs || []; S.artists = r.artists || []; })
       .catch(() => { S.failed = true; })
