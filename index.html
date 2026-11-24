@@ -3797,6 +3797,21 @@
   html body:not(.anon) main#view#view#view .learner-summary .ls-card { max-width: 520px; padding: 12px 16px !important; }
   html body:not(.anon) main#view#view#view .learner-summary .ls-card.join-prompt, html body:not(.anon) main#view#view#view .learner-summary.join-prompt .ls-card { max-width: 640px; }
   html body:not(.anon) main#view#view#view .learner-summary h3 { margin-top: 10px !important; }
+  /* 109: 달력 안쪽 줄 · 출석은 날짜 밑 빨간 체크 */
+  html body:not(.anon) main#view#view#view .cal { gap: 0 !important; padding: 52px 18px 18px !important; }
+  html body:not(.anon) main#view#view#view .cal-h { border-bottom: 0 !important; margin: 0 !important; padding: 4px 0 8px !important; }
+  html body:not(.anon) main#view#view#view .cal-c, html body:not(.anon) main#view#view#view .cal-c.empty, html body:not(.anon) main#view#view#view .cal-c.today, html body:not(.anon) main#view#view#view .cal-c.on, html body:not(.anon) main#view#view#view .cal-c.today.on {
+    border-radius: 0 !important; border: 0 !important; border-right: 1px solid var(--u-line2) !important; border-bottom: 1px solid var(--u-line2) !important; background: #FFFFFF !important; color: var(--u-ink) !important; gap: 3px; }
+  html body:not(.anon) main#view#view#view .cal-c:nth-child(7n+2) { border-left: 1px solid var(--u-line2) !important; }
+  html body:not(.anon) main#view#view#view .cal-c:nth-child(-n+15) { border-top: 1px solid var(--u-line2) !important; }
+  html body:not(.anon) main#view#view#view .cal-c.empty { background: #FAFBFD !important; }
+  html body:not(.anon) main#view#view#view .cal-c.today { background: #EEF3FF !important; color: var(--u-blue) !important; font-weight: 700 !important; }
+  html body:not(.anon) main#view#view#view button.cal-c.today:hover:not(:disabled) { background: #E2EBFF !important; }
+  html body:not(.anon) main#view#view#view .cal-c .cal-ck { display: flex !important; color: #D93A3A; line-height: 0; }
+  html body:not(.anon) main#view#view#view .cal-c .cal-ck svg { display: block !important; }
+  html body:not(.anon) main#view#view#view .cal-c.on .cal-d { color: var(--u-ink); }
+  html body:not(.anon) main#view#view#view .cal-c.today.on .cal-d { color: var(--u-blue); }
+  html body:not(.anon) main#view#view#view .cal-note { margin-top: 8px !important; font-size: 12px !important; }
   @media (prefers-reduced-motion: reduce) { html body:not(.anon) main#view#view#view *, html body:not(.anon) main#view#view#view > * { animation: none !important; transition: none !important; } }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -8266,6 +8281,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       const first = view.firstElementChild; if (first && first.nextSibling) view.insertBefore(sec, first.nextSibling); else view.appendChild(sec);
       return;
     }
+    return; // 출석 체크 화면에는 교과목 요약을 두지 않음(승인받은 교과목으로 들어오므로)
     const cards = list.map(c => {
       const now = courseWeekNow(c), tasks = c.weeks.filter(w => weekState(w).has), done = tasks.filter(w => weekState(w).done).length;
       const todo = c.weeks.filter(w => weekState(w).has && !weekState(w).done && (now === 0 || w.week_no <= now));
@@ -11231,6 +11247,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     addLearnerSummary();
     const T = todayStr(), me = Server.user().id;
     let justStamped = false;
+    const CK = () => { const x = el("span", { class: "cal-ck", "aria-hidden": "true" }); x.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'; return x; };
     function draw(d) {
       const a = d.summary, stamps = new Set(d.stamps), studied = new Set(d.studied);
       const [y, m] = T.split("-").map(Number);
@@ -11242,26 +11259,26 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         const on = stamps.has(ds), st = studied.has(ds);
         if (ds === T && !on) {
           // 오늘 칸 자체가 출석 버튼(다른 날짜는 누를 수 없음)
-          const tb = el("button", { type: "button", class: "cal-c today tap-today" + (st ? " studied" : ""), "aria-label": m + "월 " + dd + "일 오늘, 눌러서 출석하기" },
-            [el("span", { class: "cal-d", text: String(dd) }), st ? el("span", { class: "cal-s", text: "공부" }) : null].filter(Boolean));
+          const tb = el("button", { type: "button", class: "cal-c today tap-today", "aria-label": m + "월 " + dd + "일 오늘, 눌러서 출석하기" },
+            [el("span", { class: "cal-d", text: String(dd) })]);
           tb.addEventListener("click", async () => {
-            tb.disabled = true; tb.classList.add("on"); tb.classList.remove("tap-today");
+            tb.disabled = true; tb.classList.add("on"); tb.classList.remove("tap-today"); tb.appendChild(CK());
             try { await Server.checkIn(); justStamped = true; draw(await Server.checkinDetail(me, T)); }
-            catch (e) { tb.disabled = false; tb.classList.remove("on"); tb.classList.add("tap-today"); box.appendChild(el("p", { class: "bad", text: e.message })); }
+            catch (e) { tb.disabled = false; tb.classList.remove("on"); tb.classList.add("tap-today"); tb.querySelectorAll(".cal-ck").forEach(x => x.remove()); box.appendChild(el("p", { class: "bad", text: e.message })); }
           });
           cells.push(tb); continue;
         }
-        cells.push(el("div", { class: "cal-c" + (on ? " on" : "") + (st ? " studied" : "") + (ds === T ? " today" : "") , "aria-label": ds + (on ? " 출석 도장" : "") + (st ? " 공부함" : "") },
-          [el("span", { class: "cal-d", text: String(dd) }), on ? el("span", { class: "sr-only", text: " 출석" }) : null, st ? el("span", { class: "cal-s", text: "공부" }) : null]));
+        cells.push(el("div", { class: "cal-c" + (on ? " on" : "") + (ds === T ? " today" : ""), "aria-label": ds + (on ? " 출석" : "") },
+          [el("span", { class: "cal-d", text: String(dd) }), on ? CK() : null, on ? el("span", { class: "sr-only", text: " 출석" }) : null].filter(Boolean)));
       }
+      while ((cells.length - 7) % 7) cells.push(el("div", { class: "cal-c empty" }));
       const btn = el("p", { class: "sr-only", role: "status", text: a.today ? "오늘 출석 완료" : "달력에서 오늘 날짜를 누르면 출석합니다." });
       const stat = (k, v) => el("div", { class: "stat" }, [el("span", { class: "small muted", text: k }), el("strong", { text: v })]);
       const badge = (label, date) => el("li", null, [el("span", { class: "badge-word" + (date ? " got" : ""), text: label }), el("span", { class: "small", text: date ? date + " 받음" : "아직" })]);
       fill(box, el("div", { class: "row-actions" }, [btn]),
         el("div", { class: "stat-grid" }, [stat("연속 출석", a.streak + "일"), stat("최장 연속", a.longest + "일"), stat("이번 달 출석", a.month + "일"), stat("이번 학기 출석", a.semester + "일")]),
         el("div", { class: "cal", "aria-label": y + "년 " + m + "월 출석 달력" }, [el("p", { class: "cal-month", text: y + "년 " + m + "월" })].concat(cells)),
-        el("p", { class: "small muted", text: "색칠된 칸 = 출석 · '공부' = 그날 연습 문제를 풀거나 녹음을 저장하거나 복습한 날. 교수자는 둘 다 봅니다. 이번 학기는 " + a.semester_start + "부터 셉니다." }),
-        el("ul", { class: "word-list" }, [badge("7일 연속 출석", a.badge7), badge("30일 연속 출석", a.badge30)]));
+        el("p", { class: "small muted cal-note", text: "오늘 날짜를 누르면 출석이 체크됩니다." }));
     }
     Server.checkinDetail(me, T).then(draw).catch(e => box.replaceChildren(el("p", { class: "bad", text: e.message })));
     Promise.all([Server.myAssignments().catch(() => []), Promise.resolve(Learner.due().length), Server.weeks().catch(() => [])]).then(([asg, due, weeks]) => {
