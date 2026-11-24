@@ -3681,6 +3681,123 @@
   html body:not(.anon) > footer.app-footer .af-copy { max-width: 1320px; margin: 22px auto 0; padding-top: 16px; border-top: 1px solid rgba(241,232,223,.18); font-size: 12.5px; color: rgba(241,232,223,.6); }
   html body:not(.anon) nav#mainNav#mainNav#mainNav { max-height: calc(100vh - 290px) !important; }
   html body:not(.anon) > .layout { min-height: calc(100vh - 380px) !important; }
+  /* ===== 106: 글씨 가볍게 · 출석 달력 작게 · 곡별 진행 간단히 · 검색 돋보기 · 등장/누름 효과 ===== */
+  html body:not(.anon) main#view#view#view { font-size: 14.5px; }
+  html body:not(.anon) main#view#view#view h2 { font-size: clamp(21px, 1.7vw, 24px) !important; font-weight: 700 !important; }
+  html body:not(.anon) main#view#view#view h3 { font-size: 16px !important; font-weight: 650 !important; margin-top: 26px !important; }
+  html body:not(.anon) main#view#view#view :is(p, li, td, th, label) { font-weight: 400; }
+  html body:not(.anon) main#view#view#view :is(.card-title, .card h4) { font-size: 15px !important; font-weight: 650 !important; }
+  html body:not(.anon) main#view#view#view .kicker { font-size: 12px !important; font-weight: 600 !important; }
+  html body:not(.anon) main#view#view#view :is(button, .btn) { font-weight: 600 !important; }
+  html body:not(.anon) main#view#view#view .small.strong { font-weight: 600 !important; }
+  html body:not(.anon) main#view#view#view .next-line { font-size: 14px !important; font-weight: 500 !important; }
+  /* 숫자 카드: 작게 */
+  html body:not(.anon) main#view#view#view .stat-grid { gap: 10px !important; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)) !important; max-width: 860px; }
+  html body:not(.anon) main#view#view#view .stat { padding: 12px 14px !important; min-height: 0 !important; border-radius: 12px !important; }
+  html body:not(.anon) main#view#view#view .stat span { font-size: 12px !important; font-weight: 500 !important; }
+  html body:not(.anon) main#view#view#view .stat strong { font-size: 19px !important; font-weight: 650 !important; margin-top: 2px; line-height: 1.3 !important; }
+  html body:not(.anon) main#view#view#view .stat::before, html body:not(.anon) main#view#view#view .stat::after { width: 6px !important; height: 6px !important; }
+
+  /* 출석 달력: 하얀 카드 한 장 */
+  html body:not(.anon) main#view#view#view .cal { display: grid !important; grid-template-columns: repeat(7, 1fr) !important; gap: 4px !important; max-width: 460px; padding: 46px 14px 14px !important; margin: 6px 0 10px !important;
+    background: #FFFFFF !important; border: 1px solid var(--u-line) !important; border-radius: 16px !important; box-shadow: 0 6px 18px rgba(23,35,61,.06) !important; position: relative; opacity: 1 !important; backdrop-filter: none !important; }
+  html body:not(.anon) main#view#view#view .cal-month { position: absolute; top: 14px; left: 18px; margin: 0; font-size: 14px; font-weight: 650; color: var(--u-ink); }
+  html body:not(.anon) main#view#view#view .cal-h { font-size: 11.5px !important; font-weight: 500 !important; color: var(--u-ink2) !important; text-align: center; padding: 2px 0 6px !important; border-bottom: 1px solid var(--u-line); margin-bottom: 2px; }
+  html body:not(.anon) main#view#view#view .cal-h:nth-child(8) { color: #C0533F !important; }
+  html body:not(.anon) main#view#view#view .cal-c { aspect-ratio: 1 / 1; min-height: 0 !important; height: auto !important; padding: 0 !important; display: flex !important; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+    border-radius: 9px !important; border: 1px solid transparent !important; background: transparent !important; box-shadow: none !important; font-size: 13px !important; font-weight: 500 !important; color: var(--u-ink) !important;
+    animation: none !important; transform: none !important; opacity: 1 !important; transition: background-color .18s ease, color .18s ease !important; outline-offset: 2px; }
+  html body:not(.anon) main#view#view#view .cal-c::before, html body:not(.anon) main#view#view#view .cal-c::after { content: none !important; display: none !important; }
+  html body:not(.anon) main#view#view#view .cal-c :is(.stamp-img, .cal-tap, img, svg) { display: none !important; }
+  html body:not(.anon) main#view#view#view .cal-c .cal-d { font-size: 13px !important; font-weight: inherit !important; line-height: 1; }
+  html body:not(.anon) main#view#view#view .cal-c .cal-s { font-size: 9.5px !important; font-weight: 600 !important; color: var(--u-blue) !important; line-height: 1; }
+  html body:not(.anon) main#view#view#view .cal-c.studied { box-shadow: none !important; }
+  html body:not(.anon) main#view#view#view .cal-c.today { border: 1.5px solid var(--u-blue) !important; background: #FFFFFF !important; font-weight: 700 !important; color: var(--u-blue) !important; cursor: pointer; }
+  html body:not(.anon) main#view#view#view button.cal-c.today:hover:not(:disabled) { background: #EEF3FF !important; }
+  html body:not(.anon) main#view#view#view .cal-c.on, html body:not(.anon) main#view#view#view .cal-c.today.on { background: #D9BFA4 !important; border-color: #D9BFA4 !important; color: #3E2A1F !important; font-weight: 650 !important; }
+  html body:not(.anon) main#view#view#view .cal-c.on .cal-s { color: #3E2A1F !important; }
+  html body:not(.anon) main#view#view#view .cal-c.empty { background: transparent !important; border-color: transparent !important; }
+  html body:not(.anon) main#view#view#view .cal + p.small { font-size: 12px !important; max-width: 640px; }
+  html body:not(.anon) main#view#view#view .badge-word { font-size: 12.5px !important; padding: 2px 10px !important; }
+
+  /* 곡별 진행 · 남은 것: 한 줄씩 작게 */
+  html body:not(.anon) main#view#view#view .sp-list { display: grid; gap: 8px; max-width: 900px; }
+  html body:not(.anon) main#view#view#view .sp-row { display: grid; grid-template-columns: minmax(150px, 220px) 1fr; gap: 6px 16px; align-items: center; padding: 10px 14px; background: #FFFFFF; border: 1px solid var(--u-line); border-radius: 12px; }
+  html body:not(.anon) main#view#view#view .sp-head { min-width: 0; }
+  html body:not(.anon) main#view#view#view .sp-title { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  html body:not(.anon) main#view#view#view .sp-title a { color: var(--u-ink) !important; text-decoration: none; }
+  html body:not(.anon) main#view#view#view .sp-title a:hover { color: var(--u-blue) !important; text-decoration: underline; }
+  html body:not(.anon) main#view#view#view .sp-date { font-size: 11.5px; color: var(--u-ink2); }
+  html body:not(.anon) main#view#view#view .sp-chips { display: flex; flex-wrap: wrap; gap: 5px; margin: 0; padding: 0; list-style: none; }
+  html body:not(.anon) main#view#view#view .sp-chip { display: inline-flex; gap: 5px; align-items: center; margin: 0; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; line-height: 1.4; background: #F2F4F8; color: #7A8396; border: 1px solid transparent; }
+  html body:not(.anon) main#view#view#view .sp-chip .sp-k { font-weight: 600; }
+  html body:not(.anon) main#view#view#view .sp-chip.ok { background: #E8F3EC; color: #2C6B47; }
+  html body:not(.anon) main#view#view#view .sp-chip.need { background: #FBF1E4; color: #8A5A2B; }
+  html body:not(.anon) main#view#view#view .sp-rem { grid-column: 2; margin: 0; font-size: 12px; color: var(--u-ink2); }
+  html body:not(.anon) main#view#view#view .sp-rem.ok { color: #2C6B47; }
+  @media (max-width: 640px) { html body:not(.anon) main#view#view#view .sp-row { grid-template-columns: 1fr; } html body:not(.anon) main#view#view#view .sp-rem { grid-column: 1; } }
+
+  /* 위쪽 검색: 돋보기 */
+  html body:not(.anon) #userBox#userBox .top-search.has-ico { position: relative; }
+  html body:not(.anon) #userBox#userBox .top-search .ts-ico { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); display: flex; color: var(--u-blue); cursor: pointer; z-index: 1; }
+  html body:not(.anon) #userBox#userBox .top-search.has-ico input { padding-left: 38px !important; font-size: 13.5px !important; }
+  html body:not(.anon) main#view#view#view input[type=search] { padding-left: 36px !important; background-repeat: no-repeat !important; background-position: 12px 50% !important; background-size: 16px 16px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234778C8' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='6.5'/%3E%3Cpath d='m16 16 4.5 4.5'/%3E%3C/svg%3E") !important; }
+
+  /* 등장: 아래에서 위로 차례로 */
+  @keyframes u-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  html body:not(.anon) main#view#view#view > * { animation: u-rise .45s cubic-bezier(.2,.7,.2,1) both; }
+  html body:not(.anon) main#view#view#view > :nth-child(2) { animation-delay: .05s; } html body:not(.anon) main#view#view#view > :nth-child(3) { animation-delay: .1s; }
+  html body:not(.anon) main#view#view#view > :nth-child(4) { animation-delay: .15s; } html body:not(.anon) main#view#view#view > :nth-child(5) { animation-delay: .2s; }
+  html body:not(.anon) main#view#view#view > :nth-child(n+6) { animation-delay: .25s; }
+  html body:not(.anon) main#view#view#view :is(.stat-grid, .cards, .sp-list, .songs, .todo) > * { animation: u-rise .45s cubic-bezier(.2,.7,.2,1) both; }
+  html body:not(.anon) main#view#view#view :is(.stat-grid, .cards, .sp-list, .songs, .todo) > :nth-child(2) { animation-delay: .06s; }
+  html body:not(.anon) main#view#view#view :is(.stat-grid, .cards, .sp-list, .songs, .todo) > :nth-child(3) { animation-delay: .12s; }
+  html body:not(.anon) main#view#view#view :is(.stat-grid, .cards, .sp-list, .songs, .todo) > :nth-child(4) { animation-delay: .18s; }
+  html body:not(.anon) main#view#view#view :is(.stat-grid, .cards, .sp-list, .songs, .todo) > :nth-child(5) { animation-delay: .24s; }
+  html body:not(.anon) main#view#view#view :is(.stat-grid, .cards, .sp-list, .songs, .todo) > :nth-child(n+6) { animation-delay: .3s; }
+  /* 누를 때: 살짝 눌림 */
+  html body:not(.anon) main#view#view#view :is(button, .btn, a.card, .card, .stat, .sp-row, .songs > li, .cp-card) { transition: transform .12s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease !important; }
+  html body:not(.anon) main#view#view#view :is(.card, .sp-row, .songs > li, .cp-card):hover { box-shadow: 0 8px 20px rgba(23,35,61,.08) !important; }
+  html body:not(.anon) main#view#view#view :is(button, .btn):active:not(:disabled) { transform: scale(.96) !important; }
+  html body:not(.anon) main#view#view#view :is(a.card, .card, .stat, .sp-row, .songs > li, .cp-card):active { transform: scale(.985) !important; }
+  html body:not(.anon) nav#mainNav#mainNav#mainNav a:active { transform: scale(.97); }
+  html body:not(.anon) main#view#view#view .cal-c.on { outline: 0 !important; }
+  html body:not(.anon) main#view#view#view .cal { max-width: 620px; }
+  html body:not(.anon) main#view#view#view .stat > span { padding-right: 12px; white-space: nowrap; }
+  html body:not(.anon) main#view#view#view .stat strong { font-weight: 600 !important; }
+  html body:not(.anon) main#view#view#view :is(button, .btn):not(.point):not(.cp-card):not(.pz-b):not(.rec-btn):not(.recording):not(.tc-card):not([role="tab"]):not(.wk-no):not(.cal-c) { font-size: 14px !important; min-height: 40px !important; padding-left: 16px !important; padding-right: 16px !important; }
+  html body:not(.anon) main#view#view#view :is(input[type=text], input[type=search], input[type=url], input[type=number], input[type=email], select, textarea) { font-size: 14px !important; }
+  html body:not(.anon) main#view#view#view :is(.card, .song-card) :is(h3, h4, .title, .card-title) { font-weight: 650 !important; }
+  /* 107: 달력 다시 크게 · 마이페이지 정보 비율 · 단어 연습 3열 */
+  html body:not(.anon) main#view#view#view .cal { padding: 52px 18px 18px !important; gap: 6px !important; }
+  html body:not(.anon) main#view#view#view .cal-month { top: 18px; left: 22px; font-size: 16px; }
+  html body:not(.anon) main#view#view#view .cal-c { aspect-ratio: 1.15 / 1; border-radius: 11px !important; font-size: 15px !important; }
+  html body:not(.anon) main#view#view#view .cal-c .cal-d { font-size: 15px !important; }
+  html body:not(.anon) main#view#view#view .cal-c .cal-s { font-size: 10.5px !important; }
+  html body:not(.anon) main#view#view#view .cal-h { font-size: 12.5px !important; }
+  html body:not(.anon) main#view#view#view .me-cards { display: grid !important; grid-template-columns: 1.25fr 1fr 1fr !important; gap: 14px !important; align-items: stretch; max-width: 1100px; }
+  html body:not(.anon) main#view#view#view .me-cards > .card { display: flex; flex-direction: column; padding: 18px 20px !important; margin: 0 !important; min-width: 0; }
+  html body:not(.anon) main#view#view#view .me-cards > .card > :is(a.btn, .btn) { margin-top: auto !important; align-self: flex-start; }
+  html body:not(.anon) main#view#view#view .me-cards .kv { margin: 6px 0 14px !important; }
+  html body:not(.anon) main#view#view#view .me-cards .kv li { display: grid !important; grid-template-columns: 76px 1fr; gap: 10px; align-items: baseline; padding: 7px 0 !important; font-size: 13.5px; }
+  html body:not(.anon) main#view#view#view .me-cards .kv li > :first-child { color: var(--u-ink2) !important; white-space: nowrap; }
+  html body:not(.anon) main#view#view#view .me-cards .kv li > :last-child { text-align: right; overflow-wrap: anywhere; word-break: keep-all; color: var(--u-ink) !important; }
+  @media (max-width: 980px) { html body:not(.anon) main#view#view#view .me-cards { grid-template-columns: 1fr 1fr !important; } }
+  @media (max-width: 640px) { html body:not(.anon) main#view#view#view .me-cards { grid-template-columns: 1fr !important; } }
+  html body:not(.anon) main#view#view#view .pcards { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 14px !important; max-width: 900px; }
+  html body:not(.anon) main#view#view#view .pcard { padding: 18px 20px !important; min-height: 112px; }
+  @media (max-width: 700px) { html body:not(.anon) main#view#view#view .pcards { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; } }
+  /* 108: 출석 달력은 '오늘 할 일' 폭에 맞추고, 내 교과목 카드는 짧게 */
+  html body:not(.anon)[data-route="checkin"] main#view#view#view .cal { max-width: none !important; width: 100%; box-sizing: border-box; }
+  html body:not(.anon)[data-route="checkin"] main#view#view#view .cal-c { aspect-ratio: auto !important; height: 64px !important; }
+  html body:not(.anon)[data-route="checkin"] main#view#view#view .stat-grid { max-width: none !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  @media (max-width: 640px) { html body:not(.anon)[data-route="checkin"] main#view#view#view .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    html body:not(.anon)[data-route="checkin"] main#view#view#view .cal-c { height: 44px !important; } }
+  html body:not(.anon) main#view#view#view .learner-summary .ls-card { max-width: 520px; padding: 12px 16px !important; }
+  html body:not(.anon) main#view#view#view .learner-summary .ls-card.join-prompt, html body:not(.anon) main#view#view#view .learner-summary.join-prompt .ls-card { max-width: 640px; }
+  html body:not(.anon) main#view#view#view .learner-summary h3 { margin-top: 10px !important; }
+  @media (prefers-reduced-motion: reduce) { html body:not(.anon) main#view#view#view *, html body:not(.anon) main#view#view#view > * { animation: none !important; transition: none !important; } }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Serif+KR:wght@500;600;700&family=Caveat:wght@600;700&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
@@ -6317,6 +6434,12 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 72' preserveAspectRatio='none'%3E%3Cpath d='M0 40 C 240 0, 480 70, 760 34 S 1200 6, 1440 30 V72 H0Z' fill='%236E5242'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
   .hp .hp-fbrand { color: #FFFFFF; } .hp .hp-fbrand .hp-logo-wave { color: #EBC77B; }
   .hp .hp-contact a { color: #F0CF8F; }
+
+  /* 70단계: 학습 목표 아이콘 — 위 기능 줄(블루 동그라미)과 다르게, 베이지 둥근 네모 + 브라운 선 */
+  .hp .hp-gico { width: 48px; height: 48px; border-radius: 14px; background: #F6EEE3; color: #8C6A4F; box-shadow: inset 0 0 0 1px #EADBC8; }
+  .hp .hp-gico .hp-ico { width: 24px; height: 24px; } .hp .hp-gico .hp-ico svg { stroke: currentColor; stroke-width: 1.7; }
+  .hp .hp-gi h3 { margin-top: 16px; }
+  .hp .hp-goals .hp-gwrap { margin-top: 22px; }
   /* 스크롤 등장: 구역마다 다르게 */
   .hp.rv-on .rv { opacity: 0; transition: opacity .9s cubic-bezier(.2,.7,.2,1) var(--d, 0s), transform .9s cubic-bezier(.2,.7,.2,1) var(--d, 0s), filter .9s ease var(--d, 0s), letter-spacing 1.4s cubic-bezier(.2,.7,.2,1); }
   .hp.rv-on .rv[data-rv="up"] { transform: translateY(36px); }
@@ -6389,6 +6512,10 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     menu: '<svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
     quiz: '<svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2.5"/><path d="M8 9h8M8 13h5"/><path d="M14.5 16.5l1.5 1.5 3-3"/></svg>',
     chat: '<svg viewBox="0 0 24 24"><path d="M4.5 5.5h15v10h-8l-4.5 3.5v-3.5H4.5z"/></svg>',
+    g_listen: '<svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
+    g_tone: '<svg viewBox="0 0 24 24"><path d="M3 17c2.5 0 3.5-9 6-9s3 6 5.5 6S18 6 21 6"/><circle cx="3.5" cy="17" r="1.2" class="f"/><circle cx="21" cy="6" r="1.2" class="f"/></svg>',
+    g_words: '<svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2.5"/><path d="M8 8.5h8M8 12h8M8 15.5h5"/></svg>',
+    g_culture: '<svg viewBox="0 0 24 24"><path d="M12 3.5 4 8h16z"/><path d="M6 8v9M10 8v9M14 8v9M18 8v9M3.5 20.5h17M4.5 17.5h15"/></svg>',
   };
   const HP_MARKS = { "\u0301": "sắc", "\u0300": "huyền", "\u0309": "hỏi", "\u0303": "ngã", "\u0323": "nặng" };
   function hpToneOf(sy) { const d = String(sy).normalize("NFD"); for (let i = 0; i < d.length; i++) if (HP_MARKS[d[i]]) return HP_MARKS[d[i]]; return "ngang"; }
@@ -6744,10 +6871,10 @@ if (typeof module !== "undefined") module.exports = UploadKit;
 
     /* 학습 목표 · 학습 방법 */
     /* 59단계: 학습 목표 — 아이보리 패널(가로 4칸 + 우드 카드) */
-    const GOALS = [["ear", "베트남어 듣기 능력 향상", "실제 노래의 속도와 발음으로 귀를 열고, 들리는 문장을 늘려 갑니다."],
-      ["wave", "성조와 발음의 정확성 향상", "여섯 성조의 높낮이를 듣고 따라 하며, 녹음으로 내 발음을 확인합니다."],
-      ["book", "어휘 및 일상 표현 습득", "가사 속 자주 쓰는 단어와 표현을 뜻 · 예문과 함께 익힙니다."],
-      ["globe", "노래를 통한 문화 이해", "가사에 담긴 사랑 · 가족 · 일상의 정서로 현대 베트남 문화를 이해합니다."]];
+    const GOALS = [["g_listen", "베트남어 듣기 능력 향상", "실제 노래의 속도와 발음으로 귀를 열고, 들리는 문장을 늘려 갑니다."],
+      ["g_tone", "성조와 발음의 정확성 향상", "여섯 성조의 높낮이를 듣고 따라 하며, 녹음으로 내 발음을 확인합니다."],
+      ["g_words", "어휘 및 일상 표현 습득", "가사 속 자주 쓰는 단어와 표현을 뜻 · 예문과 함께 익힙니다."],
+      ["g_culture", "노래를 통한 문화 이해", "가사에 담긴 사랑 · 가족 · 일상의 정서로 현대 베트남 문화를 이해합니다."]];
     const goals = el("section", { class: "hp-sec hp-goals hp-panel pv-ivory", id: "hp-goals" }, [
       el("div", { class: "hp-phead rv", "data-rv": "up" }, [el("div", null, [el("p", { class: "hp-skick", text: "LEARNING GOALS" }), el("h2", { class: "hp-sh", text: "학습 목표" })])]),
       el("div", { class: "hp-gwrap" }, [
@@ -9366,12 +9493,6 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       back,
       el("div", { class: "title-row" }, [el("h2", { lang: "vi", text: song.title }), favBtn]),
       el("p", { class: "artist-line", lang: "vi", text: song.artist + (song.visibility === "class" ? " · 반 곡" : song.visibility === "private" ? " · 나만 보는 곡" : "") }),
-      (function () { // 학생이 할 세 가지 연습을 맨 위에
-        const rp = el("button", { type: "button", class: "primary", disabled: !hasSync(), text: hasSync() ? "한 줄 반복 연습" : "한 줄 반복 연습 (자막 싱크 설정 필요)" });
-        rp.addEventListener("click", () => { lineStatus.textContent = "가사 한 줄을 누르면 그 줄만 반복합니다. 다시 누르면 멈춥니다."; lyricsBox.scrollIntoView({ block: "start" }); });
-        // 8단계: 핵심 단어 연습·따라 부르기 녹음은 [연습하기]로 옮김(교수자가 확인하는 연습). 여기서는 바로가기만.
-        return el("div", { class: "practice2", role: "group", "aria-label": "연습" }, [rp, el("a", { class: "btn go-practice", href: "#/practice/" + id + "/repeat", text: "연습하기 →" })]);
-      })(),
       videoBox, subsBox,
       el("div", { class: "row-actions sub-modes", role: "group", "aria-label": "자막" }, modeBtns),
       el("p", { class: "small muted", text: "영상 안에 유튜브 자체 자막이 함께 보이면 플레이어의 [CC] 버튼을 눌러 끄세요." }),
@@ -10699,7 +10820,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     out.addEventListener("click", async () => { await Server.signOut(); await afterSignOut(); });
     const cls = Repo.getClasses().filter(c => Repo.memberOf(c.id));
     const info = el("div", { class: "cards me-cards" }, [el("p", { class: "muted", text: "불러오는 중…" })]);
-    const myStatus = el("div"); mountStatus(myStatus, Server.user().id);
+    const myStatus = el("div"); mountStatus(myStatus, Server.user().id, true);
     const favs = Repo.getSongs().filter(s => Progress.isFav(s.id));
     Promise.all([Server.checkinDetail(Server.user().id, todayStr()), Server.myAssignments().catch(() => []), Server.myFeedback().catch(() => []), Server.mySubmissions().catch(() => [])]).then(([ck, asg, fb, subs]) => {
       const sing = asg.filter(a => a.tasks.includes("sing")), singDone = sing.filter(a => (a.progress.sing || {}).done).length;
@@ -10737,8 +10858,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         sel.addEventListener("change", () => { location.hash = "#/practice/" + sel.value + "/" + active; });
         return el("div", { class: "pr-song" }, [el("label", { for: "pr-song", text: "연습할 곡" }), sel]);
       })(),
-      el("nav", { class: "ptabs", "aria-label": "연습 종류" }, [tab("repeat", "① 한 줄 반복 연습", "#/practice/" + id + "/repeat"),
-        tab("words", "② 핵심 단어 연습", "#/practice/" + id + "/words"), tab("sing", "③ 따라 부르기 녹음", "#/practice/" + id + "/sing")])]);
+      el("nav", { class: "ptabs", "aria-label": "연습 종류" }, [tab("words", "① 핵심 단어 연습", "#/practice/" + id + "/words"), tab("sing", "② 따라 부르기 녹음", "#/practice/" + id + "/sing")])]);
   }
   let practiceSong = null;
   function defaultPracticeSong() {
@@ -10754,8 +10874,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     const songs = Repo.getSongs().filter(s => s.status === "ready");
     const rates = Progress.bestRates();
     setView([el("h2", { text: "연습하기" }),
-      el("p", { class: "hint", text: "곡을 고르면 ① 한 줄 반복 연습 ② 핵심 단어 연습 ③ 따라 부르기 녹음을 할 수 있습니다. 연습한 기록은 교수자가 확인합니다." }),
-      el("div", { class: "row-actions" }, [el("a", { class: "btn", href: "#/review", text: "오늘의 복습 바로 하기" })]),
+      el("p", { class: "hint", text: "곡을 고르면 ① 핵심 단어 연습 ② 따라 부르기 녹음을 할 수 있습니다. 연습한 기록은 교수자가 확인합니다." }),
       el("ul", { class: "songs" }, songs.map(s => {
         const r = rates[s.id] || {}, done = ["flash", "meaning", "blank", "tone"].filter(k => r[k] != null).length;
         return el("li", null, [el("a", { class: "song", href: "#/practice/" + s.id + (next ? "/" + next : "") }, [thumbNode(s),
@@ -10772,24 +10891,18 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     const rates = (Progress.bestRates()[id]) || {};
     const words = KeyWords.forSong(id), withMeaning = words.filter(w => w.meaning).length;
     let body;
-    if (tab === "repeat") {
-      body = [el("h3", { text: "① 한 줄 반복 연습" }),
-        el("p", { text: "곡 화면에서 가사 한 줄을 누르면 그 줄만 계속 반복됩니다. 다시 누르면 멈춥니다. 여러 줄은 '구간 반복'으로 할 수 있습니다." }),
-        el("div", { class: "row-actions" }, [el("a", { class: "btn primary", href: "#/song/" + id, text: "곡 화면에서 한 줄 반복 시작" })])];
-    } else {
+    {
       const card = (kind, label, desc, href, extra) => el("a", { class: "pcard", href }, [el("span", { class: "pc-title", text: label }), el("span", { class: "small muted", text: desc }),
         el("span", { class: "pc-state", text: extra != null ? extra : (rates[kind] != null ? "최고 " + rates[kind] + "%" : "아직 안 함") })]);
-      body = [el("h3", { text: "② 핵심 단어 연습" }),
-        el("p", { class: "small muted", text: "핵심 단어 " + words.length + "개 · 뜻이 있는 단어 " + withMeaning + "개 · " }, ),
+      body = [el("h3", { text: "① 핵심 단어 연습" }),
+        el("p", { class: "small muted", text: "핵심 단어 " + words.length + "개 · 뜻이 있는 단어 " + withMeaning + "개" }),
         el("div", { class: "pcards" }, [
           card("flash", "플래시카드", "단어를 보고 뜻 떠올리기", "#/practice/" + id + "/flash"),
           card("meaning", "뜻 고르기", "4지선다", "#/practice/" + id + "/meaning"),
           card("blank", "빈칸 고르기", "가사 빈칸에 알맞은 단어", "#/practice/" + id + "/blank"),
           card("tone", "성조 고르기", "같은 글자, 다른 성조", "#/practice/" + id + "/tone"),
-          card("sing", "따라 부르기", "그 단어가 나오는 줄 녹음", "#/practice/" + id + "/sing", ""),
           card("game", "30초 게임", "짝 맞추기", "#/practice/" + id + "/game"),
-          card("review", "오늘의 복습", "틀린 단어 다시 보기", "#/review", "")]),
-        el("div", { class: "row-actions" }, [el("a", { class: "btn", href: "#/words/" + id, text: "핵심 단어 목록·뜻 보기" })])];
+          card("list", "단어 목록 · 뜻", "핵심 단어 " + words.length + "개 한눈에 보기", "#/words/" + id, "목록 보기")])];
     }
     setView([practiceTabs(id, tab || "words"), el("h2", { lang: "vi", text: s.title })].concat(body), "practice-" + (tab || "words"));
     Progress.touch(id);
@@ -11132,13 +11245,13 @@ if (typeof module !== "undefined") module.exports = UploadKit;
           const tb = el("button", { type: "button", class: "cal-c today tap-today" + (st ? " studied" : ""), "aria-label": m + "월 " + dd + "일 오늘, 눌러서 출석하기" },
             [el("span", { class: "cal-d", text: String(dd) }), st ? el("span", { class: "cal-s", text: "공부" }) : null].filter(Boolean));
           tb.addEventListener("click", async () => {
-            tb.disabled = true;
+            tb.disabled = true; tb.classList.add("on"); tb.classList.remove("tap-today");
             try { await Server.checkIn(); justStamped = true; draw(await Server.checkinDetail(me, T)); }
-            catch (e) { tb.disabled = false; box.appendChild(el("p", { class: "bad", text: e.message })); }
+            catch (e) { tb.disabled = false; tb.classList.remove("on"); tb.classList.add("tap-today"); box.appendChild(el("p", { class: "bad", text: e.message })); }
           });
           cells.push(tb); continue;
         }
-        cells.push(el("div", { class: "cal-c" + (on ? " on" : "") + (st ? " studied" : "") + (ds === T ? " today" : "") + (ds === T && justStamped ? " pop" : ""), "aria-label": ds + (on ? " 출석 도장" : "") + (st ? " 공부함" : "") },
+        cells.push(el("div", { class: "cal-c" + (on ? " on" : "") + (st ? " studied" : "") + (ds === T ? " today" : "") , "aria-label": ds + (on ? " 출석 도장" : "") + (st ? " 공부함" : "") },
           [el("span", { class: "cal-d", text: String(dd) }), on ? el("span", { class: "sr-only", text: " 출석" }) : null, st ? el("span", { class: "cal-s", text: "공부" }) : null]));
       }
       const btn = el("p", { class: "sr-only", role: "status", text: a.today ? "오늘 출석 완료" : "달력에서 오늘 날짜를 누르면 출석합니다." });
@@ -11146,7 +11259,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       const badge = (label, date) => el("li", null, [el("span", { class: "badge-word" + (date ? " got" : ""), text: label }), el("span", { class: "small", text: date ? date + " 받음" : "아직" })]);
       fill(box, el("div", { class: "row-actions" }, [btn]),
         el("div", { class: "stat-grid" }, [stat("연속 출석", a.streak + "일"), stat("최장 연속", a.longest + "일"), stat("이번 달 출석", a.month + "일"), stat("이번 학기 출석", a.semester + "일")]),
-        el("p", { class: "small strong", text: y + "년 " + m + "월" }), el("div", { class: "cal" }, cells),
+        el("div", { class: "cal", "aria-label": y + "년 " + m + "월 출석 달력" }, [el("p", { class: "cal-month", text: y + "년 " + m + "월" })].concat(cells)),
         el("p", { class: "small muted", text: "색칠된 칸 = 출석 · '공부' = 그날 연습 문제를 풀거나 녹음을 저장하거나 복습한 날. 교수자는 둘 다 봅니다. 이번 학기는 " + a.semester_start + "부터 셉니다." }),
         el("ul", { class: "word-list" }, [badge("7일 연속 출석", a.badge7), badge("30일 연속 출석", a.badge30)]));
     }
@@ -11620,7 +11733,7 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     if (p.done) return { done: true, label: "완료" + (p.best != null ? "(" + p.best + "%)" : "") };
     return { done: false, started: true, label: "시작함" };
   }
-  function statusNodes(d) {
+  function statusNodes(d, mine) {
     const st = d.stats, g = Repo.getGlossary(), songs = d.songs || [];
     const rem = s => STATUS_KINDS.filter(([k]) => !practiceState(s, k).done).map(x => x[1]);
     const nextSong = songs.find(s => rem(s).length);
@@ -11631,16 +11744,17 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       el("p", { class: "next-line", lang: "vi", text: "다음에 할 것: " + next }),
       el("div", { class: "stat-grid" }, [stat("학습한 곡", st.songs_studied + " / " + st.songs_available), stat("마지막 학습", fmtDate(st.last_studied_at)),
         stat("오늘 남은 복습", st.due_today + "단어"), stat("밀린 복습", st.overdue + "단어"), stat("저장한 녹음", st.recordings + "개"), stat("이번 주 학습", st.days_this_week + "일"),
-        stat("출석 도장(이번 주)", ((st.checkin || {}).week || 0) + "일"), stat("출석 도장(이번 학기)", ((st.checkin || {}).semester || 0) + "일"),
-        stat("학습한 날(이번 주)", ((st.attendance || {}).attend_week || 0) + "일"), stat("학습한 날(이번 학기)", ((st.attendance || {}).attend_semester || 0) + "일")]),
+        mine ? null : stat("출석 도장(이번 주)", ((st.checkin || {}).week || 0) + "일"), mine ? null : stat("출석 도장(이번 학기)", ((st.checkin || {}).semester || 0) + "일"),
+        stat("이번 학기 학습", ((st.attendance || {}).attend_semester || 0) + "일")].filter(Boolean)),
       el("h3", { text: "곡별 진행 · 남은 것" }),
-      songs.length ? el("div", { class: "cards" }, songs.map(s => {
+      songs.length ? el("div", { class: "sp-list" }, songs.map(s => {
         const r = rem(s);
-        return el("div", { class: "card" }, [
-          el("p", { class: "card-title", lang: "vi" }, [Repo.getSong(s.song_id) ? el("a", { href: "#/song/" + s.song_id, text: s.title }) : el("span", { text: s.title })]),
-          el("p", { class: "small muted", text: "마지막 학습 " + fmtDate(s.last_studied_at) }),
-          el("ul", { class: "kv" }, STATUS_KINDS.map(([k, name]) => { const ps = practiceState(s, k); return kv(name, ps.label, ps.done ? "ok" : ps.started ? "need" : "muted"); })),
-          el("p", { class: "small" + (r.length ? "" : " ok"), text: r.length ? "남은 연습: " + r.join(", ") : "다섯 가지 연습을 모두 마쳤습니다." })]);
+        return el("div", { class: "sp-row" }, [
+          el("div", { class: "sp-head" }, [el("p", { class: "sp-title", lang: "vi" }, [Repo.getSong(s.song_id) ? el("a", { href: "#/song/" + s.song_id, text: s.title }) : el("span", { text: s.title })]),
+            el("span", { class: "sp-date", text: "마지막 학습 " + fmtDate(s.last_studied_at) })]),
+          el("ul", { class: "sp-chips" }, STATUS_KINDS.map(([k, name]) => { const ps = practiceState(s, k);
+            return el("li", { class: "sp-chip " + (ps.done ? "ok" : ps.started ? "need" : "muted"), title: name + ": " + ps.label }, [el("span", { class: "sp-k", text: name }), el("span", { class: "sp-v", text: ps.label })]); })),
+          el("p", { class: "sp-rem" + (r.length ? "" : " ok"), text: r.length ? "남은 연습: " + r.join(", ") : "다섯 가지 연습을 모두 마쳤습니다." })]);
       })) : el("p", { class: "muted", text: "아직 학습한 곡이 없습니다." }),
       el("h3", { text: "자주 틀린 단어" }),
       (d.top_wrong || []).length ? el("ul", { class: "word-list" }, d.top_wrong.map(w => el("li", null, [el("span", { class: "wl-word", lang: "vi", text: w.word }),
@@ -11648,9 +11762,9 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       el("p", { class: "hint", text: "완료 기준: 플래시카드는 모든 카드를 한 번 넘김, 뜻·빈칸·성조 고르기는 끝까지 제출, 따라 부르기는 녹음 1개 이상을 보관함에 저장. '시작함' = 연습을 열었지만 끝까지 하지 않음. 정답률은 끝까지 한 기록 중 가장 높은 값." })
     ];
   }
-  function mountStatus(box, uid) {
+  function mountStatus(box, uid, mine) {
     box.replaceChildren(el("p", { class: "muted", text: "학습 현황을 불러오는 중…" }));
-    return Server.studyDetail(uid).then(d => { fill(box, ...statusNodes(d)); return d; })
+    return Server.studyDetail(uid).then(d => { fill(box, ...statusNodes(d, mine)); return d; })
       .catch(e => { box.replaceChildren(el("p", { class: "bad", text: e.message })); return null; });
   }
   // Gmail 피드백: 학습 요약으로 초안을 만들고 → 앱에서 고친 뒤 → Gmail 쓰기 창을 연다(보내기는 선생님 Gmail에서)
@@ -12372,11 +12486,11 @@ if (typeof module !== "undefined") module.exports = UploadKit;
         big("#/learn", "list", "전체 곡", "곡 목록 · 검색"),
         big("#/weeks", "weeks", "주차별 학습", "1~15주차 한 주 한 곡"),
         big("#/classes", "classes", "내 교과목", "교과목 코드로 수강 등록"),
-        big("#/practice", "practice", "연습하기", "반복 · 단어 · 녹음", "practice"),
-        small("#/practice/pick/repeat", "practice-repeat", "한 줄 반복 연습", "practice"), small("#/practice/pick/words", "practice-words", "핵심 단어 연습", "practice"),
+        big("#/practice", "practice", "연습하기", "단어 · 녹음", "practice"),
+        small("#/practice/pick/words", "practice-words", "핵심 단어 연습", "practice"),
         small("#/practice/pick/sing", "practice-sing", "따라 부르기 녹음", "practice"), small("#/vault", "vault", "녹음 보관함", "practice"), small("#/review", "review", "오늘의 복습", "practice"),
         big("#/assignments", "assignments", "과제" + cnt(navCounts.assign), "녹음 과제", "assign"),
-        small("#/assignments", "assignments", "이번 주 과제", "assign"), small("#/submit", "submit", "과제 제출" + cnt(navCounts.newFeedback), "assign"),
+        small("#/submit", "submit", "과제 제출" + cnt(navCounts.newFeedback), "assign"),
         big("#/me", "me", "마이페이지", "나의 정보 · 피드백"));
       if (Server.canTeach()) {
         const sw = el("button", { type: "button", class: "mode-btn" }, [el("span", { class: "lbl", text: "교수자 화면으로" })]);
@@ -12429,7 +12543,9 @@ if (typeof module !== "undefined") module.exports = UploadKit;
       const q = el("input", { type: "search", id: "top-search", placeholder: "곡명·가수 검색", "aria-label": "곡 검색", value: prevQ ? prevQ.value : songQuery });
       q.addEventListener("keydown", ev => { if (ev.key === "Enter") { songQuery = q.value.trim(); location.hash = "#/learn"; route(); } });
       if (typing) setTimeout(() => { q.focus(); q.setSelectionRange(q.value.length, q.value.length); }, 0);
-      box.replaceChildren(el("div", { class: "top-search" }, [q]), el("span", { class: "hello" }, [el("span", { text: "안녕하세요, " + p.display_name + "님" }), el("span", { class: "small muted", text: p.display_name + " · " + ROLE_LABEL(p) })]), out);
+      const qi = el("span", { class: "ts-ico", "aria-hidden": "true" }); qi.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>';
+      qi.addEventListener("click", () => { songQuery = q.value.trim(); location.hash = "#/learn"; route(); });
+      box.replaceChildren(el("div", { class: "top-search has-ico" }, [qi, q]), el("span", { class: "hello" }, [el("span", { text: "안녕하세요, " + p.display_name + "님" }), el("span", { class: "small muted", text: p.display_name + " · " + ROLE_LABEL(p) })]), out);
     }
     else if (Server.noProfile()) box.replaceChildren(el("span", { text: (Server.user().email || "") + " · 계정 정보 없음" }), out);
     else {
@@ -12507,12 +12623,12 @@ if (typeof module !== "undefined") module.exports = UploadKit;
     else if (h === "#/checkin") { if (login()) { currentRoute = "checkin"; renderCheckin(); } }
     else if (h === "#/learn") { if (login()) { currentRoute = "list"; renderList(); } }
     else if (h === "#/practice" || (m = h.match(/^#\/practice\/pick\/(repeat|words|sing)$/))) {
-      if (login()) { currentRoute = "practice"; const sid = defaultPracticeSong(); const tb = m ? m[1] : "repeat";
+      if (login()) { currentRoute = "practice"; const sid = defaultPracticeSong(); const tb = m && m[1] !== "repeat" ? m[1] : "words";
         if (sid) location.replace("#/practice/" + sid + "/" + tb); else renderPracticePick(tb); } }
     else if (h === "#/practice/songs") { if (login()) { currentRoute = "practice"; renderPracticePick(); } }
     else if (h === "#/vault") { if (login()) { currentRoute = "vault"; renderVault(); } }
     else if (h === "#/submit") { if (login()) { currentRoute = "submit"; renderSubmit(); } }
-    else if ((m = h.match(/^#\/practice\/(\d+)(?:\/(repeat|words|sing))?$/))) { if (login()) { currentRoute = "practice"; renderPracticeHub(Number(m[1]), m[2] || "repeat"); } }
+    else if ((m = h.match(/^#\/practice\/(\d+)(?:\/(repeat|words|sing))?$/))) { if (login()) { currentRoute = "practice"; renderPracticeHub(Number(m[1]), m[2] && m[2] !== "repeat" ? m[2] : "words"); } }
     else if (h === "#/board") { if (login()) { currentRoute = "board"; renderBoard(); } }
     else if ((m = h.match(/^#\/board\/([0-9a-f-]{36})$/))) { if (login()) { currentRoute = "board"; renderBoardPost(m[1]); } }
     else if ((m = h.match(/^#\/practice\/(\d+)\/(flash|meaning|blank|tone|game)$/))) { if (login()) { currentRoute = "practice"; renderPractice(Number(m[1]), m[2]); } }
